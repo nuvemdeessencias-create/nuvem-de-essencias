@@ -16,33 +16,56 @@
 
     body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--azul-fundo); color: white; }
 
-    /* HEADER COM LOGO MAIOR À ESQUERDA */
+    /* HEADER COM LOGO */
     header { 
         background: var(--azul-fundo); 
-        padding: 15px 20px; 
+        padding: 20px 20px 10px 20px; 
         display: flex;
         align-items: center;
         justify-content: flex-start; 
-        border-bottom: 2px solid var(--dourado); 
-        position: sticky; 
-        top: 0; 
+        position: relative;
         z-index: 1000;
     }
     
     .logo-img { 
-        width: 200px; /* Tamanho ideal para o seu logo 575x230 */
+        width: 200px; 
         height: auto; 
         display: block; 
     }
 
-    /* FILTROS INTEGRADOS AO FUNDO ESCURO */
+    /* BARRA DE FRASE ABAIXO DO LOGO */
+    .top-bar {
+        background-color: var(--azul-fundo); /* Agora igual ao fundo do site */
+        color: #ffffff;            
+        text-align: center;
+        padding: 12px 0;
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        /* Linhas douradas de destaque */
+        border-top: 2px solid var(--dourado);
+        border-bottom: 2px solid var(--dourado);
+        margin-bottom: 5px;
+    }
+    
+    .top-bar p {
+        margin: 0;
+        padding: 0;
+        color: #ffffff !important;
+    }
+
+    /* FILTROS */
     .filtros-container { 
         padding: 20px 15px; 
         display: flex; 
         flex-direction: column;
         align-items: center; 
         gap: 15px;
-        background-color: var(--azul-fundo); /* Removido o fundo branco que bagunçou */
+        background-color: var(--azul-fundo); 
     }
     
     .busca-grupo { 
@@ -53,7 +76,6 @@
         width: 100%; 
     }
 
-    /* Estilo original dos inputs */
     select, input { 
         padding: 12px; 
         border: 1px solid var(--dourado); 
@@ -65,7 +87,6 @@
         color: var(--texto-escuro);
     }
 
-    /* BOTÕES DE CATEGORIA */
     .categorias-nav { 
         display: flex; 
         gap: 10px; 
@@ -92,7 +113,6 @@
         color: white;
     }
 
-    /* GRID E CARDS */
     .container { 
         display: grid; 
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
@@ -111,25 +131,6 @@
         padding-bottom: 20px;
         box-shadow: 0 10px 20px rgba(0,0,0,0.5);
     }
-.btn-carrinho {
-    background: #333; /* Cor escura para contrastar com o verde do WhatsApp */
-    color: white;
-    border: none;
-    padding: 15px;
-    width: 90%;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    text-transform: uppercase;
-    margin-bottom: 10px; /* Espaço entre ele e o botão de WhatsApp */
-    transition: background 0.3s;
-}
-
-
-
-.btn-carrinho:hover {
-    background: #555; /* Muda de cor levemente ao passar o mouse */
-}
 
     .card img { width: 100%; height: 140px; object-fit: contain; background: white; }
     .info { padding: 15px; }
@@ -141,6 +142,12 @@
     .hidden { display: none !important; }
     footer { padding: 30px; text-align: center; color: #888; font-size: 13px; }
 
+    @media (max-width: 600px) {
+        .top-bar {
+            font-size: 11px;
+            padding: 8px 10px;
+        }
+    }
     </style>
 </head>
 <body>
@@ -149,43 +156,43 @@
     <img src="img/logo.png" alt="NUVEM DE ESSÊNCIAS" class="logo-img">
 </header>
 
-
+<div class="top-bar">
+    <p>✨ Parcele suas fragrâncias favoritas em até 10x sem juros no cartão! ✨</p>
+</div>
 
 <div class="filtros-container">
     <div class="busca-grupo">
         <select id="filtroMarca" onchange="filtrar()">
             <option value="todos">TODAS AS MARCAS</option>
-            
             <optgroup label="ALTA PERFUMARIA">
                 <option value="PACO RABANNE">PACO RABANNE</option>
-		<option value="CHLOE">CHLOE</option>
+                <option value="CHLOE">CHLOE</option>
                 <option value="CAROLINA HERRERA">CAROLINA HERRERA</option>
                 <option value="DIOR">DIOR</option>
                 <option value="JEAN PAUL GAULTIER">JEAN PAUL GAULTIER</option>
                 <option value="ARMANI">ARMANI</option>
                 <option value="DOLCE & GABBANA">DOLCE & GABBANA</option>
                 <option value="YVES SAINT LAURENT">YVES SAINT LAURENT</option>
-		<option value="HUGO BOSS">HUGO BOSS</option>
+                <option value="HUGO BOSS">HUGO BOSS</option>
                 <option value="ADOLFO DOMINGUEZ">ADOLFO DOMINGUEZ</option>
-		 <option value="GABRIELA SABATINI">GABRIELA SABATINI</option>
+                <option value="GABRIELA SABATINI">GABRIELA SABATINI</option>
                 <option value="ANIMALE">ANIMALE</option>
                 <option value="ANTONIO BANDEIRAS">ANTONIO BANDEIRAS</option>
                 <option value="AZZARO">AZZARO</option>
                 <option value="BVLGARI">BVLGARI</option>
-				<option value="JACQUES BOGART ">JACQUES BOGART </option>
+                <option value="JACQUES BOGART ">JACQUES BOGART </option>
                 <option value="CACHAREL">CACHAREL</option>
                 <option value="CALVIN KLEIN">CALVIN KLEIN</option>
                 <option value="DAVIDOFF">DAVIDOFF</option>
                 <option value="GIVENCHY">GIVENCHY</option>
                 <option value="JOOP">JOOP</option>
                 <option value="KENZO">KENZO</option>
-		<option value="NAUTICA">NAUTICA</option>
+                <option value="NAUTICA">NAUTICA</option>
                 <option value="MARINA DE BOURBON">MARINA DE BOURBON</option>
                 <option value="MERCEDES BENZ">MERCEDES BENZ</option>
                 <option value="RALPH LAUREN">RALPH LAUREN</option>
                 <option value="SHAKIRA">SHAKIRA</option>
             </optgroup>
-
             <optgroup label="PERFUMARIA ÁRABE">
                 <option value="LATTAFA">LATTAFA</option>
                 <option value="AL WATANIAH">AL WATANIAH</option>
@@ -194,14 +201,9 @@
                 <option value="AFNAN">AFNAN</option>
                 <option value="ORIENTICA">ORIENTICA</option>
             </optgroup>
-
-<optgroup label="KITS">
-
-<option value="KITS">KITS</option> 
-
-</optgroup>
-
-
+            <optgroup label="KITS">
+                <option value="KITS">KITS</option> 
+            </optgroup>
             <optgroup label="CASA">
                 <option value="VELAS AROMATICAS">VELAS AROMÁTICAS</option>
             </optgroup>
@@ -214,8 +216,7 @@
         <button class="btn-categoria" onclick="filtrarCategoria('alta', this)">ALTA PERFUMARIA</button>
         <button class="btn-categoria" onclick="filtrarCategoria('arabe', this)">PERFUMES ÁRABES</button>
         <button class="btn-categoria" onclick="filtrarCategoria('casa', this)">CASA & VELAS</button>
-<button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
-
+        <button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
     </div>
 </div>
 
@@ -227,9 +228,7 @@
             <span class="marca-tag">SHAKIRA</span>
             <div class="nome-perfume">SHAKIRA FUCSIA EDP </div>
             <select class="seletor-ml" id="ml-shakira">
-
                    <option value="80ml">80ML - R$ 239,00</option>
-
             </select>
             <button onclick="enviarPedido('SHAKIRA', 'ml-shakira')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
@@ -242,9 +241,7 @@
             <span class="marca-tag">SHAKIRA</span>
             <div class="nome-perfume">SHAKIRA ROJO EDP </div>
             <select class="seletor-ml" id="ml-shakiraROJO">
-
                    <option value="80ml">80ML - R$ 239,00</option>
-
             </select>
             <button onclick="enviarPedido('SHAKIRA', 'ml-shakiraROJO')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
@@ -255,12 +252,10 @@
         <div class="info">
             <span class="marca-tag">SHAKIRA</span>
             <div class="nome-perfume">SHAKIRA AMARILLO EDP </div>
-            <select class="seletor-ml" id="ml-shakira">
-
+            <select class="seletor-ml" id="ml-shakira-ama">
                    <option value="80ml">80ML - R$ 239,00</option>
-
             </select>
-            <button onclick="enviarPedido('SHAKIRA AMARILLO', 'ml-shakira')" class="btn-whats">COMPRAR NO WHATSAPP</button>
+            <button onclick="enviarPedido('SHAKIRA AMARILLO', 'ml-shakira-ama')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
 
@@ -270,12 +265,8 @@
             <span class="marca-tag">CHLOE</span>
             <div class="nome-perfume">CHLOÉ EDP </div>
             <select class="seletor-ml" id="Chloe">
-
                    <option value="50ml">50ML - R$ 809,00</option>
 			<option value="75ml"> 75ML - R$ 939,00</option>
-
-
-
             </select>
             <button onclick="enviarPedido('CHLOE ', 'Chloe')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
@@ -287,9 +278,7 @@
             <span class="marca-tag">GABRIELA SABATINI</span>
             <div class="nome-perfume"> GABRIELA SABATINI  EDT</div>
             <select class="seletor-ml" id="ml-gabriela">
-
                    <option value="60ml">60ML - R$ 169,00</option>
-
             </select>
             <button onclick="enviarPedido('Gabriela Sabatini', 'ml-gabriela')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
@@ -302,19 +291,11 @@
             <span class="marca-tag">PACO RABANNE</span>
             <div class="nome-perfume">LADY MILLION EDP </div>
             <select class="seletor-ml" id="ladymillion">
-
                    <option value="80ml">80ML - R$ 869,00</option>
-
             </select>
-
-
-    </button>
-
             <button onclick="enviarPedido('PACO RABANNE - LADY MILLION', 'ladymillion')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
-
-
 
     <div class="card" data-marca="PACO RABANNE" data-secao="alta">
         <img src="img/invictus.jpg" alt="Invictus">
@@ -322,24 +303,20 @@
             <span class="marca-tag">PACO RABANNE</span>
             <div class="nome-perfume">INVICTUS EDT </div>
             <select class="seletor-ml" id="invictus">
-
                    <option value="100ml">100ML - R$ 749,00</option>
-
             </select>
-
             <button onclick="enviarPedido('PACO RABANNE - INVICTUS', 'invictus')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
+
 <div class="card" data-marca="MARINA DE BOURBON" data-secao="alta">
         <img src="img/marinadiamond.webp" alt=" marinadiamond ">
         <div class="info">
             <span class="marca-tag"> MARINA DE BOURBON</span>
             <div class="nome-perfume"> MARINA DIAMOND EDP</div>
             <select class="seletor-ml" id="ml-marinadiamond">
-
                    <option value="100ml">100ML - R$ 565,00</option>
 		<option value="30ml">30ML - R$ 320,00</option>
-
             </select>
             <button onclick="enviarPedido(' MARINA DIAMOND ','ml-marinadiamond')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
@@ -351,12 +328,10 @@
         <div class="info">
             <span class="marca-tag">ANIMALE</span>
             <div class="nome-perfume">ANIMALE FEM EDP </div>
-            <select class="seletor-ml" id="ml-animale fem">
-
+            <select class="seletor-ml" id="ml-animale-fem">
                    <option value="100ml">100ML - R$ 598,00</option>
-
             </select>
-            <button onclick="enviarPedido('ANIMALE FEM EDP', 'ml-animale fem')" class="btn-whats">COMPRAR NO WHATSAPP</button>
+            <button onclick="enviarPedido('ANIMALE FEM EDP', 'ml-animale-fem')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
 
@@ -366,42 +341,35 @@
             <span class="marca-tag">ANIMALE</span>
             <div class="nome-perfume">ANIMALE FOR MEN EDT </div>
             <select class="seletor-ml" id="ml-animalemasc">
-
                    <option value="100ml">100ML - R$ 478,00</option>
-
             </select>
             <button onclick="enviarPedido(' ANIMALE FOR MEN ', 'ml-animalemasc')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
 
-	<div class="card" data-marca="JACQUES BOGART" data-secao="alta">
+<div class="card" data-marca="JACQUES BOGART" data-secao="alta">
         <img src="img/silverscent.webp" alt="silverscent ">
         <div class="info">
             <span class="marca-tag"> JACQUES BOGART </span>
             <div class="nome-perfume"> SILVER SCENT INTENSE EDT</div>
             <select class="seletor-ml" id="ml-silverscent">
-
                    <option value="100ml">100ML - R$ 399,00</option>
-
             </select>
             <button onclick="enviarPedido(' SILVER SCENT INTENSE EDT ', 'ml-silverscent')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
-	
+
 <div class="card" data-marca="CALVIN KLEIN" data-secao="alta">
         <img src="img/ckoneessence.avif" alt="ckoneessence">
         <div class="info">
             <span class="marca-tag"> CALVIN KLEIN </span>
             <div class="nome-perfume">CK ONE ESSENCE PARFUM INTENSE  </div>
             <select class="seletor-ml" id="ml-ckoneessence">
-
                    <option value="100ml">100ML - R$ 589,00</option>
-
             </select>
             <button onclick="enviarPedido(' CK ONE ESSENCE PARFUM INTENSE ', 'ml-ckoneessence')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
-
 
 <div class="card" data-marca="ADOLFO DOMINGUEZ" data-secao="alta">
         <img src="img/azahar.webp" alt="azahar">
@@ -409,9 +377,7 @@
             <span class="marca-tag">ADOLFO DOMINGUEZ</span>
             <div class="nome-perfume"> ÁGUA FRESCA DE AZAHAR </div>
             <select class="seletor-ml" id="ml-azahar">
-
                    <option value="120ml">120ML - R$ 369,00</option>
-
             </select>
             <button onclick="enviarPedido(' ÁGUA FRESCA DE AZAHAR ', 'ml-azahar')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
@@ -423,13 +389,11 @@
             <span class="marca-tag"> HUGO BOSS </span>
             <div class="nome-perfume">HUGO MEN EDT </div>
             <select class="seletor-ml" id="ml-hugomen">
-
                    <option value="75ml">75ML - R$ 479,00</option>
             </select>
             <button onclick="enviarPedido(' HUGO MEN EDT ', 'ml-hugomen')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
-
 
 <div class="card" data-marca="ANTONIO BANDEIRAS" data-secao="alta">
         <img src="img/blueseduction.avif" alt=" blueseduction ">
@@ -437,9 +401,7 @@
             <span class="marca-tag"> ANTONIO BANDEIRAS </span>
             <div class="nome-perfume"> BLUE SEDUCTIONE EDT </div>
             <select class="seletor-ml" id="ml-blue">
-
                    <option value="80ml">80ML - R$ 249,00</option>
-
             </select>
             <button onclick="enviarPedido(' BLUE SEDUCTIONE EDT ', 'ml-blue')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
@@ -451,9 +413,7 @@
             <span class="marca-tag"> ANTONIO BANDEIRAS </span>
             <div class="nome-perfume">THE ICON EDP </div>
             <select class="seletor-ml" id="ml-theicon">
-
                    <option value="200ml">200ML - R$ 379,00</option>
-
             </select>
             <button onclick="enviarPedido(' THE ICON EDP ', 'ml-theicon')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
@@ -463,15 +423,13 @@
         <img src="img/powerseduction.avif" alt="powerseduction ">
         <div class="info">
             <span class="marca-tag"> ANTONIO BANDEIRAS </span>
-            <div class="nome-perfume"> POWER OF SEDUCTION
-</div>
-            <select class="seletor-ml" id="ml- powerseduction">
+            <div class="nome-perfume"> POWER OF SEDUCTION</div>
+            <select class="seletor-ml" id="ml-powerseduction">
                    <option value="100ml">100ML - R$ 229,00</option>
             </select>
-            <button onclick="enviarPedido(' POWER OF SEDUCTION EDT ', 'ml- powerseduction')" class="btn-whats">COMPRAR NO WHATSAPP</button>
+            <button onclick="enviarPedido(' POWER OF SEDUCTION EDT ', 'ml-powerseduction')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
-
 
 <div class="card" data-marca="AZZARO" data-secao="alta">
         <img src="img/azzaropourhomme.avif" alt="azzaropourhomme">
@@ -479,54 +437,49 @@
             <span class="marca-tag"> AZZARO </span>
             <div class="nome-perfume">AZZARO POUR HOMME EDT </div>
             <select class="seletor-ml" id="ml-azzaropourhomme">
-
                    <option value="100ml">100ML - R$ 459,00</option>
-<option value="50ml">50ML - R$ 249,00</option>
-
+                   <option value="50ml">50ML - R$ 249,00</option>
             </select>
             <button onclick="enviarPedido('AZZARO POUR HOMME EDT ', 'ml-azzaropourhomme')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
-
 
 <div class="card" data-marca="MERCEDES BENZ" data-secao="alta">
         <img src="img/clubblack.avif" alt=" clubblack ">
         <div class="info">
             <span class="marca-tag"> MERCEDES BENZ </span>
             <div class="nome-perfume"> MERCEDES BENZ  CLUB BLACK EDT</div>
-            <select class="seletor-ml" id="ml-clubblack ">
-
+            <select class="seletor-ml" id="ml-clubblack">
                    <option value="100ml">100ML - R$ 578,00</option>
-<option value="50ml">50ML - R$ 470,00</option>
+                   <option value="50ml">50ML - R$ 470,00</option>
             </select>
-            <button onclick="enviarPedido(' MERCEDES BENZ  CLUB BLACK ', 'ml-clubblack ')" class="btn-whats">COMPRAR NO WHATSAPP</button>
+            <button onclick="enviarPedido(' MERCEDES BENZ  CLUB BLACK ', 'ml-clubblack')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
+
 <div class="card" data-marca="DAVIDOFF" data-secao="alta">
         <img src="img/coolwater.webp" alt=" coolwater ">
         <div class="info">
             <span class="marca-tag"> DAVIDOFF </span>
             <div class="nome-perfume">COOL WATER DAVIDOFF EDT </div>
-            <select class="seletor-ml" id="ml- coolwater">
-
+            <select class="seletor-ml" id="ml-coolwater">
                    <option value="125ml">125ML - R$ 289,00</option>
-
             </select>
-            <button onclick="enviarPedido(' COOL WATER DAVIDOFF EDT ', 'ml- coolwater ')" class="btn-whats">COMPRAR NO WHATSAPP</button>
+            <button onclick="enviarPedido(' COOL WATER DAVIDOFF EDT ', 'ml-coolwater')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
+
 <div class="card" data-marca="JOOP" data-secao="alta">
         <img src="img/joophomme.webp" alt="joophomme">
         <div class="info">
             <span class="marca-tag"> JOOP </span>
             <div class="nome-perfume">JOOP HOMME EDT </div>
-            <select class="seletor-ml" id="ml-joophomme ">
+            <select class="seletor-ml" id="ml-joophomme">
                    <option value="75ml">75ML - R$ 249,00</option>
             </select>
-            <button onclick="enviarPedido(' JOOP HOMME EDT ', 'ml-joophomme ')" class="btn-whats">COMPRAR NO WHATSAPP</button>
+            <button onclick="enviarPedido(' JOOP HOMME EDT ', 'ml-joophomme')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
-
 
 <div class="card" data-marca="NAUTICA" data-secao="alta">
         <img src="img/nauticavoyage.webp" alt=" nauticavoyage ">
@@ -534,14 +487,11 @@
             <span class="marca-tag"> NAUTICA </span>
             <div class="nome-perfume">NAUTICA VOYAGE EDT  </div>
             <select class="seletor-ml" id="ml-nauticavoyage">
-
                    <option value="100ml">100ML - R$ 199,00</option>
-
             </select>
             <button onclick="enviarPedido(' NAUTICA VOYAGE EDT ', 'ml-nauticavoyage')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
-
 
     <div class="card" data-marca="AL WATANIAH" data-secao="arabe">
         <img src="img/SabahAlWard.jpg" alt="SABAH AL WARD">
@@ -557,16 +507,13 @@
         <img src="img/bareeq.jpg" alt=" bareeq ">
         <div class="info">
             <span class="marca-tag"> AL WATANIAH </span>
-            <div class="nome-perfume"> BAREEQ AL DHAHAB EDP
- </div>
+            <div class="nome-perfume"> BAREEQ AL DHAHAB EDP</div>
             <select class="seletor-ml" id="ml-bareeq">
-
                    <option value="100ml">100ML - R$ 359,00</option>
             </select>
             <button onclick="enviarPedido(' BAREEQ AL DHAHAB EDP ', 'ml-bareeq')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
-
 
 <div class="card" data-marca="LATTAFA" data-secao="arabe">
         <img src="img/fakharrose.webp" alt="FAKHAR ROSE">
@@ -574,9 +521,7 @@
             <span class="marca-tag">LATTAFA</span>
             <div class="nome-perfume"> FAKHAR ROSE EDP</div>
             <select class="seletor-ml" id="ml-fakhar">
-
                    <option value="100ml">100ML - R$ 439,00</option>
-
             </select>
             <button onclick="enviarPedido('FAKHAR ROSE','ml-fakhar')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
@@ -587,25 +532,20 @@
         <div class="info">
             <span class="marca-tag"> LATTAFA </span>
             <div class="nome-perfume"> ASAD DA LATTAFA EDP</div>
-            <select class="seletor-ml" id="ml- asadlattafa ">
-
+            <select class="seletor-ml" id="ml-asadlattafa">
                    <option value="100ml">100ML - R$ 369,00</option>
             </select>
-            <button onclick="enviarPedido(' ASAD DA LATTAFA EDP ', 'ml- asadlattafa ')" class="btn-whats">COMPRAR NO WHATSAPP</button>
+            <button onclick="enviarPedido(' ASAD DA LATTAFA EDP ', 'ml-asadlattafa')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
-
 
 <div class="card" data-marca="SHAKIRA" data-secao="kits">
         <img src="img/kitshakiraamarillo.avif" alt="amarillo">
         <div class="info">
             <span class="marca-tag">SHAKIRA</span>
-            <div class="nome-perfume"> KIT COFFRET SHAKIRA AMARILLO FEMININO EAU DE PARFUM
- </div>
+            <div class="nome-perfume"> KIT COFFRET SHAKIRA AMARILLO FEMININO EAU DE PARFUM</div>
             <select class="seletor-ml" id="ml-kitamarillo">
-
                    <option value="80ml+10ml">80ML+10ML - R$ 259,00</option>
-
             </select>
             <button onclick="enviarPedido('KIT COFFRET SHAKIRA AMARILLO FEMININO EAU DE PARFUM', 'ml-kitamarillo')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
@@ -617,14 +557,11 @@
             <span class="marca-tag">SHAKIRA</span>
             <div class="nome-perfume"> COFFRET FUCSIA SHAKIRA KIT - PERFUME EDP + CREME CORPORAL KIT </div>
             <select class="seletor-ml" id="ml-coffretfucsia">
-
                    <option value="80ml+CREME CP">80ML+CREME CP - R$ 259,00</option>
-
             </select>
             <button onclick="enviarPedido(' KIT COFFRET SHAKIRA FUCSIA FEMININO EAU DE PARFUM ', 'ml-coffretfucsia')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
-
 
 <div class="card" data-marca="ANTONIO BANDEIRAS" data-secao="kits">
         <img src="img/bandeirasblueseduction.webp" alt=" bandeirasblueseduction ">
@@ -632,18 +569,13 @@
             <span class="marca-tag"> ANTONIO BANDEIRAS </span>
             <div class="nome-perfume"> KIT BANDERAS BLUE SEDUCTION WOMEN</div>
             <select class="seletor-ml" id="ml-kitblue">
-
                    <option value="80ml+ DES">80ML - R$ 259,00</option>
-
             </select>
             <button onclick="enviarPedido(' KIT BANDERAS BLUE SEDUCTION WOMEN ', 'ml-kitblue')" class="btn-whats">COMPRAR NO WHATSAPP</button>
         </div>
     </div>
 
-
-
 </div>
-
 <footer>
     <div class="footer-brand">NUVEM DE ESSÊNCIAS PERFUMARIA</div>
     <div>&copy; <span id="ano"></span> TODOS OS DIREITOS RESERVADOS.</div>
@@ -683,21 +615,10 @@
     }
 
     function enviarPedido(n, id) {
-        const num = "63992576211"; // SUBSTITUA PELO SEU NÚMERO
+        const num = "63992576211"; 
         const ml = document.getElementById(id).value;
         window.open(`https://wa.me/${num}?text=Olá! Quero o produto ${n} (${ml})`, '_blank');
     }
 </script>
-<script>
-    let itensNoCarrinho = 0;
-
-    function adicionarAoCarrinho(nomeProduto) {
-        itensNoCarrinho++;
-        alert(nomeProduto + " foi adicionado ao seu carrinho! Total de itens: " + itensNoCarrinho);
-        
-        // Aqui você poderia salvar no banco de dados ou cookies
-    }
-</script>
 </body>
-
 </html>
