@@ -145,6 +145,35 @@
     padding-top: 20px;
 }
 
+        /* Ajuste para fixar o rodapé da sacola e o botão de enviar */
+.cart-modal {
+    display: flex;
+    flex-direction: column;
+    justify-content:空间-between; /* Garante separação entre itens e botão */
+}
+
+#cart-items {
+    flex: 1; /* Faz a lista de itens ocupar o espaço disponível e rolar */
+    overflow-y: auto;
+    margin-bottom: 10px;
+    padding-bottom: 20px;
+}
+
+/* Esta é a div que contém o Total e o Botão de Enviar */
+#cart-modal > div:last-child {
+    position: sticky;
+    bottom: 0;
+    background: white;
+    padding: 15px 0;
+    border-top: 2px solid #eee;
+    z-index: 10;
+}
+
+.btn-whats {
+    margin-top: 10px;
+    box-shadow: 0 -5px 10px rgba(0,0,0,0.05); /* Destaque visual */
+}
+        
 /* Ajuste responsivo: se o nome ainda for muito grande para celulares */
 @media (max-width: 768px) {
     .logo-text { font-size: 1.3rem; }
@@ -1068,6 +1097,7 @@
     </div>
 </footer></body>
 </html>
+
 
 
 
