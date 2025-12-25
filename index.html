@@ -180,30 +180,6 @@
     border-top: 2px solid #eee;
     z-index: 10;
 }
-
-        <div id="cart-modal" class="cart-modal">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>Sua Sacola</h3>
-        <span style="cursor:pointer; font-size: 24px;" onclick="toggleCart()">×</span>
-    </div>
-
-    <div id="cart-items" style="flex:1; overflow-y:auto; margin-top:20px;">
-        <p style="text-align:center; color:#999;">Sacola vazia</p>
-    </div>
-
-    <div style="padding: 10px 0; border-top: 1px dashed #ccc; margin-top: 10px;">
-        <label style="font-size: 12px; font-weight: bold;">CALCULAR FRETE:</label>
-        <div style="display: flex; gap: 5px; margin-top: 5px;">
-            <input type="text" id="cep-cliente" placeholder="00000-000">
-            <button onclick="calcularFrete()" style="background: #b89356; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-weight: bold;">OK</button>
-        </div>
-        <div id="opcoes-frete"></div>
-    </div>
-    <div style="border-top: 1px solid #eee; padding-top: 15px;">
-        <p><strong>Total: R$ <span id="cart-total">0,00</span></strong></p>
-        <button class="btn-whats" onclick="finalizarWhatsApp()">ENVIAR PEDIDO</button>
-    </div>
-</div>
         
 .btn-whats {
     margin-top: 10px;
@@ -286,14 +262,25 @@
 
 <div id="cart-modal" class="cart-modal">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>Sua Sacola</h3>
-        <span style="cursor:pointer; font-size: 24px;" onclick="toggleCart()">×</span>
+        <h3 style="margin:0;">Sua Sacola</h3>
+        <span style="cursor:pointer; font-size: 28px;" onclick="toggleCart()">×</span>
     </div>
-    <div id="cart-items" style="flex:1; overflow-y:auto; margin-top:20px;">
-        <p style="text-align:center; color:#999;">Sacola vazia</p>
+
+    <div id="cart-items">
+        <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
     </div>
-    <div style="border-top: 1px solid #eee; padding-top: 15px;">
-        <p><strong>Total: R$ <span id="cart-total">0,00</span></strong></p>
+
+    <div style="padding: 15px 0; border-top: 1px dashed #ccc; margin-top: 10px;">
+        <label style="font-size: 11px; font-weight: bold; color: #666;">SIMULAR FRETE (Araguaína):</label>
+        <div style="display: flex; gap: 5px; margin-top: 5px;">
+            <input type="text" id="cep-cliente" placeholder="Digite seu CEP">
+            <button onclick="calcularFrete()" style="background: #b89356; color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">OK</button>
+        </div>
+        <div id="opcoes-frete"></div>
+    </div>
+
+    <div>
+        <p style="margin-bottom: 10px;"><strong>Total: R$ <span id="cart-total">0,00</span></strong></p>
         <button class="btn-whats" onclick="finalizarWhatsApp()">ENVIAR PEDIDO</button>
     </div>
 </div>
@@ -1278,6 +1265,7 @@ function aplicarFrete(valor) {
     </div>
 </footer></body>
 </html>
+
 
 
 
