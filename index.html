@@ -145,7 +145,7 @@
     padding-top: 20px;
 }
 
-        /* Ajuste para fixar o rodapé da sacola e o botão de enviar */
+/* Ajuste para fixar o rodapé da sacola e o botão de enviar */
 .cart-modal {
     display: flex;
     flex-direction: column;
@@ -168,121 +168,12 @@
     border-top: 2px solid #eee;
     z-index: 10;
 }
-    let sacola = [];
 
-    // Função para abrir/fechar a sacola lateral
-    function toggleCart() {
-        const cart = document.getElementById('cart-modal');
-        cart.classList.toggle('active');
-    }
-
-    // Função para alterar a quantidade nos botões + e -
-    function alterarQtd(id, delta, max) {
-        let input = document.getElementById(id);
-        let valor = parseInt(input.value) + delta;
-        if (valor >= 1 && valor <= max) {
-            input.value = valor;
-        }
-    }
-
-    // Função para adicionar à sacola
-    function addCart(nome, mlId, qtdId) {
-        const selectMl = document.getElementById(mlId);
-        const qtd = parseInt(document.getElementById(qtdId).value);
-        
-        // Divide o valor do select (ex: "80ml|239.00")
-        const [ml, preco] = selectMl.value.split('|');
-        const precoNum = parseFloat(preco);
-
-        if (precoNum <= 0) return;
-
-        sacola.push({
-            nome: nome,
-            ml: ml,
-            preco: precoNum,
-            qtd: qtd
-        });
-
-        atualizarSacola();
-        
-        // Abre a sacola automaticamente ao adicionar
-        if (!document.getElementById('cart-modal').classList.contains('active')) {
-            toggleCart();
-        }
-    }
-
-    // FUNÇÃO QUE ESTAVA FALTANDO: Remover item
-    function removerItem(index) {
-        // Remove 1 item na posição do índice clicado
-        sacola.splice(index, 1); 
-        atualizarSacola();
-    }
-
-    // Atualiza a visualização da sacola
-    function atualizarSacola() {
-        const container = document.getElementById('cart-items');
-        const totalElement = document.getElementById('cart-total');
-        const countElement = document.getElementById('cart-count');
-        
-        let total = 0;
-        let totalItens = 0;
-
-        if (sacola.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
-        } else {
-            container.innerHTML = '';
-            sacola.forEach((item, index) => {
-                const subtotal = item.preco * item.qtd;
-                total += subtotal;
-                totalItens += item.qtd;
-
-                container.innerHTML += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0;">
-                        <div style="flex: 1;">
-                            <span style="font-weight: bold; font-size: 13px;">${item.nome}</span><br>
-                            <span style="font-size: 11px; color: #666;">${item.ml} | Qtd: ${item.qtd}</span><br>
-                            <span style="font-size: 13px; color: var(--dourado);">R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
-                        </div>
-                        <button onclick="removerItem(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 18px; font-weight: bold; padding: 5px;">×</button>
-                    </div>
-                `;
-            });
-        }
-
-        totalElement.innerText = total.toFixed(2).replace('.', ',');
-        countElement.innerText = totalItens;
-    }
-
-    // Finalizar pedido via WhatsApp
-    function finalizarWhatsApp() {
-        if (sacola.length === 0) {
-            alert("Adicione produtos antes de enviar!");
-            return;
-        }
-
-        let mensagem = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
-        sacola.forEach(item => {
-            mensagem += `• *${item.nome}* (${item.ml}) - ${item.qtd}x R$ ${item.preco.toFixed(2)}\n`;
-        });
-        mensagem += `\n*Total: R$ ${document.getElementById('cart-total').innerText}*`;
-        
-        const fone = "5500000000000"; // COLOQUE SEU NÚMERO AQUI
-        window.open(`https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`);
-    }
-
-    // Compra rápida (um só produto)
-    function comprarAgora(nome, mlId) {
-        const selectMl = document.getElementById(mlId);
-        const [ml, preco] = selectMl.value.split('|');
-        const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${preco.replace('.', ',')}`;
-        window.open(`https://wa.me/5500000000000?text=${encodeURIComponent(msg)}`);
-    }
-        
 .btn-whats {
     margin-top: 10px;
     box-shadow: 0 -5px 10px rgba(0,0,0,0.05); /* Destaque visual */
 }
-        
+
 /* Ajuste responsivo: se o nome ainda for muito grande para celulares */
 @media (max-width: 768px) {
     .logo-text { font-size: 1.3rem; }
@@ -901,6 +792,8 @@
     </div>
 </div>
 
+
+
 <div class="card" data-marca="NAUTICA" data-secao="alta">
     <img src="img/nauticavoyage.webp" alt="nauticavoyage">
     <div class="info">
@@ -1136,6 +1029,8 @@
         toggleCart();
     }
 
+
+
     function atualizarCarrinho() {
         const itensCont = document.getElementById('cart-items');
         const totalCont = document.getElementById('cart-total');
@@ -1168,6 +1063,118 @@
         msg += `\n\nTotal: R$ ${document.getElementById('cart-total').innerText}`;
         window.open(`https://wa.me/63992576211?text=${encodeURIComponent(msg)}`, '_blank');
     }
+
+    let sacola = [];
+
+    // Função para abrir/fechar a sacola lateral
+    function toggleCart() {
+        const cart = document.getElementById('cart-modal');
+        cart.classList.toggle('active');
+    }
+
+    // Função para alterar a quantidade nos botões + e -
+    function alterarQtd(id, delta, max) {
+        let input = document.getElementById(id);
+        let valor = parseInt(input.value) + delta;
+        if (valor >= 1 && valor <= max) {
+            input.value = valor;
+        }
+    }
+
+    // Função para adicionar à sacola
+    function addCart(nome, mlId, qtdId) {
+        const selectMl = document.getElementById(mlId);
+        const qtd = parseInt(document.getElementById(qtdId).value);
+        
+        // Divide o valor do select (ex: "80ml|239.00")
+        const [ml, preco] = selectMl.value.split('|');
+        const precoNum = parseFloat(preco);
+
+        if (precoNum <= 0) return;
+
+        sacola.push({
+            nome: nome,
+            ml: ml,
+            preco: precoNum,
+            qtd: qtd
+        });
+
+        atualizarSacola();
+        
+        // Abre a sacola automaticamente ao adicionar
+        if (!document.getElementById('cart-modal').classList.contains('active')) {
+            toggleCart();
+        }
+    }
+
+    // FUNÇÃO QUE ESTAVA FALTANDO: Remover item
+    function removerItem(index) {
+        // Remove 1 item na posição do índice clicado
+        sacola.splice(index, 1); 
+        atualizarSacola();
+    }
+
+    // Atualiza a visualização da sacola
+    function atualizarSacola() {
+        const container = document.getElementById('cart-items');
+        const totalElement = document.getElementById('cart-total');
+        const countElement = document.getElementById('cart-count');
+        
+        let total = 0;
+        let totalItens = 0;
+
+        if (sacola.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
+        } else {
+            container.innerHTML = '';
+            sacola.forEach((item, index) => {
+                const subtotal = item.preco * item.qtd;
+                total += subtotal;
+                totalItens += item.qtd;
+
+                container.innerHTML += `
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0;">
+                        <div style="flex: 1;">
+                            <span style="font-weight: bold; font-size: 13px;">${item.nome}</span><br>
+                            <span style="font-size: 11px; color: #666;">${item.ml} | Qtd: ${item.qtd}</span><br>
+                            <span style="font-size: 13px; color: var(--dourado);">R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <button onclick="removerItem(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 18px; font-weight: bold; padding: 5px;">×</button>
+                    </div>
+                `;
+            });
+        }
+
+        totalElement.innerText = total.toFixed(2).replace('.', ',');
+        countElement.innerText = totalItens;
+    }
+
+    // Finalizar pedido via WhatsApp
+    function finalizarWhatsApp() {
+        if (sacola.length === 0) {
+            alert("Adicione produtos antes de enviar!");
+            return;
+        }
+
+        let mensagem = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
+        sacola.forEach(item => {
+            mensagem += `• *${item.nome}* (${item.ml}) - ${item.qtd}x R$ ${item.preco.toFixed(2)}\n`;
+        });
+        mensagem += `\n*Total: R$ ${document.getElementById('cart-total').innerText}*`;
+        
+        const fone = "5500000000000"; // COLOQUE SEU NÚMERO AQUI
+        window.open(`https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`);
+    }
+
+    // Compra rápida (um só produto)
+    function comprarAgora(nome, mlId) {
+        const selectMl = document.getElementById(mlId);
+        const [ml, preco] = selectMl.value.split('|');
+        const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${preco.replace('.', ',')}`;
+        window.open(`https://wa.me/5500000000000?text=${encodeURIComponent(msg)}`);
+    }
+
+
 </script>
 <footer class="rodape-premium">
     <div class="container">
@@ -1206,10 +1213,3 @@
     </div>
 </footer></body>
 </html>
-
-
-
-
-
-
-
