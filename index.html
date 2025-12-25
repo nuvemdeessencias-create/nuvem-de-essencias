@@ -637,7 +637,7 @@
         </div>
 
         <select class="seletor-ml" id="ml-blue">
-            <option value="80ml|239.00">80ML - R$ 239,00</option>
+            <option value="80ml|249.00">80ML - R$ 249,00</option>
         </select>
         
         <button onclick="comprarAgora('BLUE SEDUCTION', 'ml-blue')" class="btn-whats">COMPRAR AGORA</button>
@@ -763,17 +763,29 @@
     </div>
 </div>
 
-<div class="card" data-marca="JOOP" data-secao="alta">
-        <img src="img/joophomme.webp" alt="joophomme">
-        <div class="info">
-            <span class="marca-tag"> JOOP </span>
-            <div class="nome-perfume">JOOP HOMME EDT </div>
-            <select class="seletor-ml" id="ml-joophomme">
-                   <option value="75ml">75ML - R$ 249,00</option>
-            </select>
-            <button onclick="enviarPedido(' JOOP HOMME EDT ', 'ml-joophomme')" class="btn-whats">COMPRAR NO WHATSAPP</button>
+div class="card" data-marca="JOOP" data-secao="alta">
+    <img src="img/joophomme.webp" alt="joophomme" style="filter: grayscale(1); opacity: 0.6;">
+    <div class="info">
+        <span class="marca-tag">JOOP</span>
+        <div class="nome-perfume">JOOP HOMME EDT</div>
+        
+        <div class="estoque-label" style="color: #888;">PRODUTO INDISPONÍVEL</div>
+
+        <div class="qtd-container" style="opacity: 0.5; pointer-events: none;">
+            <button class="btn-qtd">-</button>
+            <input type="text" id="q-joophomme" value="0" readonly class="input-qtd">
+            <button class="btn-qtd">+</button>
         </div>
+
+        <select class="seletor-ml" id="ml-joophomme" disabled style="background: #f0f0f0;">
+            <option value="75ml|0.00">75ML - ESGOTADO</option>
+        </select>
+        
+        <button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>
+        
+        <button class="btn-add-cart" style="display: none;">+ Adicionar à Sacola</button>
     </div>
+</div>
 <div class="card" data-marca="NAUTICA" data-secao="alta">
     <img src="img/nauticavoyage.webp" alt="nauticavoyage">
     <div class="info">
@@ -1079,3 +1091,4 @@
     </div>
 </footer></body>
 </html>
+
