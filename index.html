@@ -1211,21 +1211,36 @@
         countElement.innerText = totalItens;
     }
 
-   // Finalizar pedido via WhatsApp com Lista de Produtos
-function finalizarWhatsApp() {
-    // 1. Localiza todos os cartões de produtos (classe "cartão")
-    const itensNoCarrinho = document.querySelectorAll('.cartão'); 
-    let mensagemProdutos = "";
+  function finalizarWhatsApp() {
+    // 1. Pegamos todos os elementos da sacola
+    const itensNaSacola = document.querySelectorAll('#cart-items div');
+    let listaDeProdutos = "";
 
-    itensNoCarrinho.forEach(item => {
-        // Pega o nome do perfume e a quantidade do input
-        const nome = item.querySelector('.nome-perfume').innerText;
-        const qtd = item.querySelector('.entrada-qtd').value;
-
-        // Só adiciona na lista se a quantidade for maior que zero
-        if (parseInt(qtd) > 0) {
-            mensagemProdutos += `• *${nome}* (Qtd: ${qtd})\n`;
+    // 2. Verificamos se há itens (ignora se estiver escrito "Sacola vazia")
+    itensNaSacola.forEach(item => {
+        const textoItem = item.innerText;
+        if (textoItem && !textoItem.includes("Sacola vazia")) {
+            // Limpa espaços extras e adiciona um marcador de lista
+            listaDeProdutos += "• " + textoItem.trim() + "\n";
         }
+    });
+
+    // 3. Se a lista estiver vazia, avisa o usuário
+    if (listaDeProdutos === "") {
+        alert("Sua sacola está vazia! Adicione produtos antes de enviar.");
+        return;
+    }
+
+    // 4. Pega o valor total que já está na tela (com o frete somado)
+    const valorTotalComFrete = document.getElementById('cart-total').innerText;
+
+    // 5. Monta a mensagem final para o seu WhatsApp (Araguaína)
+    const mensagemFinal = `Olá! Gostaria de fazer o seguinte pedido:\n\n${listaDeProdutos}\n*Total Final: R$ ${valorTotalComFrete}*`;
+    
+    const meuNumero = "5563992576211";
+    
+    window.open(`https://wa.me/${meuNumero}?text=${encodeURIComponent(mensagemFinal)}`, '_blank');
+}
     });
 
     // 2. Pega o valor FINAL que já está somado com o frete na tela
@@ -1361,6 +1376,7 @@ function aplicarFrete(valor, nome) {
     </div>
 </footer></body>
 </html>
+
 
 
 
