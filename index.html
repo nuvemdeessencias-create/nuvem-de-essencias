@@ -1268,9 +1268,26 @@ async function calcularFrete() {
 }
 
 function aplicarFrete(valor, nome) {
+    // 1. Salva o valor do frete na variável global para o Asaas/WhatsApp usar depois
     valorFreteGlobal = parseFloat(valor);
-    alert("Frete " + nome + " selecionado!");
-    // Aqui você pode adicionar uma lógica para somar o valor no total da tela se desejar
+    
+    // 2. Define o valor base do seu produto (ajuste se o valor for diferente de 239)
+    const valorProdutos = 239.00; 
+    
+    // 3. O comando da soma
+    const novoTotal = valorProdutos + valorFreteGlobal;
+    
+    // 4. Comando para atualizar o texto na tela (formata como dinheiro R$)
+    const totalElemento = document.getElementById('cart-total');
+    if (totalElemento) {
+        totalElemento.innerText = novoTotal.toLocaleString('pt-br', { 
+            minimumFractionDigits: 2, 
+            maximumFractionDigits: 2 
+        });
+    }
+
+    // Feedback visual para o cliente
+    console.log("Frete aplicado: " + nome + " - R$ " + valor);
 }
 
 </script>
@@ -1311,6 +1328,7 @@ function aplicarFrete(valor, nome) {
     </div>
 </footer></body>
 </html>
+
 
 
 
