@@ -1096,12 +1096,36 @@
     }
 
     function finalizarWhatsApp() {
-        if (cart.length === 0) return;
-        let msg = "Olá! Gostaria de encomendar:\n\n" + cart.map(i => `• ${i.nome} (${i.ml}) x${i.qtd}`).join('\n');
-        msg += `\n\nTotal: R$ ${document.getElementById('cart-total').innerText}`;
-        window.open(`https://wa.me/63992576211?text=${encodeURIComponent(msg)}`, '_blank');
+    // 1. Selecionamos todos os cartões de perfume que têm a classe "cartão"
+    const todosOsProdutos = document.querySelectorAll('.cartão');
+    let listaDePedido = "";
+
+    todosOsProdutos.forEach(produto => {
+        // 2. Para cada cartão, pegamos o nome do perfume e a quantidade
+        const nomePerfume = produto.querySelector('.nome-perfume').innerText;
+        const quantidade = produto.querySelector('.entrada-qtd').value;
+
+        // 3. Só colocamos na mensagem se o cliente escolheu pelo menos 1 unidade
+        if (parseInt(quantidade) > 0) {
+            listaDePedido += `• *${nomePerfume}* (${quantidade}x)\n`;
+        }
+    });
+
+    // 4. Pegamos o valor final que já está somado com o frete (ex: R$ 408,00)
+    const valorTotalComFrete = document.getElementById('cart-total').innerText;
+
+    // 5. Se a lista estiver vazia, avisamos o cliente
+    if (listaDePedido === "") {
+        alert("Por favor, adicione pelo menos um produto antes de enviar.");
+        return;
     }
 
+    // 6. Montamos a mensagem final para o seu número
+    const mensagemFinal = `Olá! Gostaria de fazer o seguinte pedido:\n\n${listaDePedido}\n*Total com Frete: R$ ${valorTotalComFrete}*`;
+    const meuNumero = "5563992576211";
+
+    window.open(`https://wa.me/${meuNumero}?text=${encodeURIComponent(mensagemFinal)}`, '_blank');
+}
     let sacola = [];
 
     // Função para abrir/fechar a sacola lateral
@@ -1337,6 +1361,7 @@ function aplicarFrete(valor, nome) {
     </div>
 </footer></body>
 </html>
+
 
 
 
