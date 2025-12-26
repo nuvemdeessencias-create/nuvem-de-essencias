@@ -1210,11 +1210,11 @@ async function calcularFrete() {
         divOpcoes.innerHTML = `
             <div style="background: #f9f9f9; padding: 8px; border-radius: 4px; margin-bottom: 5px;">
                 <input type="radio" name="tipoFrete" onclick="aplicarFrete(25.00)"> 
-                <strong>SEDEX:</strong> R$ 25,00 (2-3 dias úteis)
+                <strong>SEDEX:</strong> R$ 81,00 (2-4 dias úteis)
             </div>
             <div style="background: #f9f9f9; padding: 8px; border-radius: 4px;">
                 <input type="radio" name="tipoFrete" onclick="aplicarFrete(15.00)"> 
-                <strong>PAC:</strong> R$ 15,00 (7-10 dias úteis)
+                <strong>PAC:</strong> R$ 35,00 (7-11 dias úteis)
             </div>
         `;
     }, 1000);
@@ -1265,6 +1265,7 @@ function aplicarFrete(valor) {
     </div>
 </footer></body>
 </html>
+
 
 
 
