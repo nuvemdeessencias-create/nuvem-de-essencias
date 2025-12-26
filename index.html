@@ -1188,20 +1188,16 @@
 
     // Finalizar pedido via WhatsApp
     function finalizarWhatsApp() {
-        if (sacola.length === 0) {
-            alert("Adicione produtos antes de enviar!");
-            return;
-        }
-
-        let mensagem = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
-        sacola.forEach(item => {
-            mensagem += `• *${item.nome}* (${item.ml}) - ${item.qtd}x R$ ${item.preco.toFixed(2)}\n`;
-        });
-        mensagem += `\n*Total: R$ ${document.getElementById('cart-total').innerText}*`;
-        
-        const fone = "5500000000000"; // COLOQUE SEU NÚMERO AQUI
-        window.open(`https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`);
-    }
+    // Pega o valor FINAL que está na tela (já somado)
+    const valorFinalComFrete = document.getElementById('cart-total').innerText;
+    
+    const mensagem = `Olá! Gostaria de fazer o pedido. *Total: R$ ${valorFinalComFrete}*`;
+    
+    // Use o SEU número aqui (Exemplo: 5563991136979)
+    const meuWhatsapp = "5563992576211"; 
+    
+    window.open(`https://wa.me/${meuWhatsapp}?text=${encodeURIComponent(mensagem)}`, '_blank');
+}
 
     // Compra rápida (um só produto)
     function comprarAgora(nome, mlId) {
@@ -1268,26 +1264,24 @@ async function calcularFrete() {
 }
 
 function aplicarFrete(valor, nome) {
-    // 1. Salva o valor do frete na variável global para o Asaas/WhatsApp usar depois
+    // 1. Salva o valor do frete selecionado
     valorFreteGlobal = parseFloat(valor);
     
-    // 2. Define o valor base do seu produto (ajuste se o valor for diferente de 239)
-    const valorProdutos = 239.00; 
+    // 2. BUSCA o valor que já está na tela (ex: 809,00) em vez de usar um fixo
+    const textoTotalAtual = document.getElementById('cart-total').innerText;
+    // Remove o "R$", limpa os pontos e troca a vírgula por ponto para o computador entender
+    const valorProdutos = parseFloat(textoTotalAtual.replace('R$', '').replace('.', '').replace(',', '.').trim()) - (window.ultimoFreteSomado || 0);
     
-    // 3. O comando da soma
+    // 3. Faz a soma real
     const novoTotal = valorProdutos + valorFreteGlobal;
+    window.ultimoFreteSomado = valorFreteGlobal; // Guarda para não somar frete sobre frete
     
-    // 4. Comando para atualizar o texto na tela (formata como dinheiro R$)
-    const totalElemento = document.getElementById('cart-total');
-    if (totalElemento) {
-        totalElemento.innerText = novoTotal.toLocaleString('pt-br', { 
-            minimumFractionDigits: 2, 
-            maximumFractionDigits: 2 
-        });
-    }
+    // 4. Atualiza a tela com o novo total (Produto + Frete)
+    document.getElementById('cart-total').innerText = novoTotal.toLocaleString('pt-br', { 
+        minimumFractionDigits: 2 
+    });
 
-    // Feedback visual para o cliente
-    console.log("Frete aplicado: " + nome + " - R$ " + valor);
+    console.log("Soma realizada: " + valorProdutos + " + " + valorFreteGlobal + " = " + novoTotal);
 }
 
 </script>
@@ -1328,6 +1322,7 @@ function aplicarFrete(valor, nome) {
     </div>
 </footer></body>
 </html>
+
 
 
 
