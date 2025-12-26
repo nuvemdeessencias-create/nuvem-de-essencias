@@ -1200,31 +1200,63 @@ let valorFreteGlobal = 0;
 
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    if (cep.length !== 8) return alert("Por favor, digite um CEP válido com 8 dígitos.");
-
     const divOpcoes = document.getElementById('opcoes-frete');
-    divOpcoes.innerHTML = "Calculando...";
+    const totalElement = document.getElementById('cart-total');
+    
+    // Pega o valor atual do carrinho para as regras de frete grátis
+    const valorCarrinho = parseFloat(totalElement.innerText.replace('.', '').replace(',', '.'));
 
-    // Simulação inicial (Integraremos com a API real após você salvar este passo)
-    setTimeout(() => {
-        divOpcoes.innerHTML = `
-            <div style="background: #f9f9f9; padding: 8px; border-radius: 4px; margin-bottom: 5px;">
-                <input type="radio" name="tipoFrete" onclick="aplicarFrete(25.00)"> 
-                <strong>SEDEX:</strong> R$ 81,00 (2-4 dias úteis)
-            </div>
-            <div style="background: #f9f9f9; padding: 8px; border-radius: 4px;">
-                <input type="radio" name="tipoFrete" onclick="aplicarFrete(15.00)"> 
-                <strong>PAC:</strong> R$ 35,00 (7-11 dias úteis)
-            </div>
-        `;
-    }, 1000);
+    if (cep.length !== 8) {
+        alert("Por favor, digite um CEP válido com 8 dígitos.");
+        return;
+    }
+
+    divOpcoes.innerHTML = "<p style='font-size:12px; color:#666;'>Consultando transportadoras...</p>";
+
+    try {
+        // CHAMA SUA FUNÇÃO NO NETLIFY
+        const response = await fetch('/.netlify/functions/calcular-frete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cep_destino: cep,
+                quantidade: 1, 
+                valor_total: valorCarrinho
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.error) throw new Error(data.mensagem);
+
+        divOpcoes.innerHTML = ""; // Limpa o "Calculando..."
+
+        data.forEach(opcao => {
+            if (!opcao.error && opcao.price) {
+                const precoFormatado = parseFloat(opcao.price).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+                
+                divOpcoes.innerHTML += `
+                    <div style="background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; border: 1px solid #eee;">
+                        <input type="radio" name="tipoFrete" onclick="aplicarFrete(${opcao.price}, '${opcao.name}')"> 
+                        <div style="font-size: 12px; line-height: 1.4;">
+                            <strong>${opcao.name}</strong><br>
+                            <span style="color: #b89356; font-weight: bold;">${precoFormatado}</span> - ${opcao.delivery_time} dias úteis
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+    } catch (error) {
+        console.error("Erro ao calcular:", error);
+        divOpcoes.innerHTML = "<p style='font-size:11px; color:red;'>Erro ao calcular frete. Tente novamente.</p>";
+    }
 }
 
-function aplicarFrete(valor) {
-    valorFreteGlobal = valor;
-    // Esta função vai chamar a atualização do total que você já tem no index.html
-    const totalAtual = parseFloat(document.getElementById('cart-total').innerText.replace(',', '.'));
-    alert("Frete selecionado! O valor será somado ao checkout do Asaas.");
+function aplicarFrete(valor, nome) {
+    valorFreteGlobal = parseFloat(valor);
+    alert("Frete " + nome + " selecionado!");
+    // Aqui você pode adicionar uma lógica para somar o valor no total da tela se desejar
 }
 
 </script>
@@ -1265,6 +1297,7 @@ function aplicarFrete(valor) {
     </div>
 </footer></body>
 </html>
+
 
 
 
