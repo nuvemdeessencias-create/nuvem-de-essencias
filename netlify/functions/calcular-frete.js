@@ -25,7 +25,7 @@ exports.handler = async (event) => {
     // --- 3. CÁLCULO COM CAIXA DEITADA (24x15x14) ---
     const pesoTotal = (quantidade || 1) * 0.7; 
     const payload = {
-      "from": { "postal_code": "77800000" }, 
+      "from": { "postal_code": "77809270" }, 
       "to": { "postal_code": cep_destino },
       "products": [{
         "id": "perfumes-nuvem",
