@@ -1187,19 +1187,33 @@
         countElement.innerText = totalItens;
     }
 
-    // Finalizar pedido via WhatsApp
-    function finalizarWhatsApp() {
-    // Pega o valor FINAL que está na tela (já somado)
-    const valorFinalComFrete = document.getElementById('cart-total').innerText;
-    
-    const mensagem = `Olá! Gostaria de fazer o pedido. *Total: R$ ${valorFinalComFrete}*`;
-    
-    // Use o SEU número aqui (Exemplo: 5563991136979)
-    const meuWhatsapp = "5563992576211"; 
-    
-    window.open(`https://wa.me/${meuWhatsapp}?text=${encodeURIComponent(mensagem)}`, '_blank');
-}
+   // Finalizar pedido via WhatsApp com Lista de Produtos
+function finalizarWhatsApp() {
+    // 1. Localiza todos os cartões de produtos (classe "cartão")
+    const itensNoCarrinho = document.querySelectorAll('.cartão'); 
+    let mensagemProdutos = "";
 
+    itensNoCarrinho.forEach(item => {
+        // Pega o nome do perfume e a quantidade do input
+        const nome = item.querySelector('.nome-perfume').innerText;
+        const qtd = item.querySelector('.entrada-qtd').value;
+
+        // Só adiciona na lista se a quantidade for maior que zero
+        if (parseInt(qtd) > 0) {
+            mensagemProdutos += `• *${nome}* (Qtd: ${qtd})\n`;
+        }
+    });
+
+    // 2. Pega o valor FINAL que já está somado com o frete na tela
+    const valorFinalComFrete = document.getElementById('cart-total').innerText;
+
+    // 3. Monta a mensagem completa com produtos e o total de R$ 408,00 (exemplo)
+    const mensagem = `Olá! Gostaria de fazer o pedido:\n\n${mensagemProdutos}\n*Total com Frete: R$ ${valorFinalComFrete}*`;
+    
+    const meuwhatsapp = "5563992576211"; // Seu número correto atualizado
+    
+    window.open(`https://wa.me/${meuwhatsapp}?text=${encodeURIComponent(mensagem)}`, '_blank');
+}
     // Compra rápida (um só produto)
     function comprarAgora(nome, mlId) {
         const selectMl = document.getElementById(mlId);
@@ -1323,6 +1337,7 @@ function aplicarFrete(valor, nome) {
     </div>
 </footer></body>
 </html>
+
 
 
 
