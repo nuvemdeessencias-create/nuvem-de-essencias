@@ -271,14 +271,28 @@
         <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
     </div>
 
-    <div style="padding: 15px 0; border-top: 1px dashed #ccc; margin-top: 10px;">
-        <label style="font-size: 11px; font-weight: bold; color: #666;">SIMULAR FRETE (Araguaína):</label>
-        <div style="display: flex; gap: 5px; margin-top: 5px;">
-            <input type="text" id="cep-cliente" placeholder="Digite seu CEP">
-            <button onclick="calcularFrete()" style="background: #b89356; color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">OK</button>
-        </div>
-        <div id="opcoes-frete"></div>
+   <div style="font-family: 'Inter', sans-serif; max-width: 400px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+    <h3 style="font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: #1a1a1a;">ENTREGA</h3>
+    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
+    
+    <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden;">
+        <input type="text" id="cep-cliente" placeholder="Digite o CEP" 
+               style="flex: 1; border: none; padding: 0 15px; font-size: 14px; outline: none;">
+        <button onclick="calcularFrete()" 
+                style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-transform: uppercase;">
+            CALCULAR
+        </button>
     </div>
+    
+    <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" 
+       target="_blank" 
+       rel="noopener noreferrer"
+       style="display: inline-block; font-size: 12px; color: #1a1a1a; text-decoration: underline; margin-top: 15px; padding-bottom: 20px; font-style: italic;">
+        Não sei meu CEP
+    </a>
+
+    <div id="opcoes-frete" style="margin-top: 15px;"></div>
+</div>
 
     <div>
         <p style="margin-bottom: 10px;"><strong>Total: R$ <span id="cart-total">0,00</span></strong></p>
@@ -1175,20 +1189,16 @@
 
     // Finalizar pedido via WhatsApp
     function finalizarWhatsApp() {
-        if (sacola.length === 0) {
-            alert("Adicione produtos antes de enviar!");
-            return;
-        }
-
-        let mensagem = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
-        sacola.forEach(item => {
-            mensagem += `• *${item.nome}* (${item.ml}) - ${item.qtd}x R$ ${item.preco.toFixed(2)}\n`;
-        });
-        mensagem += `\n*Total: R$ ${document.getElementById('cart-total').innerText}*`;
-        
-        const fone = "5500000000000"; // COLOQUE SEU NÚMERO AQUI
-        window.open(`https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`);
-    }
+    // Pega o valor FINAL que está na tela (já somado)
+    const valorFinalComFrete = document.getElementById('cart-total').innerText;
+    
+    const mensagem = `Olá! Gostaria de fazer o pedido. *Total: R$ ${valorFinalComFrete}*`;
+    
+    // Use o SEU número aqui (Exemplo: 5563991136979)
+    const meuWhatsapp = "5563992576211"; 
+    
+    window.open(`https://wa.me/${meuWhatsapp}?text=${encodeURIComponent(mensagem)}`, '_blank');
+}
 
     // Compra rápida (um só produto)
     function comprarAgora(nome, mlId) {
@@ -1201,31 +1211,78 @@ let valorFreteGlobal = 0;
 
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    if (cep.length !== 8) return alert("Por favor, digite um CEP válido com 8 dígitos.");
-
     const divOpcoes = document.getElementById('opcoes-frete');
-    divOpcoes.innerHTML = "Calculando...";
+    const totalElement = document.getElementById('cart-total');
+    
+    // Pega o valor atual do carrinho para as regras de frete grátis
+    const valorCarrinho = parseFloat(totalElement.innerText.replace('.', '').replace(',', '.'));
 
-    // Simulação inicial (Integraremos com a API real após você salvar este passo)
-    setTimeout(() => {
-        divOpcoes.innerHTML = `
-            <div style="background: #f9f9f9; padding: 8px; border-radius: 4px; margin-bottom: 5px;">
-                <input type="radio" name="tipoFrete" onclick="aplicarFrete(25.00)"> 
-                <strong>SEDEX:</strong> R$ xxx (2-3 dias úteis)
-            </div>
-            <div style="background: #f9f9f9; padding: 8px; border-radius: 4px;">
-                <input type="radio" name="tipoFrete" onclick="aplicarFrete(15.00)"> 
-                <strong>PAC:</strong> xxx (7-10 dias úteis)
-            </div>
-        `;
-    }, 1000);
+    if (cep.length !== 8) {
+        alert("Por favor, digite um CEP válido com 8 dígitos.");
+        return;
+    }
+
+    divOpcoes.innerHTML = "<p style='font-size:12px; color:#666;'>Consultando transportadoras...</p>";
+
+    try {
+        // CHAMA SUA FUNÇÃO NO NETLIFY
+        const response = await fetch('/.netlify/functions/calcular-frete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cep_destino: cep,
+                quantidade: 1, 
+                valor_total: valorCarrinho
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.error) throw new Error(data.mensagem);
+
+        divOpcoes.innerHTML = ""; // Limpa o "Calculando..."
+
+        data.forEach(opcao => {
+            if (!opcao.error && opcao.price) {
+                const precoFormatado = parseFloat(opcao.price).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+                
+                divOpcoes.innerHTML += `
+                    <div style="background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; border: 1px solid #eee;">
+                        <input type="radio" name="tipoFrete" onclick="aplicarFrete(${opcao.price}, '${opcao.name}')"> 
+                        <div style="font-size: 12px; line-height: 1.4;">
+                            <strong>${opcao.name}</strong><br>
+                            <span style="color: #b89356; font-weight: bold;">${precoFormatado}</span> - ${opcao.delivery_time} dias úteis
+                        </div>
+                    </div>
+                `;
+            }
+        });
+
+    } catch (error) {
+        console.error("Erro ao calcular:", error);
+        divOpcoes.innerHTML = "<p style='font-size:11px; color:red;'>Erro ao calcular frete. Tente novamente.</p>";
+    }
 }
 
-function aplicarFrete(valor) {
-    valorFreteGlobal = valor;
-    // Esta função vai chamar a atualização do total que você já tem no index.html
-    const totalAtual = parseFloat(document.getElementById('cart-total').innerText.replace(',', '.'));
-    alert("Frete selecionado! O valor será somado ao checkout do Asaas.");
+function aplicarFrete(valor, nome) {
+    // 1. Salva o valor do frete selecionado
+    valorFreteGlobal = parseFloat(valor);
+    
+    // 2. BUSCA o valor que já está na tela (ex: 809,00) em vez de usar um fixo
+    const textoTotalAtual = document.getElementById('cart-total').innerText;
+    // Remove o "R$", limpa os pontos e troca a vírgula por ponto para o computador entender
+    const valorProdutos = parseFloat(textoTotalAtual.replace('R$', '').replace('.', '').replace(',', '.').trim()) - (window.ultimoFreteSomado || 0);
+    
+    // 3. Faz a soma real
+    const novoTotal = valorProdutos + valorFreteGlobal;
+    window.ultimoFreteSomado = valorFreteGlobal; // Guarda para não somar frete sobre frete
+    
+    // 4. Atualiza a tela com o novo total (Produto + Frete)
+    document.getElementById('cart-total').innerText = novoTotal.toLocaleString('pt-br', { 
+        minimumFractionDigits: 2 
+    });
+
+    console.log("Soma realizada: " + valorProdutos + " + " + valorFreteGlobal + " = " + novoTotal);
 }
 
 </script>
@@ -1266,6 +1323,12 @@ function aplicarFrete(valor) {
     </div>
 </footer></body>
 </html>
+
+
+
+
+
+
 
 
 
