@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -159,6 +160,18 @@
     padding-bottom: 20px;
 }
 
+#cep-cliente {
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 8px;
+    width: 100%;
+    margin-top: 10px;
+}
+#opcoes-frete { 
+    margin-top: 10px; 
+    font-size: 13px;
+}
+        
 /* Esta é a div que contém o Total e o Botão de Enviar */
 #cart-modal > div:last-child {
     position: sticky;
@@ -168,7 +181,7 @@
     border-top: 2px solid #eee;
     z-index: 10;
 }
-
+        
 .btn-whats {
     margin-top: 10px;
     box-shadow: 0 -5px 10px rgba(0,0,0,0.05); /* Destaque visual */
@@ -250,14 +263,25 @@
 
 <div id="cart-modal" class="cart-modal">
     <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3>Sua Sacola</h3>
-        <span style="cursor:pointer; font-size: 24px;" onclick="toggleCart()">×</span>
+        <h3 style="margin:0;">Sua Sacola</h3>
+        <span style="cursor:pointer; font-size: 28px;" onclick="toggleCart()">×</span>
     </div>
-    <div id="cart-items" style="flex:1; overflow-y:auto; margin-top:20px;">
-        <p style="text-align:center; color:#999;">Sacola vazia</p>
+
+    <div id="cart-items">
+        <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
     </div>
-    <div style="border-top: 1px solid #eee; padding-top: 15px;">
-        <p><strong>Total: R$ <span id="cart-total">0,00</span></strong></p>
+
+    <div style="padding: 15px 0; border-top: 1px dashed #ccc; margin-top: 10px;">
+        <label style="font-size: 11px; font-weight: bold; color: #666;">SIMULAR FRETE (Araguaína):</label>
+        <div style="display: flex; gap: 5px; margin-top: 5px;">
+            <input type="text" id="cep-cliente" placeholder="Digite seu CEP">
+            <button onclick="calcularFrete()" style="background: #b89356; color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer; font-weight: bold;">OK</button>
+        </div>
+        <div id="opcoes-frete"></div>
+    </div>
+
+    <div>
+        <p style="margin-bottom: 10px;"><strong>Total: R$ <span id="cart-total">0,00</span></strong></p>
         <button class="btn-whats" onclick="finalizarWhatsApp()">ENVIAR PEDIDO</button>
     </div>
 </div>
@@ -1173,7 +1197,36 @@
         const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${preco.replace('.', ',')}`;
         window.open(`https://wa.me/5500000000000?text=${encodeURIComponent(msg)}`);
     }
+let valorFreteGlobal = 0;
 
+async function calcularFrete() {
+    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+    if (cep.length !== 8) return alert("Por favor, digite um CEP válido com 8 dígitos.");
+
+    const divOpcoes = document.getElementById('opcoes-frete');
+    divOpcoes.innerHTML = "Calculando...";
+
+    // Simulação inicial (Integraremos com a API real após você salvar este passo)
+    setTimeout(() => {
+        divOpcoes.innerHTML = `
+            <div style="background: #f9f9f9; padding: 8px; border-radius: 4px; margin-bottom: 5px;">
+                <input type="radio" name="tipoFrete" onclick="aplicarFrete(25.00)"> 
+                <strong>SEDEX:</strong> R$ 25,00 (2-3 dias úteis)
+            </div>
+            <div style="background: #f9f9f9; padding: 8px; border-radius: 4px;">
+                <input type="radio" name="tipoFrete" onclick="aplicarFrete(15.00)"> 
+                <strong>PAC:</strong> R$ 15,00 (7-10 dias úteis)
+            </div>
+        `;
+    }, 1000);
+}
+
+function aplicarFrete(valor) {
+    valorFreteGlobal = valor;
+    // Esta função vai chamar a atualização do total que você já tem no index.html
+    const totalAtual = parseFloat(document.getElementById('cart-total').innerText.replace(',', '.'));
+    alert("Frete selecionado! O valor será somado ao checkout do Asaas.");
+}
 
 </script>
 <footer class="rodape-premium">
@@ -1213,3 +1266,8 @@
     </div>
 </footer></body>
 </html>
+
+
+
+
+
