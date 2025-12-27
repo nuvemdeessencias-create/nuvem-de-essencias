@@ -261,8 +261,22 @@
 }
 
         .categorias-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
-        .btn-categoria { background: transparent; border: 1px solid var(--dourado); color: white; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .btn-categoria.active { background: var(--dourado); }
+        .btn-categoria { 
+    background: transparent; 
+    border: 1px solid var(--dourado); 
+    color: white; 
+    padding: 10px 20px; /* Aumentado de 6px 15px para 10px 20px */
+    border-radius: 20px; 
+    cursor: pointer; 
+    font-size: 13px; /* Aumentado de 11px para 13px */
+    font-weight: bold; 
+    transition: 0.3s;
+}
+
+.btn-categoria.active { 
+    background: var(--dourado); 
+    color: white; 
+}
 
         /* GRID E CARDS */
         .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
@@ -1256,4 +1270,5 @@
     </div>
 </footer></body>
 </html>
+
 
