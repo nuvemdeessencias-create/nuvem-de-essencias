@@ -1059,13 +1059,31 @@
         filtrar();
     }
 
-    function addCart(nome, idMl, idQtd) {
-        const mlInfo = document.getElementById(idMl).value.split('|');
-        const qtd = parseInt(document.getElementById(idQtd).value);
-        cart.push({ nome, ml: mlInfo[0], preco: parseFloat(mlInfo[1]), qtd });
-        atualizarCarrinho();
-        toggleCart();
+   function addCart(nome, mlId, qtdId) {
+    const selectMl = document.getElementById(mlId);
+    const qtd = parseInt(document.getElementById(qtdId).value);
+    
+    // Divide o valor para pegar ml e preço separadamente
+    const [ml, preco] = selectMl.value.split('|');
+    const precoNum = parseFloat(preco);
+
+    if (precoNum > 0) {
+        // Adiciona o objeto completo à sacola
+        sacola.push({
+            nome: nome,
+            ml: ml,
+            preco: precoNum,
+            qtd: qtd
+        });
+
+        atualizarSacola();
+        
+        // Abre a sacola se estiver fechada
+        if (!document.getElementById('cart-modal').classList.contains('active')) {
+            toggleCart();
+        }
     }
+}
 
 
 
@@ -1095,12 +1113,35 @@
         window.open(`https://wa.me/63992576211?text=Olá! Quero o ${nome} (${ml})`, '_blank');
     }
 
-    function finalizarWhatsApp() {
-        if (cart.length === 0) return;
-        let msg = "Olá! Gostaria de encomendar:\n\n" + cart.map(i => `• ${i.nome} (${i.ml}) x${i.qtd}`).join('\n');
-        msg += `\n\nTotal: R$ ${document.getElementById('cart-total').innerText}`;
-        window.open(`https://wa.me/63992576211?text=${encodeURIComponent(msg)}`, '_blank');
+   function finalizarWhatsApp() {
+    if (sacola.length === 0) {
+        alert("Sua sacola está vazia!");
+        return;
     }
+
+    // Cabeçalho da mensagem
+    let mensagem = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
+
+    // Percorre cada item da sacola e adiciona o nome, ml e quantidade
+    sacola.forEach((item, index) => {
+        const subtotal = item.preco * item.qtd;
+        mensagem += `*${index + 1}. ${item.nome}*\n`;
+        mensagem += `   Tamanho: ${item.ml}\n`;
+        mensagem += `   Quantidade: ${item.qtd}\n`;
+        mensagem += `   Valor: R$ ${subtotal.toFixed(2).replace('.', ',')}\n\n`;
+    });
+
+    // Adiciona o total geral (que já inclui ou não o frete conforme sua lógica)
+    const totalGeral = document.getElementById('cart-total').innerText;
+    mensagem += `*Total do Pedido: R$ ${totalGeral}*`;
+
+    // Seu número de WhatsApp (mantenha o código do país e DDD)
+    const fone = "5563992576211"; 
+    
+    // Abre o link com a mensagem formatada
+    const link = `https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`;
+    window.open(link, '_blank');
+}
 
     let sacola = [];
 
@@ -1323,6 +1364,7 @@ function aplicarFrete(valor, nome) {
     </div>
 </footer></body>
 </html>
+
 
 
 
