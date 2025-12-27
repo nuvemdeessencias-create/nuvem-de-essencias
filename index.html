@@ -1140,35 +1140,59 @@
     }
 
     // --- FRETE (CORRIGIDO PARA APARECER) ---
-    async function calcularFrete() {
-        const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-        const divOpcoes = document.getElementById('opcoes-frete');
-        if (cep.length !== 8) return alert("CEP inválido");
-
-        divOpcoes.innerHTML = "<p style='color:#666; font-size:12px;'>Calculando...</p>";
-
-        try {
-            const response = await fetch('/.netlify/functions/calcular-frete', {
-                method: 'POST',
-                body: JSON.stringify({ cep_destino: cep, valor_total: 100 }) 
-            });
-            const data = await response.json();
-            divOpcoes.innerHTML = "";
-            
-            data.forEach(opcao => {
-                if (opcao.price) {
-                    divOpcoes.innerHTML += `
-                        <div style="background:#f9f9f9; padding:10px; border:1px solid #eee; margin-top:5px; border-radius:5px; display:flex; align-items:center; gap:10px; color:#333;">
-                            <input type="radio" name="tipoFrete" onclick="aplicarFrete(${opcao.price})">
-                            <div style="font-size:12px;">
-                                <strong>${opcao.name}</strong><br>
-                                <span style="color:#b89356;">R$ ${parseFloat(opcao.price).toFixed(2).replace('.', ',')}</span>
-                            </div>
-                        </div>`;
-                }
-            });
-        } catch (e) { divOpcoes.innerHTML = "Erro ao carregar frete."; }
+   async function calcularFrete() {
+    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+    const divOpcoes = document.getElementById('opcoes-frete');
+    
+    if (cep.length !== 8) {
+        alert("Por favor, digite um CEP válido.");
+        return;
     }
+
+    // Garante que a div esteja visível e limpa
+    divOpcoes.style.display = "block";
+    divOpcoes.innerHTML = "<p style='color: #666; font-size: 12px;'>Consultando opções...</p>";
+
+    try {
+        const response = await fetch('/.netlify/functions/calcular-frete', {
+            method: 'POST',
+            body: JSON.stringify({ cep_destino: cep, valor_total: 100 })
+        });
+        const data = await response.json();
+        
+        divOpcoes.innerHTML = ""; // Limpa o carregando
+
+        data.forEach(opcao => {
+            if (opcao.price) {
+                // ESTA PARTE CRIA A OPÇÃO DE MARCAR (RÁDIO) BEM VISÍVEL
+                divOpcoes.innerHTML += `
+                    <label style="display: flex; align-items: center; gap: 12px; background: #ffffff; padding: 12px; margin-top: 8px; border-radius: 8px; border: 2px solid #eee; cursor: pointer; color: #333 !important;">
+                        <input type="radio" name="tipoFrete" value="${opcao.price}" onclick="aplicarFrete(${opcao.price})" style="width: 20px; height: 20px; cursor: pointer;">
+                        <div style="flex: 1;">
+                            <strong style="display: block; font-size: 14px; color: #000;">${opcao.name}</strong>
+                            <span style="color: #b89356; font-weight: bold; font-size: 14px;">R$ ${parseFloat(opcao.price).toFixed(2).replace('.', ',')}</span>
+                            <small style="color: #666; display: block; font-size: 11px;">Prazo: ${opcao.delivery_time} dias úteis</small>
+                        </div>
+                    </label>
+                `;
+            }
+        });
+        
+        // ADICIONA OPÇÃO DE RETIRAR NO LOCAL (Caso ela também precise aparecer aqui)
+        divOpcoes.innerHTML += `
+            <label style="display: flex; align-items: center; gap: 12px; background: #f0fdf4; padding: 12px; margin-top: 8px; border-radius: 8px; border: 2px solid #22c55e; cursor: pointer; color: #166534 !important;">
+                <input type="radio" name="tipoFrete" value="0" onclick="aplicarFrete(0)" style="width: 20px; height: 20px; cursor: pointer;">
+                <div style="flex: 1;">
+                    <strong style="display: block; font-size: 14px;">RETIRAR NO LOCAL</strong>
+                    <span style="font-weight: bold; font-size: 14px;">Grátis</span>
+                </div>
+            </label>
+        `;
+
+    } catch (error) {
+        divOpcoes.innerHTML = "<p style='color: red; font-size: 12px;'>Erro ao buscar frete. Tente novamente.</p>";
+    }
+}
 
     function aplicarFrete(valor) {
         valorFreteGlobal = parseFloat(valor);
@@ -1181,6 +1205,7 @@
         window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
     }
 </script>
+
 
 
 
