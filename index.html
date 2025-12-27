@@ -288,38 +288,22 @@
             .container { grid-template-columns: 1fr; padding: 15px; }
             .logo-img { width: 130px; }
         }
-  </style>
+    </style>
 </head>
-<body> <header>
+<body>
+
+<header>
     <img src="img/logo.png" alt="NUVEM DE ESSÊNCIAS" class="logo-img">
     <div class="cart-icon-container" onclick="toggleCart()">
         🛍️ <span id="cart-count">0</span>
     </div>
-</header>
 
-<div style="width: 100%; border-top: 1px solid #b89356; border-bottom: 1px solid #b89356; padding: 12px 0; margin-top: 20px; background: transparent;">
-    <div style="color: white; text-align: center; font-size: 14px; font-weight: bold; font-family: 'Inter', sans-serif; letter-spacing: 1px;">
+</header>
+<div style="width: 100%; background: #1a1a1a; padding: 15px 0; border-top: 2px solid #b89356; border-bottom: 2px solid #b89356; margin-top: 10px;">
+    <div style="color: white; text-align: center; font-size: 13px; font-weight: bold; font-family: 'Inter', sans-serif; letter-spacing: 0.5px;">
         ✨ Parcele suas fragrâncias favoritas em até 10x sem juros no cartão! ✨
     </div>
 </div>
-
-   <div class="filtros-container" style="margin-top: -15px; padding-top: 10px;">
-    <div class="busca-grupo">
-        <select id="filtro-marca" onchange="filtrarProdutos()">
-            <option value="">TODAS AS MARCAS</option>
-            </select>
-        <input type="text" id="busca-input" class="busca-input" placeholder="PESQUISAR..." onkeyup="filtrarProdutos()">
-    </div>
-
-    <div class="categorias-nav">
-        <button class="btn-categoria active" onclick="filtrarCategoria('todos', this)">TODOS</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('alta-perfumaria', this)">ALTA PERFUMARIA</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('arabes', this)">PERFUMES ÁRABES</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('casa-velas', this)">CASA & VELAS</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
-    </div>
-</div>
-
 <div id="cart-modal" class="cart-modal">
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee;">
         <h3 style="margin:0;">Sua Sacola</h3>
@@ -327,6 +311,7 @@
     </div>
 
     <div id="cart-scroll-area" style="flex: 1; overflow-y: auto; padding: 20px;">
+        
         <div id="cart-items">
             <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
         </div>
@@ -336,26 +321,25 @@
             <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
             
             <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden;">
-                <input type="text" id="cep-cliente" placeholder="Digite o CEP" style="flex: 1; border: none; padding: 0 15px; font-size: 14px; outline: none;">
-                <button onclick="calcularFrete()" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-transform: uppercase;">
+                <input type="text" id="cep-cliente" placeholder="Digite o CEP" 
+                       style="flex: 1; border: none; padding: 0 15px; font-size: 14px; outline: none;">
+                <button onclick="calcularFrete()" 
+                        style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-transform: uppercase;">
                     CALCULAR
                 </button>
             </div>
 
-            <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer" style="display: block; font-size: 12px; color: #1a1a1a; text-decoration: underline; margin-top: 8px; font-style: italic;">
-                Não sei meu CEP
-            </a>
-
-            <div id="opcoes-frete" style="margin-top: 15px; padding-bottom: 30px;"></div>
+            <div id="opcoes-frete" style="margin-top: 15px; padding-bottom: 50px;"></div>
         </div>
     </div>
 
-    <div class="cart-footer">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333;">
+    <div style="padding: 20px; border-top: 1px solid #eee; background: white;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold;">
             <span>Total:</span>
             <span>R$ <span id="cart-total">0,00</span></span>
         </div>
-        <button onclick="finalizarWhatsApp()" style="width: 100%; background: #25d366; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px;">
+        <button onclick="finalizarWhatsApp()" 
+                style="width: 100%; background: #25d366; color: white; border: none; padding: 15px; border-radius: 8px; font-weight: 700; cursor: pointer; font-size: 16px;">
             ENVIAR PEDIDO
         </button>
     </div>
@@ -421,7 +405,16 @@
         <input type="text" id="buscaInput" onkeyup="filtrar()" placeholder="PESQUISAR...">
     </div>
 
-    <div class="container" id="listaProdutos">
+    <div class="categorias-nav">
+        <button class="btn-categoria active" onclick="filtrarCategoria('todos', this)">TODOS</button>
+        <button class="btn-categoria" onclick="filtrarCategoria('alta', this)">ALTA PERFUMARIA</button>
+        <button class="btn-categoria" onclick="filtrarCategoria('arabe', this)">PERFUMES ÁRABES</button>
+        <button class="btn-categoria" onclick="filtrarCategoria('casa', this)">CASA & VELAS</button>
+        <button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
+    </div>
+</div>
+
+<div class="container" id="listaProdutos">
 
     <div class="card" data-marca="SHAKIRA" data-secao="alta">
         <img src="img/shakira.avif">
@@ -1258,40 +1251,3 @@
     </div>
 </footer></body>
 </html>
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
