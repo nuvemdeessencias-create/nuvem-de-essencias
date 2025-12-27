@@ -167,21 +167,23 @@
     width: 100%;
     margin-top: 10px;
 }
-#opcoes-frete { 
-    height: auto; /* Deixa a altura livre para crescer conforme as opções */
-    max-height: 400px; /* Define um limite máximo se quiser */
-    overflow-y: auto; /* Se passar do limite, ele cria uma barrinha de rolagem interna */
-    padding-bottom: 20px; /* Dá um respiro no final para não colar na borda */
+#opcoes-frete {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: none; /* Deixamos crescer livremente */
+    padding-bottom: 80px; /* ESPAÇO EXTRA para não sumir atrás do botão */
+    overflow: visible;
 }
-        
-/* Esta é a div que contém o Total e o Botão de Enviar */
+
+/* O rodapé da sacola (Total e Botão) */
 #cart-modal > div:last-child {
     position: sticky;
-    bottom: 0;
+    bottom: -1px; /* Cola no fundo do modal */
     background: white;
-    padding: 15px 0;
+    padding: 15px;
     border-top: 2px solid #eee;
-    z-index: 10;
+    z-index: 100;
 }
         
 .btn-whats {
@@ -1168,6 +1170,7 @@
 </script>
 
     
+
 
 
 
