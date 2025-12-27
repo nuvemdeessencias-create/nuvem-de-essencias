@@ -1021,19 +1021,14 @@
 <script>
     // Atualiza o ano no rodapé
     document.getElementById("ano-real").textContent = new Date().getFullYear();
-</script>
-<script>
-    let cart = [];
+
+    // VARIÁVEIS GLOBAIS
+    let sacola = [];
     let categoriaAtual = 'todos';
+    let valorFreteGlobal = 0;
+    window.ultimoFreteSomado = 0;
 
-    function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
-
-    function alterarQtd(id, val, max) {
-        let input = document.getElementById(id);
-        let n = parseInt(input.value) + val;
-        if (n >= 1 && n <= max) input.value = n;
-    }
-
+    // --- SISTEMA DE FILTROS ---
     function filtrar() {
         let busca = document.getElementById('buscaInput').value.toLowerCase();
         let marcaSel = document.getElementById('filtroMarca').value;
@@ -1059,310 +1054,158 @@
         filtrar();
     }
 
-   function addCart(nome, mlId, qtdId) {
-    const selectMl = document.getElementById(mlId);
-    const qtd = parseInt(document.getElementById(qtdId).value);
-    
-    // Divide o valor para pegar ml e preço separadamente
-    const [ml, preco] = selectMl.value.split('|');
-    const precoNum = parseFloat(preco);
-
-    if (precoNum > 0) {
-        // Adiciona o objeto completo à sacola
-        sacola.push({
-            nome: nome,
-            ml: ml,
-            preco: precoNum,
-            qtd: qtd
-        });
-
-        atualizarSacola();
-        
-        // Abre a sacola se estiver fechada
-        if (!document.getElementById('cart-modal').classList.contains('active')) {
-            toggleCart();
-        }
-    }
-}
-
-
-
-    function atualizarCarrinho() {
-        const itensCont = document.getElementById('cart-items');
-        const totalCont = document.getElementById('cart-total');
-        const countCont = document.getElementById('cart-count');
-        let total = 0;
-        
-        if (cart.length === 0) {
-            itensCont.innerHTML = '<p style="text-align:center; color:#999;">Sacola vazia</p>';
-        } else {
-            itensCont.innerHTML = cart.map((item, index) => {
-                total += (item.preco * item.qtd);
-                return `<div style="padding:10px 0; border-bottom:1px solid #eee; font-size:13px;">
-                    <b>${item.nome}</b> (${item.ml})<br>
-                    ${item.qtd}x R$ ${item.preco.toFixed(2)}
-                </div>`;
-            }).join('');
-        }
-        totalCont.innerText = total.toFixed(2).replace('.', ',');
-        countCont.innerText = cart.length;
+    // --- GERENCIAMENTO DA SACOLA ---
+    function toggleCart() { 
+        document.getElementById('cart-modal').classList.toggle('active'); 
     }
 
-    function comprarAgora(nome, idMl) {
-        const ml = document.getElementById(idMl).value.split('|')[0];
-        window.open(`https://wa.me/63992576211?text=Olá! Quero o ${nome} (${ml})`, '_blank');
-    }
-
-   function finalizarWhatsApp() {
-    if (sacola.length === 0) {
-        alert("Sua sacola está vazia! Adicione produtos antes de finalizar.");
-        return;
-    }
-
-    // 1. Início da mensagem
-    let mensagem = "Olá! Gostaria de encomendar os seguintes perfumes:\n\n";
-
-    // 2. O SEGREDO: Esse loop percorre cada item que você adicionou
-    sacola.forEach((item, index) => {
-        // Aqui pegamos o nome que foi salvo no addCart
-        mensagem += `*${index + 1}. ${item.nome}*\n`; 
-        mensagem += `   Tamanho: ${item.ml}\n`;
-        mensagem += `   Qtd: ${item.qtd}\n`;
-        mensagem += `   Subtotal: R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n\n`;
-    });
-
-    // 3. Pega o valor total que aparece na tela (já com frete se houver)
-    const valorTotal = document.getElementById('cart-total').innerText;
-    mensagem += `*VALOR TOTAL: R$ ${valorTotal}*`;
-
-    // 4. Link final
-    const fone = "5563992576211";
-    const link = `https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`;
-    
-    window.open(link, '_blank');
-}
-
-    let sacola = [];
-
-    // Função para abrir/fechar a sacola lateral
-    function toggleCart() {
-        const cart = document.getElementById('cart-modal');
-        cart.classList.toggle('active');
-    }
-
-    // Função para alterar a quantidade nos botões + e -
-    function alterarQtd(id, delta, max) {
+    function alterarQtd(id, val, max) {
         let input = document.getElementById(id);
-        let valor = parseInt(input.value) + delta;
-        if (valor >= 1 && valor <= max) {
-            input.value = valor;
-        }
+        let n = parseInt(input.value) + val;
+        if (n >= 1 && n <= max) input.value = n;
     }
 
-    // Função para adicionar à sacola
     function addCart(nome, mlId, qtdId) {
         const selectMl = document.getElementById(mlId);
-        const qtd = parseInt(document.getElementById(qtdId).value);
-        
-        // Divide o valor do select (ex: "80ml|239.00")
+        const qtdInput = document.getElementById(qtdId);
+        if (!selectMl || !qtdInput) return;
+
+        const qtd = parseInt(qtdInput.value);
         const [ml, preco] = selectMl.value.split('|');
         const precoNum = parseFloat(preco);
 
-        if (precoNum <= 0) return;
-
-        sacola.push({
-            nome: nome,
-            ml: ml,
-            preco: precoNum,
-            qtd: qtd
-        });
-
-        atualizarSacola();
-        
-        // Abre a sacola automaticamente ao adicionar
-        if (!document.getElementById('cart-modal').classList.contains('active')) {
-            toggleCart();
+        if (precoNum > 0) {
+            sacola.push({ nome, ml, preco: precoNum, qtd });
+            atualizarSacola();
+            if (!document.getElementById('cart-modal').classList.contains('active')) toggleCart();
         }
     }
 
-    // FUNÇÃO QUE ESTAVA FALTANDO: Remover item
     function removerItem(index) {
-        // Remove 1 item na posição do índice clicado
-        sacola.splice(index, 1); 
+        sacola.splice(index, 1);
+        // Reset do frete ao remover itens para evitar erros de cálculo
+        valorFreteGlobal = 0;
+        window.ultimoFreteSomado = 0;
+        document.getElementById('opcoes-frete').innerHTML = "";
         atualizarSacola();
     }
 
-    // Atualiza a visualização da sacola
     function atualizarSacola() {
-        const container = document.getElementById('cart-items');
-        const totalElement = document.getElementById('cart-total');
-        const countElement = document.getElementById('cart-count');
+        const itensCont = document.getElementById('cart-items');
+        const totalCont = document.getElementById('cart-total');
+        const countCont = document.getElementById('cart-count');
+        let totalProdutos = 0;
         
-        let total = 0;
-        let totalItens = 0;
-
         if (sacola.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
+            itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
         } else {
-            container.innerHTML = '';
-            sacola.forEach((item, index) => {
+            itensCont.innerHTML = sacola.map((item, index) => {
                 const subtotal = item.preco * item.qtd;
-                total += subtotal;
-                totalItens += item.qtd;
-
-                container.innerHTML += `
+                totalProdutos += subtotal;
+                return `
                     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0;">
-                        <div style="flex: 1;">
+                        <div style="flex: 1; color: #333;">
                             <span style="font-weight: bold; font-size: 13px;">${item.nome}</span><br>
                             <span style="font-size: 11px; color: #666;">${item.ml} | Qtd: ${item.qtd}</span><br>
-                            <span style="font-size: 13px; color: var(--dourado);">R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
+                            <span style="font-size: 13px; color: #b89356; font-weight: bold;">R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
                         </div>
-                        <button onclick="removerItem(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 18px; font-weight: bold; padding: 5px;">×</button>
-                    </div>
-                `;
-            });
+                        <button onclick="removerItem(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 18px; font-weight: bold; padding: 5px;">&times;</button>
+                    </div>`;
+            }).join('');
         }
 
-        totalElement.innerText = total.toFixed(2).replace('.', ',');
-        countElement.innerText = totalItens;
+        const novoTotalGeral = totalProdutos + valorFreteGlobal;
+        totalCont.innerText = novoTotalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
+        countCont.innerText = sacola.length;
     }
 
-    // Finalizar pedido via WhatsApp
+    // --- INTEGRAÇÃO WHATSAPP ---
     function finalizarWhatsApp() {
-    // Pega o valor FINAL que está na tela (já somado)
-    const valorFinalComFrete = document.getElementById('cart-total').innerText;
-    
-    const mensagem = `Olá! Gostaria de fazer o pedido. *Total: R$ ${valorFinalComFrete}*`;
-    
-    // Use o SEU número aqui (Exemplo: 5563991136979)
-    const meuWhatsapp = "5563992576211"; 
-    
-    window.open(`https://wa.me/${meuWhatsapp}?text=${encodeURIComponent(mensagem)}`, '_blank');
-}
+        if (sacola.length === 0) {
+            alert("Sua sacola está vazia!");
+            return;
+        }
 
-    // Compra rápida (um só produto)
+        let mensagem = "Olá! Gostaria de encomendar os seguintes perfumes:\n\n";
+
+        sacola.forEach((item, index) => {
+            const sub = (item.preco * item.qtd).toFixed(2).replace('.', ',');
+            mensagem += `*${index + 1}. ${item.nome}*\n`; 
+            mensagem += `   Tamanho: ${item.ml} | Qtd: ${item.qtd}\n`;
+            mensagem += `   Subtotal: R$ ${sub}\n\n`;
+        });
+
+        if (valorFreteGlobal > 0) {
+            mensagem += `*Frete:* R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')}\n`;
+        }
+
+        const totalFinal = document.getElementById('cart-total').innerText;
+        mensagem += `*VALOR TOTAL: R$ ${totalFinal}*`;
+
+        const fone = "5563992576211";
+        window.open(`https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`, '_blank');
+    }
+
     function comprarAgora(nome, mlId) {
         const selectMl = document.getElementById(mlId);
         const [ml, preco] = selectMl.value.split('|');
         const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${preco.replace('.', ',')}`;
-        window.open(`https://wa.me/5500000000000?text=${encodeURIComponent(msg)}`);
-    }
-let valorFreteGlobal = 0;
-
-async function calcularFrete() {
-    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    const divOpcoes = document.getElementById('opcoes-frete');
-    const totalElement = document.getElementById('cart-total');
-    
-    // Pega o valor atual do carrinho para as regras de frete grátis
-    const valorCarrinho = parseFloat(totalElement.innerText.replace('.', '').replace(',', '.'));
-
-    if (cep.length !== 8) {
-        alert("Por favor, digite um CEP válido com 8 dígitos.");
-        return;
+        window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    divOpcoes.innerHTML = "<p style='font-size:12px; color:#666;'>Consultando transportadoras...</p>";
+    // --- SISTEMA DE FRETE ---
+    async function calcularFrete() {
+        const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+        const divOpcoes = document.getElementById('opcoes-frete');
+        const totalElement = document.getElementById('cart-total');
+        
+        const valorCarrinho = parseFloat(totalElement.innerText.replace('.', '').replace(',', '.'));
 
-    try {
-        // CHAMA SUA FUNÇÃO NO NETLIFY
-        const response = await fetch('/.netlify/functions/calcular-frete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                cep_destino: cep,
-                quantidade: 1, 
-                valor_total: valorCarrinho
-            })
-        });
+        if (cep.length !== 8) {
+            alert("Por favor, digite um CEP válido com 8 dígitos.");
+            return;
+        }
 
-        const data = await response.json();
+        divOpcoes.innerHTML = "<p style='font-size:12px; color:#666;'>Consultando transportadoras...</p>";
 
-        if (data.error) throw new Error(data.mensagem);
+        try {
+            const response = await fetch('/.netlify/functions/calcular-frete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    cep_destino: cep,
+                    quantidade: 1, 
+                    valor_total: valorCarrinho
+                })
+            });
 
-        divOpcoes.innerHTML = ""; // Limpa o "Calculando..."
+            const data = await response.json();
+            if (data.error) throw new Error(data.mensagem);
 
-        data.forEach(opcao => {
-            if (!opcao.error && opcao.price) {
-                const precoFormatado = parseFloat(opcao.price).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
-                
-                divOpcoes.innerHTML += `
-                    <div style="background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; border: 1px solid #eee;">
-                        <input type="radio" name="tipoFrete" onclick="aplicarFrete(${opcao.price}, '${opcao.name}')"> 
-                        <div style="font-size: 12px; line-height: 1.4;">
-                            <strong>${opcao.name}</strong><br>
-                            <span style="color: #b89356; font-weight: bold;">${precoFormatado}</span> - ${opcao.delivery_time} dias úteis
-                        </div>
-                    </div>
-                `;
-            }
-        });
-
-    } catch (error) {
-        console.error("Erro ao calcular:", error);
-        divOpcoes.innerHTML = "<p style='font-size:11px; color:red;'>Erro ao calcular frete. Tente novamente.</p>";
+            divOpcoes.innerHTML = ""; 
+            data.forEach(opcao => {
+                if (!opcao.error && opcao.price) {
+                    const precoFormatado = parseFloat(opcao.price).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+                    divOpcoes.innerHTML += `
+                        <div style="background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; border: 1px solid #eee; color:#333;">
+                            <input type="radio" name="tipoFrete" onclick="aplicarFrete(${opcao.price})"> 
+                            <div style="font-size: 12px; line-height: 1.4;">
+                                <strong>${opcao.name}</strong><br>
+                                <span style="color: #b89356; font-weight: bold;">${precoFormatado}</span> - ${opcao.delivery_time} dias úteis
+                            </div>
+                        </div>`;
+                }
+            });
+        } catch (error) {
+            divOpcoes.innerHTML = "<p style='font-size:11px; color:red;'>Erro ao calcular frete.</p>";
+        }
     }
-}
 
-function aplicarFrete(valor, nome) {
-    // 1. Salva o valor do frete selecionado
-    valorFreteGlobal = parseFloat(valor);
-    
-    // 2. BUSCA o valor que já está na tela (ex: 809,00) em vez de usar um fixo
-    const textoTotalAtual = document.getElementById('cart-total').innerText;
-    // Remove o "R$", limpa os pontos e troca a vírgula por ponto para o computador entender
-    const valorProdutos = parseFloat(textoTotalAtual.replace('R$', '').replace('.', '').replace(',', '.').trim()) - (window.ultimoFreteSomado || 0);
-    
-    // 3. Faz a soma real
-    const novoTotal = valorProdutos + valorFreteGlobal;
-    window.ultimoFreteSomado = valorFreteGlobal; // Guarda para não somar frete sobre frete
-    
-    // 4. Atualiza a tela com o novo total (Produto + Frete)
-    document.getElementById('cart-total').innerText = novoTotal.toLocaleString('pt-br', { 
-        minimumFractionDigits: 2 
-    });
-
-    console.log("Soma realizada: " + valorProdutos + " + " + valorFreteGlobal + " = " + novoTotal);
-}
-
+    function aplicarFrete(valor) {
+        valorFreteGlobal = parseFloat(valor);
+        atualizarSacola();
+    }
 </script>
-<footer class="rodape-premium">
-    <div class="container">
-        <div class="secao-marca">
-            <p class="slogan no-break">"Sinta o aroma dos sonhos e realce sua beleza!"</p>
-            <h1 class="logo-text no-break">NUVEM DE ESSÊNCIAS PERFUMARIA</h1>
-        </div>
-
-        <hr class="divisor">
-
-        <div class="grid-conteudo">
-            <div class="coluna">
-                <h3>ATENDIMENTO</h3>
-                <p>Rua dos Motoristas, nº 341 - Jardim Paulista</p>
-                <div class="whatsapp-link">
-                    <img src="https://img.icons8.com/color/24/whatsapp.png" alt="WhatsApp">
-                    <a href="https://wa.me/5563992576211" target="_blank">Fale conosco: (63) 99257-6211</a>
-                </div>
-            </div>
-
-            <div class="coluna">
-                <h3>FORMAS DE PAGAMENTO</h3>
-                <div class="icones-pagamento">
-                    <img src="https://img.icons8.com/color/38/mastercard.png" alt="Mastercard">
-                    <img src="https://img.icons8.com/color/38/visa.png" alt="Visa">
-                    <img src="https://img.icons8.com/color/38/elo.png" alt="Elo">
-                    <img src="https://img.icons8.com/color/38/pix.png" alt="Pix">
-                </div>
-            </div>
-        </div>
-
-        <div class="rodape-legal">
-            <p>Nuvem de Essências Perfumaria LTDA | CNPJ: 58.620.682/0001-15</p>
-            <p>© 2025 Nuvem de Essências - Todos os direitos reservados.</p>
-        </div>
-    </div>
-</footer></body>
-</html>
 
 
 
