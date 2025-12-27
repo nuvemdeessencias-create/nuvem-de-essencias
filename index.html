@@ -1017,30 +1017,21 @@
 </div>
 </div>
 
+    <script>
+    // 1. Atualiza o ano no rodapé
+    const anoElement = document.getElementById("ano-real");
+    if(anoElement) anoElement.textContent = new Date().getFullYear();
 
-<script>
-    // Atualiza o ano no rodapé
-    if(document.getElementById("ano-real")) {
-        document.getElementById("ano-real").textContent = new Date().getFullYear();
-    }
-
-    let sacola = []; // Use sempre 'sacola'
+    // 2. Variáveis de Controle
+    let sacola = []; // Lista única para os produtos
+    let valorFreteGlobal = 0; // Valor do frete selecionado
     let categoriaAtual = 'todos';
-    let valorFreteGlobal = 0;
-    window.ultimoFreteSomado = 0;
 
-    // --- FUNÇÕES DE INTERFACE ---
+    // 3. Funções de Interface (Abrir Sacola e Filtros)
     function toggleCart() { 
         document.getElementById('cart-modal').classList.toggle('active'); 
     }
 
-    function alterarQtd(id, val, max) {
-        let input = document.getElementById(id);
-        let n = parseInt(input.value) + val;
-        if (n >= 1 && n <= max) input.value = n;
-    }
-
-    // --- FILTROS ---
     function filtrar() {
         let busca = document.getElementById('buscaInput').value.toLowerCase();
         let marcaSel = document.getElementById('filtroMarca').value;
@@ -1050,7 +1041,7 @@
             let marca = card.getAttribute('data-marca');
             let secao = card.getAttribute('data-secao');
             let match = nome.includes(busca) && 
-                        (marcaSel === 'todos' || marca === marcaSel) &&
+                        (marcaSel === 'todos' || marca === marcaSel) && 
                         (categoriaAtual === 'todos' || secao === categoriaAtual);
             card.classList.toggle('hidden', !match);
         });
@@ -1063,12 +1054,12 @@
         filtrar();
     }
 
-    // --- LOGICA DA SACOLA (NOME DO PRODUTO) ---
+    // 4. Gestão da Sacola (Adicionar e Remover)
     function addCart(nome, mlId, qtdId) {
         const selectMl = document.getElementById(mlId);
         const qtdInput = document.getElementById(qtdId);
         if (!selectMl || !qtdInput) return;
-
+        
         const [ml, preco] = selectMl.value.split('|');
         const precoNum = parseFloat(preco);
         const qtd = parseInt(qtdInput.value);
@@ -1082,10 +1073,8 @@
 
     function removerItem(index) {
         sacola.splice(index, 1);
-        valorFreteGlobal = 0;
-        window.ultimoFreteSomado = 0;
-        const divOpcoes = document.getElementById('opcoes-frete');
-        if(divOpcoes) divOpcoes.innerHTML = "";
+        valorFreteGlobal = 0; // Reseta o frete para evitar erro no cálculo total
+        document.getElementById('opcoes-frete').innerHTML = "";
         atualizarSacola();
     }
 
@@ -1104,107 +1093,82 @@
                 return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
                             <div style="text-align:left;">
                                 <b style="font-size:13px;">${item.nome}</b><br>
-                                <small>${item.ml} | Qtd: ${item.qtd}</small><br>
-                                <span style="color:#b89356; font-weight:bold;">R$ ${sub.toFixed(2).replace('.', ',')}</span>
+                                <small>${item.ml} | Qtd: ${item.qtd}</small>
                             </div>
                             <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px; cursor:pointer;">&times;</button>
                         </div>`;
             }).join('');
         }
 
-        // Soma o frete ao total dos produtos
+        // Soma real: Produtos + Frete Selecionado
         const totalGeral = totalProdutos + valorFreteGlobal;
         totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
         countCont.innerText = sacola.length;
     }
 
-    // --- WHATSAPP (AQUI É ONDE VAI O NOME) ---
-    function finalizarWhatsApp() {
-        if (sacola.length === 0) return alert("Sacola vazia!");
+    // 5. Frete (Visualização Correta da Opção de Marcar)
+    async function calcularFrete() {
+        const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+        const divOpcoes = document.getElementById('opcoes-frete');
+        if (cep.length !== 8) return alert("CEP inválido");
 
-        let msg = "Olá! Gostaria de fazer o pedido:\n\n";
-        
-        sacola.forEach((item, i) => {
-            msg += `*${i+1}. ${item.nome}*\n`;
-            msg += `   ${item.ml} - Qtd: ${item.qtd} (R$ ${(item.preco * item.qtd).toFixed(2)})\n\n`;
-        });
+        divOpcoes.innerHTML = "<p style='color:#666; font-size:12px;'>Buscando frete...</p>";
 
-        if (valorFreteGlobal > 0) {
-            msg += `*Frete:* R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')}\n`;
+        try {
+            const response = await fetch('/.netlify/functions/calcular-frete', {
+                method: 'POST',
+                body: JSON.stringify({ cep_destino: cep, valor_total: 100 })
+            });
+            const data = await response.json();
+            divOpcoes.innerHTML = "";
+
+            data.forEach(opcao => {
+                if (opcao.price) {
+                    // Aqui forçamos a label e o input radio para serem visíveis e clicáveis
+                    divOpcoes.innerHTML += `
+                        <label style="display:flex; align-items:center; gap:10px; background:#f4f4f4; padding:10px; border:1px solid #ddd; margin-top:8px; border-radius:6px; cursor:pointer; color:#333;">
+                            <input type="radio" name="tipoFrete" onclick="aplicarFrete(${opcao.price})" style="cursor:pointer;">
+                            <div style="font-size:12px;">
+                                <strong>${opcao.name}</strong><br>
+                                <span style="color:#b89356; font-weight:bold;">R$ ${parseFloat(opcao.price).toFixed(2).replace('.', ',')}</span>
+                            </div>
+                        </label>`;
+                }
+            });
+        } catch (e) { 
+            divOpcoes.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao carregar opções.</p>"; 
         }
-
-        msg += `\n*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
-        
-        const fone = "5563992576211";
-        window.open(`https://wa.me/${fone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
-
-    // --- FRETE (CORRIGIDO PARA APARECER) ---
-   async function calcularFrete() {
-    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    const divOpcoes = document.getElementById('opcoes-frete');
-    
-    if (cep.length !== 8) {
-        alert("Por favor, digite um CEP válido.");
-        return;
-    }
-
-    // Garante que a div esteja visível e limpa
-    divOpcoes.style.display = "block";
-    divOpcoes.innerHTML = "<p style='color: #666; font-size: 12px;'>Consultando opções...</p>";
-
-    try {
-        const response = await fetch('/.netlify/functions/calcular-frete', {
-            method: 'POST',
-            body: JSON.stringify({ cep_destino: cep, valor_total: 100 })
-        });
-        const data = await response.json();
-        
-        divOpcoes.innerHTML = ""; // Limpa o carregando
-
-        data.forEach(opcao => {
-            if (opcao.price) {
-                // ESTA PARTE CRIA A OPÇÃO DE MARCAR (RÁDIO) BEM VISÍVEL
-                divOpcoes.innerHTML += `
-                    <label style="display: flex; align-items: center; gap: 12px; background: #ffffff; padding: 12px; margin-top: 8px; border-radius: 8px; border: 2px solid #eee; cursor: pointer; color: #333 !important;">
-                        <input type="radio" name="tipoFrete" value="${opcao.price}" onclick="aplicarFrete(${opcao.price})" style="width: 20px; height: 20px; cursor: pointer;">
-                        <div style="flex: 1;">
-                            <strong style="display: block; font-size: 14px; color: #000;">${opcao.name}</strong>
-                            <span style="color: #b89356; font-weight: bold; font-size: 14px;">R$ ${parseFloat(opcao.price).toFixed(2).replace('.', ',')}</span>
-                            <small style="color: #666; display: block; font-size: 11px;">Prazo: ${opcao.delivery_time} dias úteis</small>
-                        </div>
-                    </label>
-                `;
-            }
-        });
-        
-        // ADICIONA OPÇÃO DE RETIRAR NO LOCAL (Caso ela também precise aparecer aqui)
-        divOpcoes.innerHTML += `
-            <label style="display: flex; align-items: center; gap: 12px; background: #f0fdf4; padding: 12px; margin-top: 8px; border-radius: 8px; border: 2px solid #22c55e; cursor: pointer; color: #166534 !important;">
-                <input type="radio" name="tipoFrete" value="0" onclick="aplicarFrete(0)" style="width: 20px; height: 20px; cursor: pointer;">
-                <div style="flex: 1;">
-                    <strong style="display: block; font-size: 14px;">RETIRAR NO LOCAL</strong>
-                    <span style="font-weight: bold; font-size: 14px;">Grátis</span>
-                </div>
-            </label>
-        `;
-
-    } catch (error) {
-        divOpcoes.innerHTML = "<p style='color: red; font-size: 12px;'>Erro ao buscar frete. Tente novamente.</p>";
-    }
-}
 
     function aplicarFrete(valor) {
         valorFreteGlobal = parseFloat(valor);
         atualizarSacola();
     }
 
-    function comprarAgora(nome, mlId) {
-        const [ml, preco] = document.getElementById(mlId).value.split('|');
-        const msg = `Olá! Quero comprar o *${nome}* (${ml})`;
-        window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
+    // 6. WhatsApp (Envio Completo: Nomes + Total)
+    function finalizarWhatsApp() {
+        if (sacola.length === 0) return alert("Sua sacola está vazia!");
+        
+        let msg = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
+        
+        // Loop para pegar o nome de cada perfume
+        sacola.forEach((item, i) => {
+            msg += `*${i+1}. ${item.nome}* (${item.ml}) - Qtd: ${item.qtd}\n`;
+        });
+
+        if (valorFreteGlobal > 0) {
+            msg += `\n*Frete:* R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')}`;
+        }
+
+        const totalFinal = document.getElementById('cart-total').innerText;
+        msg += `\n*TOTAL DO PEDIDO: R$ ${totalFinal}*`;
+
+        const fone = "5563992576211";
+        window.open(`https://wa.me/${fone}?text=${encodeURIComponent(msg)}`, '_blank');
     }
 </script>
+
+
 
 
 
