@@ -302,7 +302,24 @@
         ✨ Parcele suas fragrâncias favoritas em até 10x sem juros no cartão! ✨
     </div>
 </div>
-<div class="filtros-container" style="margin-top: -15px; padding-top: 10px;">
+
+   <div class="filtros-container" style="margin-top: -15px; padding-top: 10px;">
+    <div class="busca-grupo">
+        <select id="filtro-marca" onchange="filtrarProdutos()">
+            <option value="">TODAS AS MARCAS</option>
+            </select>
+        <input type="text" id="busca-input" class="busca-input" placeholder="PESQUISAR..." onkeyup="filtrarProdutos()">
+    </div>
+
+    <div class="categorias-nav">
+        <button class="btn-categoria active" onclick="filtrarCategoria('todos', this)">TODOS</button>
+        <button class="btn-categoria" onclick="filtrarCategoria('alta-perfumaria', this)">ALTA PERFUMARIA</button>
+        <button class="btn-categoria" onclick="filtrarCategoria('arabes', this)">PERFUMES ÁRABES</button>
+        <button class="btn-categoria" onclick="filtrarCategoria('casa-velas', this)">CASA & VELAS</button>
+        <button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
+    </div>
+</div>
+
 <div id="cart-modal" class="cart-modal">
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee;">
         <h3 style="margin:0;">Sua Sacola</h3>
@@ -404,16 +421,7 @@
         <input type="text" id="buscaInput" onkeyup="filtrar()" placeholder="PESQUISAR...">
     </div>
 
-    <div class="categorias-nav">
-        <button class="btn-categoria active" onclick="filtrarCategoria('todos', this)">TODOS</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('alta', this)">ALTA PERFUMARIA</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('arabe', this)">PERFUMES ÁRABES</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('casa', this)">CASA & VELAS</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
-    </div>
-</div>
-
-<div class="container" id="listaProdutos">
+    <div class="container" id="listaProdutos">
 
     <div class="card" data-marca="SHAKIRA" data-secao="alta">
         <img src="img/shakira.avif">
@@ -1252,6 +1260,7 @@
 </html>
 
     
+
 
 
 
