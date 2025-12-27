@@ -1115,31 +1115,30 @@
 
    function finalizarWhatsApp() {
     if (sacola.length === 0) {
-        alert("Sua sacola está vazia!");
+        alert("Sua sacola está vazia! Adicione produtos antes de finalizar.");
         return;
     }
 
-    // Cabeçalho da mensagem
-    let mensagem = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
+    // 1. Início da mensagem
+    let mensagem = "Olá! Gostaria de encomendar os seguintes perfumes:\n\n";
 
-    // Percorre cada item da sacola e adiciona o nome, ml e quantidade
+    // 2. O SEGREDO: Esse loop percorre cada item que você adicionou
     sacola.forEach((item, index) => {
-        const subtotal = item.preco * item.qtd;
-        mensagem += `*${index + 1}. ${item.nome}*\n`;
+        // Aqui pegamos o nome que foi salvo no addCart
+        mensagem += `*${index + 1}. ${item.nome}*\n`; 
         mensagem += `   Tamanho: ${item.ml}\n`;
-        mensagem += `   Quantidade: ${item.qtd}\n`;
-        mensagem += `   Valor: R$ ${subtotal.toFixed(2).replace('.', ',')}\n\n`;
+        mensagem += `   Qtd: ${item.qtd}\n`;
+        mensagem += `   Subtotal: R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n\n`;
     });
 
-    // Adiciona o total geral (que já inclui ou não o frete conforme sua lógica)
-    const totalGeral = document.getElementById('cart-total').innerText;
-    mensagem += `*Total do Pedido: R$ ${totalGeral}*`;
+    // 3. Pega o valor total que aparece na tela (já com frete se houver)
+    const valorTotal = document.getElementById('cart-total').innerText;
+    mensagem += `*VALOR TOTAL: R$ ${valorTotal}*`;
 
-    // Seu número de WhatsApp (mantenha o código do país e DDD)
-    const fone = "5563992576211"; 
-    
-    // Abre o link com a mensagem formatada
+    // 4. Link final
+    const fone = "5563992576211";
     const link = `https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`;
+    
     window.open(link, '_blank');
 }
 
@@ -1364,6 +1363,7 @@ function aplicarFrete(valor, nome) {
     </div>
 </footer></body>
 </html>
+
 
 
 
