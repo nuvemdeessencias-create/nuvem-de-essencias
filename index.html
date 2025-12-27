@@ -177,13 +177,36 @@
 }
 
 /* O rodapé da sacola (Total e Botão) */
-#cart-modal > div:last-child {
-    position: sticky;
-    bottom: -1px; /* Cola no fundo do modal */
+#cart-modal {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%; /* No celular ocupa tudo */
+    max-width: 400px; /* No computador fica limitado */
+    height: 100%;
     background: white;
-    padding: 15px;
-    border-top: 2px solid #eee;
-    z-index: 100;
+    z-index: 1000;
+    transition: 0.3s;
+    display: flex;
+    flex-direction: column; /* Organiza topo, meio e fundo */
+}
+        #cart-modal.active {
+    right: 0;
+}
+
+        /* Área onde ficam os produtos e o frete (A parte que deve rolar) */
+#cart-items-container {
+    flex: 1; /* Ocupa o espaço central */
+    overflow-y: auto; /* ATIVA A ROLAGEM AQUI */
+    padding: 20px;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* O rodapé com o botão verde (Sempre visível no fundo) */
+.cart-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    background: white;
 }
         
 .btn-whats {
@@ -1170,6 +1193,7 @@
 </script>
 
     
+
 
 
 
