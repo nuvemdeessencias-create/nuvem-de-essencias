@@ -168,8 +168,10 @@
     margin-top: 10px;
 }
 #opcoes-frete { 
-    margin-top: 10px; 
-    font-size: 13px;
+    height: auto; /* Deixa a altura livre para crescer conforme as opções */
+    max-height: 400px; /* Define um limite máximo se quiser */
+    overflow-y: auto; /* Se passar do limite, ele cria uma barrinha de rolagem interna */
+    padding-bottom: 20px; /* Dá um respiro no final para não colar na borda */
 }
         
 /* Esta é a div que contém o Total e o Botão de Enviar */
@@ -1166,6 +1168,7 @@
 </script>
 
     
+
 
 
 
