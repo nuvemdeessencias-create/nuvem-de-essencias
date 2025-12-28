@@ -145,49 +145,75 @@
     padding-top: 20px;
 }
 
+/* MODAL SACOLA LATERAL CORRIGIDO */
 .cart-modal {
     position: fixed;
     top: 0;
     right: -100%;
     width: 100%;
-    max-width: 400px;
-    height: 100vh; /* Ocupa a altura total da tela para nada sumir */
+    max-width: 350px; /* Largura ideal para celular */
+    height: 100vh;    /* Altura total da tela */
     background: white;
+    color: #333;
     z-index: 2000;
     transition: 0.4s;
     box-shadow: -5px 0 20px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
-    justify-content: space-between; /* Corrigido de 空间 para space */
+    padding: 0; /* Removemos o padding daqui para não empurrar o botão */
+    overflow: hidden; /* Trava a sacola para ela não crescer além da tela */
 }
 
-#cart-items {
+/* Área que vai permitir rolar os produtos e o frete */
+#cart-scroll-area {
     flex: 1;
     overflow-y: auto;
-    margin-bottom: 10px;
-    padding-bottom: 40px; /* Adicione este respiro para os produtos aparecerem */
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
 }
 
-#cep-cliente {
+/* O rodapé onde fica o botão de enviar - ele fica sempre visível */
+.cart-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    background: white;
+    flex-shrink: 0;
+}
+
+/* 1. O container dos produtos */
+#cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    /* Mantemos o padding-bottom para o último produto não colar no frete */
+    padding-bottom: 20px; 
+}
+
+/* 2. A área geral de rolagem (onde os produtos E o frete moram) */
+#cart-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    /* Isso garante que a rolagem seja suave no celular */
+    -webkit-overflow-scrolling: touch; 
+}
+
+/* 3. O ajuste do frete para ele não sumir atrás do botão */
+#opcoes-frete {
+    margin-top: 15px;
+    /* Aumentamos aqui para 80px para garantir que o último frete suba */
+    padding-bottom: 80px; 
+}
+        #cep-cliente {
+    flex: 1; /* Faz o campo ocupar o espaço ao lado do botão calcular */
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 8px;
-    width: 100%;
-    margin-top: 10px;
-}
-#opcoes-frete { 
-    margin-top: 10px; 
-    font-size: 13px;
-}
-        
-/* Esta é a div que contém o Total e o Botão de Enviar */
-#cart-modal > div:last-child {
-    position: sticky;
-    bottom: 0;
+    padding: 12px; /* Aumentado de 8px para 12px para facilitar o toque */
+    font-size: 16px; /* Tamanho de letra ideal para não dar zoom no iPhone */
+    outline: none;
     background: white;
-    padding: 15px 0;
-    border-top: 2px solid #eee;
-    z-index: 10;
+    color: #333;
 }
         
 .btn-whats {
@@ -1210,6 +1236,7 @@
     </div>
 </footer></body>
 </html>
+
 
 
 
