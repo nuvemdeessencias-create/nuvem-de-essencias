@@ -5,70 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuvem De Essências | Catálogo Oficial</title>
     <style>
-        :root {
-            --azul-fundo: #020b1f; 
-            --azul-card: #ffffff; 
-            --dourado: #b89356;
-            --texto-escuro: #333333;
-            --verde-whats: #25d366;
-            --cinza-botao: #333333;
-        }
+       /* 1. CONFIGURAÇÕES GERAIS E CORES */
+:root {
+    --azul-fundo: #020b1f; 
+    --azul-card: #ffffff; 
+    --dourado: #b89356;
+    --texto-escuro: #333333;
+    --verde-whats: #25d366;
+    --cinza-botao: #333333;
+}
 
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--azul-fundo); color: white; overflow-x: hidden; }
+body { 
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0; 
+    background-color: var(--azul-fundo); 
+    color: white; 
+    overflow-x: hidden; 
+}
 
-        header { 
-            background: var(--azul-fundo); 
-            padding: 15px 5%; 
-            display: flex;
-            align-items: center;
-            justify-content: space-between; 
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(184, 147, 86, 0.3);
-        }
-        
-        .logo-img { width: 180px; height: auto; }
+/* 2. CABEÇALHO DO SITE */
+header { 
+    background: var(--azul-fundo); 
+    padding: 15px 5%; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(184, 147, 86, 0.3);
+}
 
-        .cart-icon-container {
-            background: var(--dourado);
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: bold;
-            color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+.logo-img { width: 180px; height: auto; }
 
-        #cart-count { background: white; color: var(--azul-fundo); padding: 2px 6px; border-radius: 50%; font-size: 11px; }
+.cart-icon-container {
+    background: var(--dourado);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
 
-  /* MODAL SACOLA LATERAL CORRIGIDO */
+#cart-count { background: white; color: var(--azul-fundo); padding: 2px 6px; border-radius: 50%; font-size: 11px; }
+
+/* 3. ESTRUTURA DA SACOLA (MODAL) */
 .cart-modal {
     position: fixed;
     top: 0;
     right: -100%;
     width: 100%;
     max-width: 380px;
-    height: 100vh; /* Força a altura da tela */
+    height: 100vh;
     background: white;
     z-index: 2000;
     transition: 0.4s;
     display: flex;
-    flex-direction: column; /* Organiza em: Topo, Meio e Fundo */
-    padding: 0; /* O padding agora será interno nas áreas abaixo */
-    overflow: hidden; /* Não deixa a sacola inteira rolar */
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.5);
 }
 
-/* Área que vai permitir rolar os produtos e o frete */
+.cart-modal.active { right: 0; }
+
 #cart-scroll-area {
-    flex: 1; /* Ocupa todo o espaço entre o título e o botão */
-    overflow-y: auto; /* Ativa a rolagem aqui */
+    flex: 1;
+    overflow-y: auto;
     padding: 20px;
+    -webkit-overflow-scrolling: touch;
 }
 
+#cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-bottom: 20px;
+}
+
+#opcoes-frete {
+    margin-top: 15px;
+    padding-bottom: 80px; /* Garante que o último frete não suma atrás do botão */
+}
+
+.cart-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    background: white;
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+/* 4. RODAPÉ PREMIUM (FONTES E ESTILO) */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap');
 
 .rodape-premium {
@@ -79,146 +111,45 @@
     text-align: center;
 }
 
-/* Remove qualquer bloqueio que escondia o texto */
-.no-break {
-    white-space: nowrap; 
-    display: block;
-    width: 100%;
-    overflow: visible;     /* Garante que o texto apareça mesmo se for grande */
-    text-overflow: clip;   /* Remove os três pontinhos (...) */
+.logo-text {
+    font-family: 'Playfair Display', serif;
+    color: #87CEEB; 
+    font-size: 1.20rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 .slogan {
     font-family: 'Playfair Display', serif;
     font-style: italic;
     color: #c5a059;
-    font-size: 1.0rem;      /* Diminuído para garantir que a frase caiba em telas menores */
+    font-size: 1.0rem;
     margin-bottom: 5px;
-    letter-spacing: 0.5px; /* Espaçamento sutil para elegância */
 }
 
-.logo-text {
-    font-family: 'Playfair Display', serif;
-    color: #87CEEB; 
-    font-size: 1.20rem;     /* Tamanho ideal para o nome não quebrar */
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin: 0;
-}
-.divisor {
-    border: 0;
-    border-top: 1px solid rgba(197, 160, 89, 0.2);
-    margin: 30px auto;
-    width: 90%;
-}
-
-/* Alinhamento do WhatsApp */
-.whatsapp-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 5px;
-}
-
-.whatsapp-link a {
-    color: #ffffff;
-    text-decoration: none;
-}
-
-/* Grid e Ícones */
-.grid-conteudo {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 30px;
-    margin-bottom: 40px;
-    text-align: left;
-}
-
-.icones-pagamento {
-    display: flex;
-    gap: 12px;
-}
-
-.icones-pagamento img {
-    height: 30px;
-    width: auto;
-}
-
-.rodape-legal {
-    font-size: 0.75rem;
-    color: #666;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    padding-top: 20px;
-}
-
-
-
-/* O rodapé onde fica o botão de enviar - ele fica sempre visível */
-.cart-footer {
-    padding: 20px;
-    border-top: 1px solid #eee;
-    background: white;
-    flex-shrink: 0; /* Impede o botão de ser esmagado ou sumir */
-}
-
-/* 1. O container dos produtos */
-#cart-items {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    /* Mantemos o padding-bottom para o último produto não colar no frete */
-    padding-bottom: 20px; 
-}
-
-/* 3. O ajuste do frete para ele não sumir atrás do botão */
-#opcoes-frete {
-    margin-top: 15px;
-    /* Aumentamos aqui para 80px para garantir que o último frete suba */
-    padding-bottom: 80px; 
-}
-        #cep-cliente {
-    flex: 1; /* Faz o campo ocupar o espaço ao lado do botão calcular */
+/* 5. INPUTS E BOTÕES */
+#cep-cliente {
+    flex: 1;
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 12px; /* Aumentado de 8px para 12px para facilitar o toque */
-    font-size: 16px; /* Tamanho de letra ideal para não dar zoom no iPhone */
+    padding: 12px;
+    font-size: 16px;
     outline: none;
     background: white;
     color: #333;
 }
-        
+
 .btn-whats {
-    margin-top: 10px;
-    box-shadow: 0 -5px 10px rgba(0,0,0,0.05); /* Destaque visual */
+    background: var(--verde-whats);
+    color: white;
+    border: none;
+    padding: 15px;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
 }
-
-/* Ajuste responsivo: se o nome ainda for muito grande para celulares */
-@media (max-width: 768px) {
-    .logo-text { font-size: 1.3rem; }
-    .slogan { font-size: 0.9rem; }
-    .grid-conteudo { text-align: center; justify-content: center; }
-    .whatsapp-link { justify-content: center; }
-}
-.whatsapp-link {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Centraliza no rodapé */
-    gap: 8px;
-    margin-top: 10px;
-}
-
-.whatsapp-link a {
-    color: #ffffff; /* Cor do texto */
-    text-decoration: none; /* Tira o sublinhado do link */
-    font-weight: 500;
-}
-
-.whatsapp-link a:hover {
-    color: #87CEEB; /* Cor muda para o azul do seu logo ao passar o mouse */
-}
-        .cart-modal.active { right: 0; }
-
         /* FILTROS */
         .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .busca-grupo { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
@@ -273,7 +204,7 @@
         <span style="cursor:pointer; font-size: 28px; color: #333;" onclick="toggleCart()">×</span>
     </div>
 
-    <div id="cart-scroll-area" style="flex: 1; overflow-y: auto; padding: 20px;">
+    <div id="cart-scroll-area">
         <div id="cart-items">
             <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
         </div>
@@ -283,7 +214,7 @@
             <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
             
             <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
-                <input type="text" id="cep-cliente" placeholder="Digite o CEP" style="flex: 1; border: none; padding: 0 15px; font-size: 14px; outline: none;">
+                <input type="text" id="cep-cliente" placeholder="Digite o CEP">
                 <button onclick="calcularFrete()" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase;">
                     CALCULAR
                 </button>
@@ -293,16 +224,16 @@
                 Não sei meu CEP
             </a>
 
-            <div id="opcoes-frete" style="margin-top: 15px; padding-bottom: 40px;"></div>
+            <div id="opcoes-frete"></div>
         </div>
     </div>
 
-    <div class="cart-footer" style="padding: 20px; border-top: 1px solid #eee; background: white; flex-shrink: 0;">
+    <div class="cart-footer">
         <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333; font-size: 18px;">
             <span>Total:</span>
             <span>R$ <span id="cart-total">0,00</span></span>
         </div>
-        <button class="btn-whats" onclick="finalizarWhatsApp()" style="width: 100%; margin: 0;">
+        <button class="btn-whats" onclick="finalizarWhatsApp()">
             ENVIAR PEDIDO
         </button>
     </div>
@@ -1210,6 +1141,7 @@
     </div>
 </footer></body>
 </html>
+
 
 
 
