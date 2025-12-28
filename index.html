@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -6,63 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuvem De Essências | Catálogo Oficial</title>
     <style>
-        :root {
-            --azul-fundo: #020b1f; 
-            --azul-card: #ffffff; 
-            --dourado: #b89356;
-            --texto-escuro: #333333;
-            --verde-whats: #25d366;
-            --cinza-botao: #333333;
-        }
+       /* 1. CONFIGURAÇÕES GERAIS E CORES */
+:root {
+    --azul-fundo: #020b1f; 
+    --azul-card: #ffffff; 
+    --dourado: #b89356;
+    --texto-escuro: #333333;
+    --verde-whats: #25d366;
+    --cinza-botao: #333333;
+}
 
-        body { font-family: 'Segoe UI', sans-serif; margin: 0; background-color: var(--azul-fundo); color: white; overflow-x: hidden; }
+body { 
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0; 
+    background-color: var(--azul-fundo); 
+    color: white; 
+    overflow-x: hidden; 
+}
 
-        header { 
-            background: var(--azul-fundo); 
-            padding: 15px 5%; 
-            display: flex;
-            align-items: center;
-            justify-content: space-between; 
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(184, 147, 86, 0.3);
-        }
-        
-        .logo-img { width: 180px; height: auto; }
+/* 2. CABEÇALHO DO SITE */
+header { 
+    background: var(--azul-fundo); 
+    padding: 15px 5%; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(184, 147, 86, 0.3);
+}
 
-        .cart-icon-container {
-            background: var(--dourado);
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: bold;
-            color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+.logo-img { width: 180px; height: auto; }
 
-        #cart-count { background: white; color: var(--azul-fundo); padding: 2px 6px; border-radius: 50%; font-size: 11px; }
+.cart-icon-container {
+    background: var(--dourado);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
 
-        /* MODAL SACOLA LATERAL */
-        .cart-modal {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 300px;
-            height: 100%;
-            background: white;
-            color: #333;
-            z-index: 2000;
-            transition: 0.4s;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-        }
+#cart-count { background: white; color: var(--azul-fundo); padding: 2px 6px; border-radius: 50%; font-size: 11px; }
 
+/* 3. ESTRUTURA DA SACOLA (MODAL) */
+.cart-modal {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    max-width: 380px;
+    height: 100vh;
+    background: white;
+    z-index: 2000;
+    transition: 0.4s;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+}
+
+.cart-modal.active { right: 0; }
+
+#cart-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    -webkit-overflow-scrolling: touch;
+}
+
+#cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-bottom: 20px;
+}
+
+#opcoes-frete {
+    margin-top: 15px;
+    padding-bottom: 80px; /* Garante que o último frete não suma atrás do botão */
+}
+
+.cart-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    background: white;
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+/* 4. RODAPÉ PREMIUM (FONTES E ESTILO) */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap');
 
 .rodape-premium {
@@ -73,146 +111,45 @@
     text-align: center;
 }
 
-/* Remove qualquer bloqueio que escondia o texto */
-.no-break {
-    white-space: nowrap; 
-    display: block;
-    width: 100%;
-    overflow: visible;     /* Garante que o texto apareça mesmo se for grande */
-    text-overflow: clip;   /* Remove os três pontinhos (...) */
+.logo-text {
+    font-family: 'Playfair Display', serif;
+    color: #87CEEB; 
+    font-size: 1.20rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 .slogan {
     font-family: 'Playfair Display', serif;
     font-style: italic;
     color: #c5a059;
-    font-size: 1.0rem;      /* Diminuído para garantir que a frase caiba em telas menores */
+    font-size: 1.0rem;
     margin-bottom: 5px;
-    letter-spacing: 0.5px; /* Espaçamento sutil para elegância */
 }
 
-.logo-text {
-    font-family: 'Playfair Display', serif;
-    color: #87CEEB; 
-    font-size: 1.20rem;     /* Tamanho ideal para o nome não quebrar */
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin: 0;
-}
-.divisor {
-    border: 0;
-    border-top: 1px solid rgba(197, 160, 89, 0.2);
-    margin: 30px auto;
-    width: 90%;
-}
-
-/* Alinhamento do WhatsApp */
-.whatsapp-link {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 5px;
-}
-
-.whatsapp-link a {
-    color: #ffffff;
-    text-decoration: none;
-}
-
-/* Grid e Ícones */
-.grid-conteudo {
-    display: flex;
-    justify-content: space-around;
-    flex-wrap: wrap;
-    gap: 30px;
-    margin-bottom: 40px;
-    text-align: left;
-}
-
-.icones-pagamento {
-    display: flex;
-    gap: 12px;
-}
-
-.icones-pagamento img {
-    height: 30px;
-    width: auto;
-}
-
-.rodape-legal {
-    font-size: 0.75rem;
-    color: #666;
-    border-top: 1px solid rgba(255,255,255,0.05);
-    padding-top: 20px;
-}
-
-/* Ajuste para fixar o rodapé da sacola e o botão de enviar */
-.cart-modal {
-    display: flex;
-    flex-direction: column;
-    justify-content:空间-between; /* Garante separação entre itens e botão */
-}
-
-#cart-items {
-    flex: 1; /* Faz a lista de itens ocupar o espaço disponível e rolar */
-    overflow-y: auto;
-    margin-bottom: 10px;
-    padding-bottom: 20px;
-}
-
+/* 5. INPUTS E BOTÕES */
 #cep-cliente {
+    flex: 1;
     border: 1px solid #ddd;
     border-radius: 4px;
-    padding: 8px;
-    width: 100%;
-    margin-top: 10px;
-}
-#opcoes-frete { 
-    margin-top: 10px; 
-    font-size: 13px;
-}
-        
-/* Esta é a div que contém o Total e o Botão de Enviar */
-#cart-modal > div:last-child {
-    position: sticky;
-    bottom: 0;
+    padding: 12px;
+    font-size: 16px;
+    outline: none;
     background: white;
-    padding: 15px 0;
-    border-top: 2px solid #eee;
-    z-index: 10;
+    color: #333;
 }
-        
+
 .btn-whats {
-    margin-top: 10px;
-    box-shadow: 0 -5px 10px rgba(0,0,0,0.05); /* Destaque visual */
+    background: var(--verde-whats);
+    color: white;
+    border: none;
+    padding: 15px;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
 }
-
-/* Ajuste responsivo: se o nome ainda for muito grande para celulares */
-@media (max-width: 768px) {
-    .logo-text { font-size: 1.3rem; }
-    .slogan { font-size: 0.9rem; }
-    .grid-conteudo { text-align: center; justify-content: center; }
-    .whatsapp-link { justify-content: center; }
-}
-.whatsapp-link {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Centraliza no rodapé */
-    gap: 8px;
-    margin-top: 10px;
-}
-
-.whatsapp-link a {
-    color: #ffffff; /* Cor do texto */
-    text-decoration: none; /* Tira o sublinhado do link */
-    font-weight: 500;
-}
-
-.whatsapp-link a:hover {
-    color: #87CEEB; /* Cor muda para o azul do seu logo ao passar o mouse */
-}
-        .cart-modal.active { right: 0; }
-
         /* FILTROS */
         .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .busca-grupo { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
@@ -262,41 +199,43 @@
 </header>
 
 <div id="cart-modal" class="cart-modal">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-        <h3 style="margin:0;">Sua Sacola</h3>
-        <span style="cursor:pointer; font-size: 28px;" onclick="toggleCart()">×</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee; flex-shrink: 0;">
+        <h3 style="margin:0; color: #333;">Sua Sacola</h3>
+        <span style="cursor:pointer; font-size: 28px; color: #333;" onclick="toggleCart()">×</span>
     </div>
 
-    <div id="cart-items">
-        <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
+    <div id="cart-scroll-area">
+        <div id="cart-items">
+            <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
+        </div>
+
+        <div style="font-family: 'Inter', sans-serif; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+            <h3 style="font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: #1a1a1a;">ENTREGA</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
+            
+            <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
+                <input type="text" id="cep-cliente" placeholder="Digite o CEP">
+                <button onclick="calcularFrete()" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase;">
+                    CALCULAR
+                </button>
+            </div>
+
+            <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer" style="display: block; font-size: 12px; color: #1a1a1a; text-decoration: underline; font-style: italic;">
+                Não sei meu CEP
+            </a>
+
+            <div id="opcoes-frete"></div>
+        </div>
     </div>
 
-   <div style="font-family: 'Inter', sans-serif; max-width: 400px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-    <h3 style="font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: #1a1a1a;">ENTREGA</h3>
-    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
-    
-    <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden;">
-        <input type="text" id="cep-cliente" placeholder="Digite o CEP" 
-               style="flex: 1; border: none; padding: 0 15px; font-size: 14px; outline: none;">
-        <button onclick="calcularFrete()" 
-                style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-transform: uppercase;">
-            CALCULAR
+    <div class="cart-footer">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333; font-size: 18px;">
+            <span>Total:</span>
+            <span>R$ <span id="cart-total">0,00</span></span>
+        </div>
+        <button class="btn-whats" onclick="finalizarWhatsApp()">
+            ENVIAR PEDIDO
         </button>
-    </div>
-    
-    <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" 
-       target="_blank" 
-       rel="noopener noreferrer"
-       style="display: inline-block; font-size: 12px; color: #1a1a1a; text-decoration: underline; margin-top: 15px; padding-bottom: 20px; font-style: italic;">
-        Não sei meu CEP
-    </a>
-
-    <div id="opcoes-frete" style="margin-top: 15px;"></div>
-</div>
-
-    <div>
-        <p style="margin-bottom: 10px;"><strong>Total: R$ <span id="cart-total">0,00</span></strong></p>
-        <button class="btn-whats" onclick="finalizarWhatsApp()">ENVIAR PEDIDO</button>
     </div>
 </div>
 
@@ -1017,16 +956,21 @@
 </div>
 </div>
 
+   <script>
+    // 1. Atualiza o ano no rodapé
+    if(document.getElementById("ano-real")) {
+        document.getElementById("ano-real").textContent = new Date().getFullYear();
+    }
 
-<script>
-    // Atualiza o ano no rodapé
-    document.getElementById("ano-real").textContent = new Date().getFullYear();
-</script>
-<script>
-    let cart = [];
+    // 2. Variáveis Globais
+    let sacola = []; 
+    let valorFreteGlobal = 0;
     let categoriaAtual = 'todos';
 
-    function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
+    // 3. Funções de Interface
+    function toggleCart() { 
+        document.getElementById('cart-modal').classList.toggle('active'); 
+    }
 
     function alterarQtd(id, val, max) {
         let input = document.getElementById(id);
@@ -1034,20 +978,18 @@
         if (n >= 1 && n <= max) input.value = n;
     }
 
+    // 4. Filtros
     function filtrar() {
         let busca = document.getElementById('buscaInput').value.toLowerCase();
         let marcaSel = document.getElementById('filtroMarca').value;
         let cards = document.querySelectorAll('.card');
-
         cards.forEach(card => {
             let nome = card.querySelector('.nome-perfume').innerText.toLowerCase();
             let marca = card.getAttribute('data-marca');
             let secao = card.getAttribute('data-secao');
-            
             let match = nome.includes(busca) && 
-                        (marcaSel === 'todos' || marca === marcaSel) &&
+                        (marcaSel === 'todos' || marca === marcaSel) && 
                         (categoriaAtual === 'todos' || secao === categoriaAtual);
-            
             card.classList.toggle('hidden', !match);
         });
     }
@@ -1059,232 +1001,108 @@
         filtrar();
     }
 
-    function addCart(nome, idMl, idQtd) {
-        const mlInfo = document.getElementById(idMl).value.split('|');
-        const qtd = parseInt(document.getElementById(idQtd).value);
-        cart.push({ nome, ml: mlInfo[0], preco: parseFloat(mlInfo[1]), qtd });
-        atualizarCarrinho();
-        toggleCart();
+    // 5. Gestão da Sacola (Nomes dos Produtos)
+    function addCart(nome, mlId, qtdId) {
+        const selectMl = document.getElementById(mlId);
+        const qtdInput = document.getElementById(qtdId);
+        if (!selectMl || !qtdInput) return;
+        
+        const [ml, preco] = selectMl.value.split('|');
+        const precoNum = parseFloat(preco);
+        const qtd = parseInt(qtdInput.value);
+
+        if (precoNum > 0) {
+            sacola.push({ nome, ml, preco: precoNum, qtd });
+            atualizarSacola();
+            if (!document.getElementById('cart-modal').classList.contains('active')) toggleCart();
+        }
     }
 
+    function removerItem(index) {
+        sacola.splice(index, 1);
+        valorFreteGlobal = 0; 
+        document.getElementById('opcoes-frete').innerHTML = "";
+        atualizarSacola();
+    }
 
-
-    function atualizarCarrinho() {
+    function atualizarSacola() {
         const itensCont = document.getElementById('cart-items');
         const totalCont = document.getElementById('cart-total');
         const countCont = document.getElementById('cart-count');
-        let total = 0;
+        let totalProdutos = 0;
         
-        if (cart.length === 0) {
-            itensCont.innerHTML = '<p style="text-align:center; color:#999;">Sacola vazia</p>';
+        if (sacola.length === 0) {
+            itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
         } else {
-            itensCont.innerHTML = cart.map((item, index) => {
-                total += (item.preco * item.qtd);
-                return `<div style="padding:10px 0; border-bottom:1px solid #eee; font-size:13px;">
-                    <b>${item.nome}</b> (${item.ml})<br>
-                    ${item.qtd}x R$ ${item.preco.toFixed(2)}
-                </div>`;
+            itensCont.innerHTML = sacola.map((item, index) => {
+                const sub = item.preco * item.qtd;
+                totalProdutos += sub;
+                return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
+                            <div style="text-align:left;">
+                                <b style="font-size:13px;">${item.nome}</b><br>
+                                <small>${item.ml} | Qtd: ${item.qtd}</small>
+                            </div>
+                            <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px;">&times;</button>
+                        </div>`;
             }).join('');
         }
-        totalCont.innerText = total.toFixed(2).replace('.', ',');
-        countCont.innerText = cart.length;
+        const totalGeral = totalProdutos + valorFreteGlobal;
+        totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
+        countCont.innerText = sacola.length;
     }
 
-    function comprarAgora(nome, idMl) {
-        const ml = document.getElementById(idMl).value.split('|')[0];
-        window.open(`https://wa.me/63992576211?text=Olá! Quero o ${nome} (${ml})`, '_blank');
-    }
-
+    // 6. WhatsApp (Finalizar Sacola Completa)
     function finalizarWhatsApp() {
-        if (cart.length === 0) return;
-        let msg = "Olá! Gostaria de encomendar:\n\n" + cart.map(i => `• ${i.nome} (${i.ml}) x${i.qtd}`).join('\n');
-        msg += `\n\nTotal: R$ ${document.getElementById('cart-total').innerText}`;
-        window.open(`https://wa.me/63992576211?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    let sacola = [];
-
-    // Função para abrir/fechar a sacola lateral
-    function toggleCart() {
-        const cart = document.getElementById('cart-modal');
-        cart.classList.toggle('active');
-    }
-
-    // Função para alterar a quantidade nos botões + e -
-    function alterarQtd(id, delta, max) {
-        let input = document.getElementById(id);
-        let valor = parseInt(input.value) + delta;
-        if (valor >= 1 && valor <= max) {
-            input.value = valor;
-        }
-    }
-
-    // Função para adicionar à sacola
-    function addCart(nome, mlId, qtdId) {
-        const selectMl = document.getElementById(mlId);
-        const qtd = parseInt(document.getElementById(qtdId).value);
-        
-        // Divide o valor do select (ex: "80ml|239.00")
-        const [ml, preco] = selectMl.value.split('|');
-        const precoNum = parseFloat(preco);
-
-        if (precoNum <= 0) return;
-
-        sacola.push({
-            nome: nome,
-            ml: ml,
-            preco: precoNum,
-            qtd: qtd
+        if (sacola.length === 0) return alert("Sacola vazia!");
+        let msg = "Olá! Gostaria de encomendar os seguintes perfumes:\n\n";
+        sacola.forEach((item, i) => {
+            msg += `*${i+1}. ${item.nome}* (${item.ml}) - Qtd: ${item.qtd}\n`;
         });
-
-        atualizarSacola();
-        
-        // Abre a sacola automaticamente ao adicionar
-        if (!document.getElementById('cart-modal').classList.contains('active')) {
-            toggleCart();
-        }
+        if (valorFreteGlobal > 0) msg += `\n*Frete:* R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')}`;
+        msg += `\n*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
+        window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    // FUNÇÃO QUE ESTAVA FALTANDO: Remover item
-    function removerItem(index) {
-        // Remove 1 item na posição do índice clicado
-        sacola.splice(index, 1); 
-        atualizarSacola();
-    }
-
-    // Atualiza a visualização da sacola
-    function atualizarSacola() {
-        const container = document.getElementById('cart-items');
-        const totalElement = document.getElementById('cart-total');
-        const countElement = document.getElementById('cart-count');
-        
-        let total = 0;
-        let totalItens = 0;
-
-        if (sacola.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
-        } else {
-            container.innerHTML = '';
-            sacola.forEach((item, index) => {
-                const subtotal = item.preco * item.qtd;
-                total += subtotal;
-                totalItens += item.qtd;
-
-                container.innerHTML += `
-                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding: 10px 0;">
-                        <div style="flex: 1;">
-                            <span style="font-weight: bold; font-size: 13px;">${item.nome}</span><br>
-                            <span style="font-size: 11px; color: #666;">${item.ml} | Qtd: ${item.qtd}</span><br>
-                            <span style="font-size: 13px; color: var(--dourado);">R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
-                        </div>
-                        <button onclick="removerItem(${index})" style="background: none; border: none; color: #ff4d4d; cursor: pointer; font-size: 18px; font-weight: bold; padding: 5px;">×</button>
-                    </div>
-                `;
-            });
-        }
-
-        totalElement.innerText = total.toFixed(2).replace('.', ',');
-        countElement.innerText = totalItens;
-    }
-
-    // Finalizar pedido via WhatsApp
-    function finalizarWhatsApp() {
-    // Pega o valor FINAL que está na tela (já somado)
-    const valorFinalComFrete = document.getElementById('cart-total').innerText;
-    
-    const mensagem = `Olá! Gostaria de fazer o pedido. *Total: R$ ${valorFinalComFrete}*`;
-    
-    // Use o SEU número aqui (Exemplo: 5563991136979)
-    const meuWhatsapp = "5563992576211"; 
-    
-    window.open(`https://wa.me/${meuWhatsapp}?text=${encodeURIComponent(mensagem)}`, '_blank');
-}
-
-    // Compra rápida (um só produto)
+    // 7. COMPRA RÁPIDA (Botão de comprar direto no perfume) - CORRIGIDO
     function comprarAgora(nome, mlId) {
         const selectMl = document.getElementById(mlId);
+        if (!selectMl) return;
         const [ml, preco] = selectMl.value.split('|');
-        const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${preco.replace('.', ',')}`;
-        window.open(`https://wa.me/5500000000000?text=${encodeURIComponent(msg)}`);
-    }
-let valorFreteGlobal = 0;
-
-async function calcularFrete() {
-    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    const divOpcoes = document.getElementById('opcoes-frete');
-    const totalElement = document.getElementById('cart-total');
-    
-    // Pega o valor atual do carrinho para as regras de frete grátis
-    const valorCarrinho = parseFloat(totalElement.innerText.replace('.', '').replace(',', '.'));
-
-    if (cep.length !== 8) {
-        alert("Por favor, digite um CEP válido com 8 dígitos.");
-        return;
+        const precoFormatado = preco.replace('.', ',');
+        const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${precoFormatado}. Está disponível?`;
+        window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    divOpcoes.innerHTML = "<p style='font-size:12px; color:#666;'>Consultando transportadoras...</p>";
-
-    try {
-        // CHAMA SUA FUNÇÃO NO NETLIFY
-        const response = await fetch('/.netlify/functions/calcular-frete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                cep_destino: cep,
-                quantidade: 1, 
-                valor_total: valorCarrinho
-            })
-        });
-
-        const data = await response.json();
-
-        if (data.error) throw new Error(data.mensagem);
-
-        divOpcoes.innerHTML = ""; // Limpa o "Calculando..."
-
-        data.forEach(opcao => {
-            if (!opcao.error && opcao.price) {
-                const precoFormatado = parseFloat(opcao.price).toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
-                
-                divOpcoes.innerHTML += `
-                    <div style="background: #f9f9f9; padding: 10px; border-radius: 4px; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; border: 1px solid #eee;">
-                        <input type="radio" name="tipoFrete" onclick="aplicarFrete(${opcao.price}, '${opcao.name}')"> 
-                        <div style="font-size: 12px; line-height: 1.4;">
-                            <strong>${opcao.name}</strong><br>
-                            <span style="color: #b89356; font-weight: bold;">${precoFormatado}</span> - ${opcao.delivery_time} dias úteis
-                        </div>
-                    </div>
-                `;
-            }
-        });
-
-    } catch (error) {
-        console.error("Erro ao calcular:", error);
-        divOpcoes.innerHTML = "<p style='font-size:11px; color:red;'>Erro ao calcular frete. Tente novamente.</p>";
+    // 8. Frete (Visualização e Marcar Opção)
+    async function calcularFrete() {
+        const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+        const divOpcoes = document.getElementById('opcoes-frete');
+        if (cep.length !== 8) return alert("CEP inválido");
+        divOpcoes.innerHTML = "<p style='color:#666; font-size:12px;'>Buscando frete...</p>";
+        try {
+            const response = await fetch('/.netlify/functions/calcular-frete', {
+                method: 'POST',
+                body: JSON.stringify({ cep_destino: cep, valor_total: 100 })
+            });
+            const data = await response.json();
+            divOpcoes.innerHTML = "";
+            data.forEach(opcao => {
+                if (opcao.price) {
+                    divOpcoes.innerHTML += `
+                        <label style="display:flex; align-items:center; gap:10px; background:#f4f4f4; padding:10px; border:1px solid #ddd; margin-top:8px; border-radius:6px; cursor:pointer; color:#333;">
+                            <input type="radio" name="tipoFrete" onclick="aplicarFrete(${opcao.price})">
+                            <div style="font-size:12px;"><strong>${opcao.name}</strong><br>R$ ${parseFloat(opcao.price).toFixed(2).replace('.', ',')}</div>
+                        </label>`;
+                }
+            });
+        } catch (e) { divOpcoes.innerHTML = "Erro ao carregar frete."; }
     }
-}
 
-function aplicarFrete(valor, nome) {
-    // 1. Salva o valor do frete selecionado
-    valorFreteGlobal = parseFloat(valor);
-    
-    // 2. BUSCA o valor que já está na tela (ex: 809,00) em vez de usar um fixo
-    const textoTotalAtual = document.getElementById('cart-total').innerText;
-    // Remove o "R$", limpa os pontos e troca a vírgula por ponto para o computador entender
-    const valorProdutos = parseFloat(textoTotalAtual.replace('R$', '').replace('.', '').replace(',', '.').trim()) - (window.ultimoFreteSomado || 0);
-    
-    // 3. Faz a soma real
-    const novoTotal = valorProdutos + valorFreteGlobal;
-    window.ultimoFreteSomado = valorFreteGlobal; // Guarda para não somar frete sobre frete
-    
-    // 4. Atualiza a tela com o novo total (Produto + Frete)
-    document.getElementById('cart-total').innerText = novoTotal.toLocaleString('pt-br', { 
-        minimumFractionDigits: 2 
-    });
-
-    console.log("Soma realizada: " + valorProdutos + " + " + valorFreteGlobal + " = " + novoTotal);
-}
-
+    function aplicarFrete(valor) {
+        valorFreteGlobal = parseFloat(valor);
+        atualizarSacola();
+    }
+       
 </script>
 <footer class="rodape-premium">
     <div class="container">
@@ -1323,9 +1141,6 @@ function aplicarFrete(valor, nome) {
     </div>
 </footer></body>
 </html>
-
-
-
 
 
 
