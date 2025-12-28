@@ -145,11 +145,20 @@
     padding-top: 20px;
 }
 
-/* Ajuste para fixar o rodapé da sacola e o botão de enviar */
 .cart-modal {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    max-width: 400px;
+    height: 100vh; /* Ocupa a altura total da tela para nada sumir */
+    background: white;
+    z-index: 2000;
+    transition: 0.4s;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.5);
     display: flex;
     flex-direction: column;
-    justify-content:空间-between; /* Garante separação entre itens e botão */
+    justify-content: space-between; /* Corrigido de 空间 para space */
 }
 
 #cart-items {
@@ -1201,6 +1210,7 @@
     </div>
 </footer></body>
 </html>
+
 
 
 
