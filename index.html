@@ -252,31 +252,13 @@
         .cart-modal.active { right: 0; }
 
         /* FILTROS */
-        .filtros-container { 
-    padding: 10px 15px; /* Reduzi de 20px para 10px */
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    gap: 10px; 
-}
+        .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .busca-grupo { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
+        select, .busca-input { padding: 12px; border: 1px solid var(--dourado); border-radius: 8px; width: 100%; max-width: 300px; }
 
         .categorias-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
-        .btn-categoria { 
-    background: transparent; 
-    border: 1px solid var(--dourado); 
-    color: white; 
-    padding: 10px 20px; /* Aumentado de 6px 15px para 10px 20px */
-    border-radius: 20px; 
-    cursor: pointer; 
-    font-size: 13px; /* Aumentado de 11px para 13px */
-    font-weight: bold; 
-    transition: 0.3s;
-}
-
-.btn-categoria.active { 
-    background: var(--dourado); 
-    color: white; 
-}
+        .btn-categoria { background: transparent; border: 1px solid var(--dourado); color: white; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .btn-categoria.active { background: var(--dourado); }
 
         /* GRID E CARDS */
         .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
@@ -317,11 +299,10 @@
     </div>
 
 </header>
-<div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; margin-bottom: 5px; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
-    <p style="color: #ffffff; font-size: 14px; margin: 0; font-weight: bold; letter-spacing: 0.5px;">
+<div style="width: 100%; background: #1a1a1a; padding: 15px 0; border-top: 2px solid #b89356; border-bottom: 2px solid #b89356; margin-top: 10px;">
+    <div style="color: white; text-align: center; font-size: 13px; font-weight: bold; font-family: 'Inter', sans-serif; letter-spacing: 0.5px;">
         ✨ Parcele suas fragrâncias favoritas em até 10x sem juros no cartão! ✨
-    </p>
-</div>
+    </div>
 </div>
 <div id="cart-modal" class="cart-modal">
     <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee;">
@@ -1270,7 +1251,3 @@
     </div>
 </footer></body>
 </html>
-
-
-
-
