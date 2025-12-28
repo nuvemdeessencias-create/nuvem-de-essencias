@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -167,57 +166,19 @@
     width: 100%;
     margin-top: 10px;
 }
-#opcoes-frete {
-    display: block;
-    width: 100%;
-    height: auto;
-    max-height: none; /* Deixamos crescer livremente */
-    padding-bottom: 70px; /* ESPAÇO EXTRA para não sumir atrás do botão */
-    overflow: visible;
+#opcoes-frete { 
+    margin-top: 10px; 
+    font-size: 13px;
 }
-
-.cart-modal {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: 100%;
-    max-width: 400px;
-    height: 100vh; /* Ocupa a altura da tela toda */
+        
+/* Esta é a div que contém o Total e o Botão de Enviar */
+#cart-modal > div:last-child {
+    position: sticky;
+    bottom: 0;
     background: white;
-    z-index: 1000;
-    transition: 0.3s;
-    
-    /* ESTAS LINHAS SÃO O SEGREDO: */
-    display: flex;
-    flex-direction: column; 
-}
-
-.cart-modal.active {
-    right: 0;
-}
-
-/* 1. O TOPO (Sempre visível) */
-.cart-header {
-    padding: 20px;
-    border-bottom: 1px solid #eee;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: white;
-}
-
-/* 2. O MEIO (Onde ficam os produtos e frete - ESSE VAI ROLAR) */
-#cart-main-content {
-    flex: 1; /* Ocupa o espaço que sobrar */
-    overflow-y: auto; /* ATIVA A ROLAGEM AQUI */
-    padding: 20px;
-}
-
-/* 3. O RODAPÉ (Onde fica o total e o botão verde - Sempre visível) */
-.cart-footer {
-    padding: 20px;
-    border-top: 1px solid #eee;
-    background: white;
+    padding: 15px 0;
+    border-top: 2px solid #eee;
+    z-index: 10;
 }
         
 .btn-whats {
@@ -297,41 +258,51 @@
     <div class="cart-icon-container" onclick="toggleCart()">
         🛍️ <span id="cart-count">0</span>
     </div>
-
 </header>
-<div style="width: 100%; background: #1a1a1a; padding: 15px 0; border-top: 2px solid #b89356; border-bottom: 2px solid #b89356; margin-top: 10px;">
-    <div style="color: white; text-align: center; font-size: 13px; font-weight: bold; font-family: 'Inter', sans-serif; letter-spacing: 0.5px;">
-        ✨ Parcele suas fragrâncias favoritas em até 10x sem juros no cartão! ✨
-    </div>
-</div>
+
 <div id="cart-modal" class="cart-modal">
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee;">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
         <h3 style="margin:0;">Sua Sacola</h3>
         <span style="cursor:pointer; font-size: 28px;" onclick="toggleCart()">×</span>
     </div>
 
-    <div id="cart-scroll-area" style="flex: 1; overflow-y: auto; padding: 20px;">
-        
-        <div id="cart-items">
-            <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
-        </div>
+    <div id="cart-items">
+        <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
+    </div>
 
- <div style="font-family: 'Inter', sans-serif; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+   <div style="font-family: 'Inter', sans-serif; max-width: 400px; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
     <h3 style="font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: #1a1a1a;">ENTREGA</h3>
     <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
     
     <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden;">
-        <input type="text" id="cep-cliente" placeholder="Digite o CEP" style="flex: 1; border: none; padding: 0 15px; font-size: 14px; outline: none;">
-        <button onclick="calcularFrete()" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-transform: uppercase;">
+        <input type="text" id="cep-cliente" placeholder="Digite o CEP" 
+               style="flex: 1; border: none; padding: 0 15px; font-size: 14px; outline: none;">
+        <button onclick="calcularFrete()" 
+                style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; letter-spacing: 1px; cursor: pointer; text-transform: uppercase;">
             CALCULAR
         </button>
     </div>
-
-    <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer" style="display: block; font-size: 12px; color: #1a1a1a; text-decoration: underline; margin-top: 8px; font-style: italic;">
+    
+    <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" 
+       target="_blank" 
+       rel="noopener noreferrer"
+       style="display: inline-block; font-size: 12px; color: #1a1a1a; text-decoration: underline; margin-top: 15px; padding-bottom: 20px; font-style: italic;">
         Não sei meu CEP
     </a>
 
-    <div id="opcoes-frete" style="margin-top: 15px; padding-bottom: 30px;"></div>
+    <div id="opcoes-frete" style="margin-top: 15px;"></div>
+</div>
+
+    <div>
+        <p style="margin-bottom: 10px;"><strong>Total: R$ <span id="cart-total">0,00</span></strong></p>
+        <button class="btn-whats" onclick="finalizarWhatsApp()">ENVIAR PEDIDO</button>
+    </div>
+</div>
+
+<div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; margin-bottom: 20px; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
+    <p style="color: #ffffff; font-size: 14px; margin: 0; font-weight: bold; letter-spacing: 0.5px;">
+        ✨ Parcele suas fragrâncias favoritas em até 10x sem juros no cartão! ✨
+    </p>
 </div>
 <div class="filtros-container">
     <div class="busca-grupo">
@@ -1230,5 +1201,6 @@
     </div>
 </footer></body>
 </html>
+
 
 
