@@ -309,11 +309,11 @@ header {
    <div class="container" id="listaProdutos"></div>
 
     <script src="produtos.js"></script>
-
-    // Esta função lê a lista do produtos.js e cria os cartões na tela
+<script>
+  // Esta função lê a lista do produtos.js e cria os cartões na tela
 function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
-    if (!container) return;
+    if (!container) return; // "se" vira "if", "retornar" vira "return"
     container.innerHTML = "";
 
     // 'meusProdutos' vem do arquivo produtos.js
@@ -356,9 +356,6 @@ function carregarProdutos() {
         container.appendChild(card);
     });
 }
-
-// Isso faz os produtos aparecerem assim que a página termina de carregar
-window.addEventListener('load', carregarProdutos);
 
    <script>
     // 1. Atualiza o ano no rodapé
@@ -604,6 +601,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
