@@ -53,20 +53,7 @@
 
         #cart-count { background: white; color: var(--azul-fundo); padding: 2px 6px; border-radius: 50%; font-size: 11px; }
 
-        /* 3. ESTRUTURA DA SACOLA (MODAL) */
-        .cart-modal {
-            position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px;
-            height: 100vh; background: white; z-index: 2000; transition: 0.4s;
-            display: flex; flex-direction: column; padding: 0; overflow: hidden;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
-        }
-        .cart-modal.active { right: 0; }
-
-        #cart-scroll-area { flex: 1; overflow-y: auto; padding: 20px; -webkit-overflow-scrolling: touch; }
-        #cart-items { display: flex; flex-direction: column; gap: 15px; padding-bottom: 20px; }
-        .cart-footer { padding: 20px; border-top: 1px solid #eee; background: white; flex-shrink: 0; z-index: 10; }
-
-        /* 4. MODAL DE DETALHES (ESTILO SEPHORA) */
+        /* 3. MODAL DE DETALHES (ESTILO SEPHORA) */
         .detalhe-modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.9); z-index: 3000;
@@ -86,14 +73,7 @@
             .detalhe-img, .detalhe-info { width: 100%; }
         }
 
-        /* 5. FILTROS E GRID */
-        .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .busca-grupo { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
-        select, .busca-input { padding: 12px; border: 1px solid var(--dourado); border-radius: 8px; width: 100%; max-width: 300px; }
-        .categorias-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
-        .btn-categoria { background: transparent; border: 1px solid var(--dourado); color: white; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .btn-categoria.active { background: var(--dourado); }
-
+        /* 4. GRID E CARDS */
         .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
         .card { background: var(--azul-card); color: var(--texto-escuro); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
         .card img { width: 100%; height: 180px; object-fit: contain; background: white; padding: 10px 0; cursor: zoom-in; }
@@ -103,10 +83,22 @@
         .btn-add-cart { background: var(--cinza-botao); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; }
         .btn-whats { background: var(--verde-whats); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
 
+        /* 5. RODAPÉ ORIGINAL PREMIUM */
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap');
-        .rodape-premium { background-color: #0a0c1a; color: #ffffff; padding: 50px 0 30px 0; font-family: 'Poppins', sans-serif; text-align: center; }
-        .logo-text { font-family: 'Playfair Display', serif; color: #87CEEB; font-size: 1.20rem; letter-spacing: 1px; text-transform: uppercase; }
+        .rodape-premium { background-color: #0a0c1a; color: #ffffff; padding: 50px 0 30px 0; font-family: 'Poppins', sans-serif; text-align: center; border-top: 1px solid rgba(184, 147, 86, 0.3); }
+        .logo-text { font-family: 'Playfair Display', serif; color: #87CEEB; font-size: 1.20rem; letter-spacing: 1px; text-transform: uppercase; margin: 0; }
         .slogan { font-family: 'Playfair Display', serif; font-style: italic; color: #c5a059; font-size: 1.0rem; margin-bottom: 5px; }
+        .divisor { border: 0; border-top: 1px solid rgba(184, 147, 86, 0.2); margin: 25px auto; width: 80%; }
+        .grid-conteudo { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; padding: 0 5%; max-width: 1200px; margin: 0 auto; text-align: left; }
+        .coluna h3 { font-size: 14px; color: var(--dourado); letter-spacing: 1px; margin-bottom: 15px; text-transform: uppercase; }
+        .coluna p, .coluna a { font-size: 13px; color: #ccc; text-decoration: none; line-height: 1.6; }
+        .whatsapp-link { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+        .icones-pagamento { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
+        .rodape-legal { margin-top: 40px; font-size: 11px; color: #666; }
+
+        /* SACOLA */
+        .cart-modal { position: fixed; top: 0; right: -100%; width: 100%; max-width: 380px; height: 100vh; background: white; z-index: 2000; transition: 0.4s; display: flex; flex-direction: column; box-shadow: -5px 0 20px rgba(0,0,0,0.5); }
+        .cart-modal.active { right: 0; }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -121,17 +113,17 @@
 
 <div id="detalhe-modal" class="detalhe-modal">
     <div class="detalhe-conteudo">
-        <span onclick="fecharDetalhe()" style="position:absolute; right:20px; top:10px; font-size:30px; cursor:pointer; z-index:10;">&times;</span>
+        <span onclick="fecharDetalhe()" style="position:absolute; right:20px; top:10px; font-size:30px; cursor:pointer; z-index:10; color:#333;">&times;</span>
         <div class="detalhe-img">
             <img id="det-img" src="" alt="">
         </div>
         <div class="detalhe-info">
             <h2 id="det-titulo" style="margin-top:0;"></h2>
-            <p id="det-marca" style="color:var(--dourado); font-weight:bold; letter-spacing: 1px;"></p>
+            <p id="det-marca" style="color:var(--dourado); font-weight:bold;"></p>
             <p id="det-preco" style="font-size:24px; font-weight:bold; color: #1a1a1a;"></p>
             <div id="det-variacao" style="margin: 15px 0;"></div>
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
-            <h4 style="letter-spacing: 1px; color: #555;">DESCRIÇÃO</h4>
+            <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+            <h4 style="color: #555;">DESCRIÇÃO</h4>
             <div id="det-descricao" style="line-height: 1.6; color: #666; font-size: 14px;"></div>
             <br>
             <button id="det-btn-whats" class="btn-whats">PEDIR PELO WHATSAPP</button>
@@ -140,23 +132,15 @@
 </div>
 
 <div id="cart-modal" class="cart-modal">
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee;">
-        <h3 style="margin:0; color: #333;">Sua Sacola</h3>
-        <span style="cursor:pointer; font-size: 28px; color: #333;" onclick="toggleCart()">×</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee; color:#333;">
+        <h3 style="margin:0;">Sua Sacola</h3>
+        <span style="cursor:pointer; font-size: 28px;" onclick="toggleCart()">×</span>
     </div>
-    <div id="cart-scroll-area">
+    <div id="cart-scroll-area" style="flex:1; overflow-y:auto; padding:20px;">
         <div id="cart-items"></div>
-        <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-            <h3 style="font-size: 14px; color: #1a1a1a;">ENTREGA</h3>
-            <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-top: 10px;">
-                <input type="text" id="cep-cliente" placeholder="Digite o CEP" style="flex:1; border:none; padding:10px;">
-                <button onclick="calcularFrete()" style="background:#1a1a1a; color:white; border:none; padding:0 15px; cursor:pointer;">CALCULAR</button>
-            </div>
-            <div id="opcoes-frete"></div>
-        </div>
     </div>
-    <div class="cart-footer">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333; font-size: 18px;">
+    <div style="padding:20px; border-top:1px solid #eee; background:white;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:bold; color:#333; font-size:18px;">
             <span>Total:</span>
             <span>R$ <span id="cart-total">0,00</span></span>
         </div>
@@ -164,9 +148,9 @@
     </div>
 </div>
 
-<div class="filtros-container">
-    <div class="busca-grupo">
-        <select id="filtroMarca" onchange="filtrar()">
+<div style="padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px;">
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%;">
+        <select id="filtroMarca" onchange="filtrar()" style="padding: 12px; border: 1px solid var(--dourado); border-radius: 8px; width: 100%; max-width: 300px;">
             <option value="todos">TODAS AS MARCAS</option>
             <optgroup label="ALTA PERFUMARIA">
                 <option value="PACO RABANNE">PACO RABANNE</option>
@@ -184,7 +168,7 @@
                 <option value="ANTONIO BANDEIRAS">ANTONIO BANDEIRAS</option>
                 <option value="AZZARO">AZZARO</option>
                 <option value="BVLGARI">BVLGARI</option>
-                <option value="JACQUES BOGART ">JACQUES BOGART </option>
+                <option value="JACQUES BOGART">JACQUES BOGART</option>
                 <option value="CACHAREL">CACHAREL</option>
                 <option value="CALVIN KLEIN">CALVIN KLEIN</option>
                 <option value="DAVIDOFF">DAVIDOFF</option>
@@ -205,40 +189,47 @@
                 <option value="AFNAN">AFNAN</option>
                 <option value="ORIENTICA">ORIENTICA</option>
             </optgroup>
-            <optgroup label="KITS"><option value="KITS">KITS</option></optgroup>
-            <optgroup label="CASA"><option value="VELAS AROMATICAS">VELAS AROMÁTICAS</option></optgroup>
-            <optgroup label="MAQUIAGEM"><option value="BATONS">BATONS</option></optgroup>
         </select>
-        <input type="text" id="buscaInput" onkeyup="filtrar()" placeholder="PESQUISAR..." class="busca-input">
-    </div>
-    <div class="categorias-nav">
-        <button class="btn-categoria active" onclick="filtrarCategoria('todos', this)">TODOS</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('alta', this)">ALTA PERFUMARIA</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('arabe', this)">PERFUMES ÁRABES</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('casa', this)">CASA & VELAS</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('maquiagem', this)">MAQUIAGEM</button>
+        <input type="text" id="buscaInput" onkeyup="filtrar()" placeholder="PESQUISAR..." style="padding: 12px; border: 1px solid var(--dourado); border-radius: 8px; width: 100%; max-width: 300px;">
     </div>
 </div>
 
-<div class="container" id="listaProdutos">
-    <p style="text-align:center; color:white; padding: 50px; grid-column: 1 / -1;">Buscando as melhores fragrâncias...</p>
-</div>
+<div class="container" id="listaProdutos"></div>
 
 <footer class="rodape-premium">
-    <div class="container" style="display:block;">
+    <div class="secao-marca">
         <p class="slogan">"Sinta o aroma dos sonhos e realce sua beleza!"</p>
         <h1 class="logo-text">NUVEM DE ESSÊNCIAS PERFUMARIA</h1>
-        <hr style="border:0; border-top:1px solid rgba(184,147,86,0.3); margin:20px 0;">
-        <p style="font-size:12px;">Nuvem de Essências Perfumaria LTDA | CNPJ: 58.620.682/0001-15</p>
+    </div>
+    <hr class="divisor">
+    <div class="grid-conteudo">
+        <div class="coluna">
+            <h3>ATENDIMENTO</h3>
+            <p>Rua dos Motoristas, nº 341 - Jardim Paulista</p>
+            <div class="whatsapp-link">
+                <img src="https://img.icons8.com/color/24/whatsapp.png" alt="WhatsApp">
+                <a href="https://wa.me/5563992576211" target="_blank">Fale conosco: (63) 99257-6211</a>
+            </div>
+        </div>
+        <div class="coluna">
+            <h3>FORMAS DE PAGAMENTO</h3>
+            <div class="icones-pagamento">
+                <img src="https://img.icons8.com/color/38/mastercard.png" alt="Mastercard">
+                <img src="https://img.icons8.com/color/38/visa.png" alt="Visa">
+                <img src="https://img.icons8.com/color/38/elo.png" alt="Elo">
+                <img src="https://img.icons8.com/color/38/pix.png" alt="Pix">
+            </div>
+        </div>
+    </div>
+    <div class="rodape-legal">
+        <p>Nuvem de Essências Perfumaria LTDA | CNPJ: 58.620.682/0001-15</p>
+        <p>© 2025 Nuvem de Essências - Todos os direitos reservados.</p>
     </div>
 </footer>
 
 <script>
 const REPO_CONFIG = { owner: 'nuvemdeessencias', repo: 'create', path: 'content/produtos', branch: 'teste' };
 let sacola = [];
-let valorFreteGlobal = 0;
-let categoriaAtual = 'todos';
 
 async function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
@@ -250,20 +241,19 @@ async function carregarProdutos() {
             if (arquivo.name.endsWith('.json')) {
                 const res = await fetch(arquivo.download_url);
                 const dados = await res.json();
-                renderizarCard(dados, arquivo.name, container);
+                renderizarCard(dados, container);
             }
         }
     } catch (e) { container.innerHTML = "<p>Erro ao carregar catálogo.</p>"; }
 }
 
-function renderizarCard(dados, fileName, container) {
+function renderizarCard(dados, container) {
     const card = `
-        <div class="card" data-marca="${dados.marca.toUpperCase()}" data-secao="${dados.categoria || 'alta'}">
+        <div class="card" data-marca="${dados.marca.toUpperCase()}">
             <img src="${dados.imagem}" alt="${dados.title}" onclick='abrirDetalhe(${JSON.stringify(dados)})'>
             <div class="info">
                 <span class="marca-tag">${dados.marca}</span>
                 <div class="nome-perfume">${dados.title.toUpperCase()}</div>
-                <div class="estoque-label">Estoque: ${dados.estoque}</div>
                 <button onclick='abrirDetalhe(${JSON.stringify(dados)})' class="btn-add-cart">VER DETALHES</button>
             </div>
         </div>
@@ -283,45 +273,21 @@ function abrirDetalhe(dados) {
     if(dados.categoria === 'maquiagem' && dados.cores) {
         divVar.innerHTML = "<strong>CORES DISPONÍVEIS:</strong><br>";
         dados.cores.forEach(cor => {
-            divVar.innerHTML += `<span style="display:inline-block; border:1px solid #ddd; padding:5px 10px; margin:5px; border-radius:5px; font-size:12px;">${cor.nome_cor}</span>`;
+            divVar.innerHTML += `<span style="display:inline-block; border:1px solid #ddd; padding:5px 10px; margin:5px; border-radius:5px; font-size:12px; color:#333;">${cor.nome_cor}</span>`;
         });
-    } else if (dados.ml) {
-        divVar.innerHTML = `<strong>TAMANHO:</strong> ${dados.ml}`;
+    } else {
+        divVar.innerHTML = `<strong>TAMANHO:</strong> ${dados.ml || ''}`;
     }
 
     document.getElementById('det-btn-whats').onclick = () => {
-        addCart(dados.title, dados.preco, dados.ml);
-        const msg = encodeURIComponent(`Olá! Gostaria de encomendar: ${dados.title} (${dados.ml})`);
+        const msg = encodeURIComponent(`Olá! Quero saber mais sobre: ${dados.title} (${dados.ml || ''})`);
         window.open(`https://wa.me/5563992576211?text=${msg}`);
     };
-
     document.getElementById('detalhe-modal').classList.add('active');
 }
 
 function fecharDetalhe() { document.getElementById('detalhe-modal').classList.remove('active'); }
-
 function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
-
-function addCart(nome, preco, ml) {
-    const precoNum = parseFloat(preco.replace(',', '.'));
-    sacola.push({ nome, preco: precoNum, ml });
-    atualizarSacola();
-}
-
-function atualizarSacola() {
-    const itensCont = document.getElementById('cart-items');
-    const totalCont = document.getElementById('cart-total');
-    let total = 0;
-    itensCont.innerHTML = sacola.map((item, i) => {
-        total += item.preco;
-        return `<div style="display:flex; justify-content:space-between; color:#333; font-size:13px; border-bottom:1px solid #eee; padding:5px 0;">
-            <span>${item.nome} (${item.ml})</span>
-            <b>R$ ${item.preco.toFixed(2)}</b>
-        </div>`;
-    }).join('');
-    totalCont.innerText = (total + valorFreteGlobal).toFixed(2).replace('.', ',');
-    document.getElementById('cart-count').innerText = sacola.length;
-}
 
 function filtrar() {
     let busca = document.getElementById('buscaInput').value.toLowerCase();
@@ -329,34 +295,9 @@ function filtrar() {
     document.querySelectorAll('.card').forEach(card => {
         let nome = card.querySelector('.nome-perfume').innerText.toLowerCase();
         let marca = card.getAttribute('data-marca');
-        let secao = card.getAttribute('data-secao');
-        let match = nome.includes(busca) && (marcaSel === 'todos' || marca === marcaSel) && (categoriaAtual === 'todos' || secao === categoriaAtual);
+        let match = nome.includes(busca) && (marcaSel === 'todos' || marca === marcaSel);
         card.classList.toggle('hidden', !match);
     });
-}
-
-function filtrarCategoria(cat, btn) {
-    categoriaAtual = cat;
-    document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    filtrar();
-}
-
-async function calcularFrete() {
-    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    if (cep.length !== 8) return alert("CEP inválido");
-    const div = document.getElementById('opcoes-frete');
-    div.innerHTML = "Calculando...";
-    try {
-        const res = await fetch('/.netlify/functions/calcular-frete', { method: 'POST', body: JSON.stringify({ cep_destino: cep }) });
-        const data = await res.json();
-        div.innerHTML = data.map(op => `<div onclick="valorFreteGlobal=${op.price}; atualizarSacola()" style="cursor:pointer; background:#f4f4f4; padding:8px; margin-top:5px; color:#333; font-size:12px;">${op.name}: R$ ${op.price}</div>`).join('');
-    } catch (e) { div.innerHTML = "Erro ao calcular."; }
-}
-
-function finalizarWhatsApp() {
-    let msg = "Pedido Nuvem de Essências:\n" + sacola.map(i => `- ${i.nome}`).join('\n');
-    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`);
 }
 
 carregarProdutos();
