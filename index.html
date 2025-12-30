@@ -379,29 +379,43 @@ function carregarProdutos() {
         if (n >= 1 && n <= max) input.value = n;
     }
 
-    // 4. Filtros
-    function filtrar() {
-        let busca = document.getElementById('buscaInput').value.toLowerCase();
-        let marcaSel = document.getElementById('filtroMarca').value;
-        let cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            let nome = card.querySelector('.nome-perfume').innerText.toLowerCase();
-            let marca = card.getAttribute('data-marca');
-            let secao = card.getAttribute('data-secao');
-            let match = nome.includes(busca) && 
-                        (marcaSel === 'todos' || marca === marcaSel) && 
-                        (categoriaAtual === 'todos' || secao === categoriaAtual);
-            card.classList.toggle('hidden', !match);
-        });
-    }
+    // No topo do seu script, certifique-se de que essa variável existe:
+let categoriaAtual = 'todos'; 
 
-    function filtrarCategoria(cat, btn) {
-        categoriaAtual = cat;
-        document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        filtrar();
-    }
+function filtrar() {
+    // Pegamos o que foi digitado e a marca selecionada
+    let busca = document.getElementById('buscaInput').value.toLowerCase();
+    let marcaSel = document.getElementById('filtroMarca').value.toUpperCase(); // Forçamos maiúsculas
+    let cards = document.querySelectorAll('.card');
 
+    cards.forEach(card => {
+        let nome = card.querySelector('.nome-perfume').innerText.toLowerCase();
+        let marca = card.getAttribute('data-marca').toUpperCase(); // Pegamos a marca do card em maiúsculas
+        let secao = card.getAttribute('data-secao');
+
+        // Lógica de comparação
+        let bateuBusca = nome.includes(busca);
+        let bateuMarca = (marcaSel === 'TODOS' || marca === marcaSel);
+        let bateuCategoria = (categoriaAtual === 'todos' || secao === categoriaAtual);
+
+        // Se passar em todos os filtros, mostra. Se não, esconde.
+        if (bateuBusca && bateuMarca && bateuCategoria) {
+            card.style.display = "block"; 
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+function filtrarCategoria(cat, btn) {
+    categoriaAtual = cat;
+    // Estética dos botões
+    document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    
+    // Chama a função de busca para atualizar a tela
+    filtrar();
+}
     // 5. Gestão da Sacola (Nomes dos Produtos)
     function addCart(nome, mlId, qtdId) {
         const selectMl = document.getElementById(mlId);
@@ -601,6 +615,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
