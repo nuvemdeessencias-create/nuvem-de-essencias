@@ -1087,7 +1087,7 @@ async function calcularFrete() {
     div.innerHTML = "Calculando...";
 
     try {
-        const response = await fetch('/.netlify/functions/calcular-frete', {
+        const response = await fetch('/api/calcular-frete', {
             method: 'POST',
             body: JSON.stringify({ cep_destino: cep })
         });
@@ -1200,6 +1200,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
