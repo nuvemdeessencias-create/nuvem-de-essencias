@@ -67,14 +67,53 @@
 
 <div class="frase-container">
     <div class="linha-dourada"></div>
-    <div class="frase-central">Aromas que encantam, essências que marcam.</div>
+    <div class="frase-central">✨ Parcele suas fragrâncias favoritas em até 10x sem juros no cartão! ✨!</div>
     <div class="linha-dourada"></div>
 </div>
 
-<div class="filtros-area">
-    <select id="filtroMarca" onchange="filtrar()" style="padding:12px; border-radius:8px; width:100%; max-width:400px; margin-bottom:10px; background: white; border: 1px solid var(--dourado);">
-        <option value="todos">TODAS AS MARCAS</option>
-    </select>
+<div style="text-align:center; padding: 10px 5%;">
+    <div style="margin-bottom: 20px;">
+        <select id="filtroMarca" onchange="filtrar()" style="padding: 12px; border: 1px solid var(--dourado); border-radius: 8px; width: 100%; max-width: 300px; background: white;">
+            <option value="todos">TODAS AS MARCAS</option>
+            <optgroup label="ALTA PERFUMARIA">
+                <option value="PACO RABANNE">PACO RABANNE</option>
+                <option value="CHLOE">CHLOE</option>
+                <option value="CAROLINA HERRERA">CAROLINA HERRERA</option>
+                <option value="DIOR">DIOR</option>
+                <option value="JEAN PAUL GAULTIER">JEAN PAUL GAULTIER</option>
+                <option value="ARMANI">ARMANI</option>
+                <option value="DOLCE & GABBANA">DOLCE & GABBANA</option>
+                <option value="YVES SAINT LAURENT">YVES SAINT LAURENT</option>
+                <option value="HUGO BOSS">HUGO BOSS</option>
+                <option value="ADOLFO DOMINGUEZ">ADOLFO DOMINGUEZ</option>
+                <option value="GABRIELA SABATINI">GABRIELA SABATINI</option>
+                <option value="ANIMALE">ANIMALE</option>
+                <option value="ANTONIO BANDEIRAS">ANTONIO BANDEIRAS</option>
+                <option value="AZZARO">AZZARO</option>
+                <option value="BVLGARI">BVLGARI</option>
+                <option value="JACQUES BOGART">JACQUES BOGART</option>
+                <option value="CACHAREL">CACHAREL</option>
+                <option value="CALVIN KLEIN">CALVIN KLEIN</option>
+                <option value="DAVIDOFF">DAVIDOFF</option>
+                <option value="GIVENCHY">GIVENCHY</option>
+                <option value="JOOP">JOOP</option>
+                <option value="KENZO">KENZO</option>
+                <option value="NAUTICA">NAUTICA</option>
+                <option value="MARINA DE BOURBON">MARINA DE BOURBON</option>
+                <option value="MERCEDES BENZ">MERCEDES BENZ</option>
+                <option value="RALPH LAUREN">RALPH LAUREN</option>
+                <option value="SHAKIRA">SHAKIRA</option>
+            </optgroup>
+            <optgroup label="PERFUMARIA ÁRABE">
+                <option value="LATTAFA">LATTAFA</option>
+                <option value="AL WATANIAH">AL WATANIAH</option>
+                <option value="ARMAF">ARMAF</option>
+                <option value="MAISON ALHAMBRA">MAISON ALHAMBRA</option>
+                <option value="AFNAN">AFNAN</option>
+                <option value="ORIENTICA">ORIENTICA</option>
+            </optgroup>
+        </select>
+    </div>
     <div class="categorias-nav">
         <button class="btn-categoria active" onclick="filtrarCategoria('todos', this)">TODOS</button>
         <button class="btn-categoria" onclick="filtrarCategoria('alta', this)">ALTA PERFUMARIA</button>
@@ -263,3 +302,4 @@ carregarProdutos();
 </script>
 </body>
 </html>
+
