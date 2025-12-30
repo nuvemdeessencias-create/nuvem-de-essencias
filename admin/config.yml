@@ -1,0 +1,44 @@
+backend:
+  name: github
+  repo: nuvemdeessencias/create
+  branch: teste
+
+media_folder: "img"
+public_folder: "/img"
+
+collections:
+  - name: "produtos"
+    label: "Produtos"
+    folder: "content/produtos"
+    create: true
+    slug: "{{slug}}"
+    format: "json"
+    fields:
+      - { label: "Nome do Produto", name: "title", widget: "string" }
+      - { label: "Marca", name: "marca", widget: "string" }
+      - { label: "Preço", name: "preco", widget: "string" }
+      - { label: "Estoque", name: "estoque", widget: "number" }
+      - { label: "Tamanho (ML ou Gramas)", name: "ml", widget: "string", hint: "Ex: 100ml ou 200g" }
+      - { label: "Imagem Principal", name: "imagem", widget: "image" }
+      - { label: "Descrição/Especificações", name: "descricao", widget: "markdown", hint: "Descreva as notas do perfume ou detalhes do produto" }
+      - { 
+          label: "Categoria", 
+          name: "categoria", 
+          widget: "select", 
+          options: [
+            { label: "Alta PERFUMARIA", value: "alta" },
+            { label: "PERFUMES ÁRABES", value: "arabe" },
+            { label: "CASA & VELAS", value: "casa" },
+            { label: "Kits", value: "kits" },
+            { label: "Maquiagem", value: "maquiagem" }
+          ] 
+        }
+      - { 
+          label: "Variações de Cores (Apenas Batons)", 
+          name: "cores", 
+          widget: "list", 
+          required: false,
+          fields: [
+            { label: "Nome da Cor/Tonalidade", name: "nome_cor", widget: "string" }
+          ]
+        }
