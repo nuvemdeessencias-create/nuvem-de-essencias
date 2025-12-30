@@ -1,8 +1,10 @@
 backend:
   name: github
   repo: nuvemdeessencias-create/nuvem-de-essencias
-  branch: teste # Certifique-se de que sua branch de desenvolvimento se chama 'teste'
-
+  branch: teste
+  base_url: https://sua-api-de-auth.vercel.app # Precisaremos criar isso
+  auth_endpoint: api/auth
+  
 media_folder: "img"
 public_folder: "/img"
 
