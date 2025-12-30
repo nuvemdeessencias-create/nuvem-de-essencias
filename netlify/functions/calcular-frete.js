@@ -4,10 +4,10 @@ exports.handler = async (event) => {
     const token = process.env.MELHOR_ENVIO_TOKEN;
 
     // --- 1. REGRA DE FRETE GRÁTIS POR VALOR ---
-    if (valor_total >= 600) {
+    if (valor_total >= 700) {
        return {
          statusCode: 200,
-         body: JSON.stringify([{ name: "Frete Grátis (Promoção)", price: "0.00", delivery_time: "5-13" }])
+         body: JSON.stringify([{ name: "Frete Grátis (Promoção)", price: "0.00", delivery_time: "6-13" }])
        };
     }
 
