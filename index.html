@@ -1073,7 +1073,7 @@ header {
         window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-   // --- LÓGICA DE FRETE COM REGRA DE R$ 600 E PRAZO ---
+   // --- LÓGICA DE FRETE COM REGRA DE R$ 700 E PRAZO ---
 
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
@@ -1093,8 +1093,8 @@ async function calcularFrete() {
         });
         const data = await response.json();
 
-        // REGRA: Se o valor for maior que 600, forçamos o frete grátis na lista
-        if (subtotal >= 600) {
+        // REGRA: Se o valor for maior que 700, forçamos o frete grátis na lista
+        if (subtotal >= 700) {
             div.innerHTML = `
                 <div style="background:#e7f3ef; padding:10px; margin-top:5px; border:1px solid #25d366; border-radius:5px; color:#155724; cursor:pointer;" 
                      onclick="aplicarFrete(0, 'FRETE GRÁTIS')">
@@ -1135,8 +1135,8 @@ function atualizarSacola() {
             </div>`;
         }).join('');
 
-    // Se o subtotal atingir 600 e houver frete selecionado, avisamos
-    if (subtotal >= 600 && valorFreteGlobal > 0) {
+    // Se o subtotal atingir 700 e houver frete selecionado, avisamos
+    if (subtotal >= 700 && valorFreteGlobal > 0) {
         valorFreteGlobal = 0;
         nomeFreteGlobal = "FRETE GRÁTIS";
     }
@@ -1200,6 +1200,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
