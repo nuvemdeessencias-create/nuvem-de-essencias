@@ -16,7 +16,7 @@ collections:
     fields:
       - { label: "Nome do Produto", name: "title", widget: "string" }
       - { label: "Marca", name: "marca", widget: "string" }
-      - { label: "Preço", name: "preco", widget: "string" }
+      - { label: "Preço", name: "preco", widget: "string", hint: "Apenas números e vírgula. Ex: 150,00" }
       - { label: "Estoque", name: "estoque", widget: "number" }
       - { label: "Tamanho (ML ou Gramas)", name: "ml", widget: "string", hint: "Ex: 100ml ou 200g" }
       - { label: "Imagem Principal", name: "imagem", widget: "image" }
