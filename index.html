@@ -308,13 +308,14 @@ header {
 
    <div class="container" id="listaProdutos"></div>
 
-    <script src="produtos.js"></script>
+<script src="produtos.js"></script>
 <script>
-  // Esta função lê a lista do produtos.js e cria os cartões na tela
-function carregarProdutos() {
-    const container = document.getElementById('listaProdutos');
-    if (!container) return; // "se" vira "if", "retornar" vira "return"
-    container.innerHTML = "";
+    // Inicie a função assim que a página carregar
+    window.onload = function() {
+        if (typeof carregarProdutos === "function") {
+            carregarProdutos();
+        }
+    };
 
     // 'meusProdutos' vem do arquivo produtos.js
     meusProdutos.forEach(p => {
@@ -618,6 +619,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
