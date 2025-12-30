@@ -1,7 +1,7 @@
 backend:
   name: github
-  repo: nuvemdeessencias/create
-  branch: teste
+  repo: nuvemdeessencias-create/nuvem-de-essencias
+  branch: teste # Certifique-se de que sua branch de desenvolvimento se chama 'teste'
 
 media_folder: "img"
 public_folder: "/img"
@@ -14,13 +14,18 @@ collections:
     slug: "{{slug}}"
     format: "json"
     fields:
-      - { label: "Nome do Produto", name: "title", widget: "string" }
+      - { label: "Nome do Produto", name: "title", widget: "string", hint: "Ex: Vela Aromática de Lavanda" }
       - { label: "Marca", name: "marca", widget: "string" }
-      - { label: "Preço", name: "preco", widget: "string", hint: "Apenas números e vírgula. Ex: 150,00" }
+      - { label: "Preço", name: "preco", widget: "string", hint: "Apenas números e vírgula. Ex: 89,90" }
       - { label: "Estoque", name: "estoque", widget: "number" }
-      - { label: "Tamanho (ML ou Gramas)", name: "ml", widget: "string", hint: "Ex: 100ml ou 200g" }
+      - { label: "Tamanho (ML ou Gramas)", name: "ml", widget: "string", hint: "Ex: 100ml ou 150g" }
+      
+      # CAMPO NOVO PARA VELAS
+      - { label: "Essência (Apenas para Velas)", name: "essencia", widget: "string", required: false, hint: "Ex: Baunilha, Alecrim, Lavanda" }
+      
       - { label: "Imagem Principal", name: "imagem", widget: "image" }
-      - { label: "Descrição/Especificações", name: "descricao", widget: "markdown", hint: "Descreva as notas do perfume ou detalhes do produto" }
+      - { label: "Descrição/Especificações", name: "descricao", widget: "markdown", hint: "Descreva as notas do perfume ou detalhes da vela" }
+      
       - { 
           label: "Categoria", 
           name: "categoria", 
@@ -29,10 +34,11 @@ collections:
             { label: "Alta PERFUMARIA", value: "alta" },
             { label: "PERFUMES ÁRABES", value: "arabe" },
             { label: "CASA & VELAS", value: "casa" },
-            { label: "Kits", value: "kits" },
+            { label: "KITS", value: "kits" },
             { label: "Maquiagem", value: "maquiagem" }
           ] 
         }
+      
       - { 
           label: "Variações de Cores (Apenas Batons)", 
           name: "cores", 
