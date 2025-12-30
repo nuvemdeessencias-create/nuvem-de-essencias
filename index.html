@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuvem De Essências | Catálogo Oficial</title>
     <style>
-       /* 1. CONFIGURAÇÕES GERAIS E CORES */
+        /* 1. CONFIGURAÇÕES GERAIS E CORES */
 :root {
     --azul-fundo: #020b1f; 
     --azul-card: #ffffff; 
@@ -89,7 +89,7 @@ header {
 
 #opcoes-frete {
     margin-top: 15px;
-    padding-bottom: 80px; /* Garante que o último frete não suma atrás do botão */
+    padding-bottom: 80px; 
 }
 
 .cart-footer {
@@ -244,6 +244,7 @@ header {
         ✨ Parcele suas fragrâncias favoritas em até 10x sem juros no cartão! ✨
     </p>
 </div>
+
 <div class="filtros-container">
     <div class="busca-grupo">
         <select id="filtroMarca" onchange="filtrar()">
@@ -291,6 +292,9 @@ header {
             <optgroup label="CASA">
                 <option value="VELAS AROMATICAS">VELAS AROMÁTICAS</option>
             </optgroup>
+             <optgroup label="MAQUIAGEM">
+                <option value="BATONS">BATONS</option>
+                </optgroup>
         </select>
         <input type="text" id="buscaInput" onkeyup="filtrar()" placeholder="PESQUISAR...">
     </div>
@@ -301,818 +305,234 @@ header {
         <button class="btn-categoria" onclick="filtrarCategoria('arabe', this)">PERFUMES ÁRABES</button>
         <button class="btn-categoria" onclick="filtrarCategoria('casa', this)">CASA & VELAS</button>
         <button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
+        <button class="btn-categoria" onclick="filtrarCategoria('maquiagem', this)">MAQUIAGEM</button>
     </div>
 </div>
 
 <div class="container" id="listaProdutos">
-
-    <div class="card" data-marca="SHAKIRA" data-secao="alta">
-        <img src="img/shakira.avif">
-        <div class="info">
-            <span class="marca-tag">SHAKIRA</span>
-            <div class="nome-perfume">SHAKIRA FUCSIA EDP</div>
-            <div class="estoque-label">Resta 1 unidade</div>
-            <div class="qtd-container">
-                <button class="btn-qtd" onclick="alterarQtd('q-fucsia', -1, 1)">-</button>
-                <input type="text" id="q-fucsia" value="1" readonly class="input-qtd">
-                <button class="btn-qtd" onclick="alterarQtd('q-fucsia', 1, 1)">+</button>
-            </div>
-            <select class="seletor-ml" id="ml-fucsia">
-                <option value="80ml|239.00">80ML - R$ 239,00</option>
-            </select>
-            <button onclick="comprarAgora('SHAKIRA FUCSIA', 'ml-fucsia')" class="btn-whats">COMPRAR AGORA</button>
-            <button onclick="addCart('SHAKIRA FUCSIA', 'ml-fucsia', 'q-fucsia')" class="btn-add-cart">+ Adicionar à Sacola</button>
-        </div>
-    </div>
-
-
-<div class="card" data-marca="SHAKIRA" data-secao="alta">
-    <img src="img/rojo.jpeg" alt="rojo">
-    <div class="info">
-        <span class="marca-tag">SHAKIRA</span>
-        <div class="nome-perfume">SHAKIRA ROJO EDP</div>
-        <div class="estoque-label">Restam 5 unidades</div>
-        
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-rojo', -1, 5)">-</button>
-            <input type="text" id="q-rojo" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-rojo', 1, 5)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-rojo">
-            <option value="80ml|239.00">80ML - R$ 239,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('SHAKIRA ROJO', 'ml-rojo')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('SHAKIRA ROJO', 'ml-rojo', 'q-rojo')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
+    <p style="text-align:center; color:white; padding: 50px; grid-column: 1 / -1;">Buscando as melhores fragrâncias...</p>
 </div>
 
-
-<div class="card" data-marca="SHAKIRA" data-secao="alta">
-    <img src="img/shakiraamarillo.avif" alt="shakira">
-    <div class="info">
-        <span class="marca-tag">SHAKIRA</span>
-        <div class="nome-perfume">SHAKIRA AMARILLO EDP</div>
-        
-        <div class="estoque-label" style="color: #888;">PRODUTO INDISPONÍVEL</div>
-
-        <div class="qtd-container" style="opacity: 0.5; pointer-events: none;">
-            <button class="btn-qtd">-</button>
-            <input type="text" id="q-ama" value="0" readonly class="input-qtd">
-            <button class="btn-qtd">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-shakira-ama" disabled style="background: #f0f0f0;">
-            <option value="80ml|0.00">80ML - INDISPONÍVEL</option>
-        </select>
-
-        <button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>
-        <button class="btn-add-cart" style="display: none;">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="CHLOE" data-secao="alta">
-    <img src="img/chloedp.avif" alt="Chloe">
-    <div class="info">
-        <span class="marca-tag">CHLOE</span>
-        <div class="nome-perfume">CHLOÉ EDP</div>
-        
-        <div class="estoque-label">Pronta Entrega</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-chloe', -1, 7)">-</button>
-            <input type="text" id="q-chloe" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-chloe', 1, 7)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-chloe">
-            <option value="50ml|809.00">50ML (Restam 2 unidades) - R$ 809,00</option>
-            <option value="75ml|939.00">75ML (Restam 5 unidades) - R$ 939,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('CHLOE', 'ml-chloe')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('CHLOE', 'ml-chloe', 'q-chloe')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-<div class="card" data-marca="GABRIELA SABATINI" data-secao="alta">
-    <img src="img/gabrielasabatini.webp" alt="gabriela sabatini">
-    <div class="info">
-        <span class="marca-tag">GABRIELA SABATINI</span>
-        <div class="nome-perfume">GABRIELA SABATINI EDT</div>
-        
-        <div class="estoque-label">Pronta Entrega</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-gabriela', -1, 2)">-</button>
-            <input type="text" id="q-gabriela" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-gabriela', 1, 2)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-gabriela">
-            <option value="60ml|169.00">60ML - R$ 169,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('GABRIELA SABATINI', 'ml-gabriela')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('GABRIELA SABATINI', 'ml-gabriela', 'q-gabriela')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="PACO RABANNE" data-secao="alta">
-    <img src="img/ladymillion.avif" alt="Lady Million">
-    <div class="info">
-        <span class="marca-tag">PACO RABANNE</span>
-        <div class="nome-perfume">LADY MILLION EDP</div>
-        
-        <div class="estoque-label">Restam 4 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-lady', -1, 4)">-</button>
-            <input type="text" id="q-lady" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-lady', 1, 4)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-lady">
-            <option value="80ml|869.00">80ML - R$ 869,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('LADY MILLION', 'ml-lady')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('LADY MILLION', 'ml-lady', 'q-lady')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="PACO RABANNE" data-secao="alta">
-    <img src="img/invictus.jpg" alt="Invictus">
-    <div class="info">
-        <span class="marca-tag">PACO RABANNE</span>
-        <div class="nome-perfume">INVICTUS EDT</div>
-        
-        <div class="estoque-label" style="color: #888;">PRODUTO INDISPONÍVEL</div>
-
-        <div class="qtd-container" style="opacity: 0.5; pointer-events: none;">
-            <button class="btn-qtd">-</button>
-            <input type="text" id="q-invictus" value="0" readonly class="input-qtd">
-            <button class="btn-qtd">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-invictus" disabled style="background: #f0f0f0;">
-            <option value="100ml|0.00">100ML - ESGOTADO</option>
-        </select>
-        
-        <button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>
-        <button class="btn-add-cart" style="display: none;">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="MARINA DE BOURBON" data-secao="alta">
-    <img src="img/marinadiamond.webp" alt="marinadiamond">
-    <div class="info">
-        <span class="marca-tag">MARINA DE BOURBON</span>
-        <div class="nome-perfume">MARINA DIAMOND EDP</div>
-        
-        <div class="estoque-label" style="color: #888;">PRODUTO INDISPONÍVEL</div>
-
-        <div class="qtd-container" style="opacity: 0.5; pointer-events: none;">
-            <button class="btn-qtd">-</button>
-            <input type="text" id="q-diamond" value="0" readonly class="input-qtd">
-            <button class="btn-qtd">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-marinadiamond" disabled style="background: #f0f0f0;">
-            <option value="100ml|0.00">100ML - INDISPONÍVEL</option>
-            <option value="30ml|0.00">30ML - INDISPONÍVEL</option>
-        </select>
-        
-        <button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>
-        
-        <button class="btn-add-cart" style="display: none;">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ANIMALE" data-secao="alta">
-    <img src="img/anamalefem.webp" alt="animale">
-    <div class="info">
-        <span class="marca-tag">ANIMALE</span>
-        <div class="nome-perfume">ANIMALE FEM EDP</div>
-        
-        <div class="estoque-label">Restam 5 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-animale-f', -1, 5)">-</button>
-            <input type="text" id="q-animale-f" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-animale-f', 1, 5)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-animale-fem">
-            <option value="100ml|598.00">100ML - R$ 598,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('ANIMALE FEM', 'ml-animale-fem')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('ANIMALE FEM', 'ml-animale-fem', 'q-animale-f')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-
-<div class="card" data-marca="ANIMALE" data-secao="alta">
-    <img src="img/animalemasc.webp" alt="animale">
-    <div class="info">
-        <span class="marca-tag">ANIMALE</span>
-        <div class="nome-perfume">ANIMALE FOR MEN EDT</div>
-        
-        <div class="estoque-label">Restam 4 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-animale-m', -1, 4)">-</button>
-            <input type="text" id="q-animale-m" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-animale-m', 1, 4)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-animalemasc">
-            <option value="100ml|478.00">100ML - R$ 478,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('ANIMALE FOR MEN', 'ml-animalemasc')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('ANIMALE FOR MEN', 'ml-animalemasc', 'q-animale-m')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="JACQUES BOGART" data-secao="alta">
-    <img src="img/silverscent.webp" alt="silverscent">
-    <div class="info">
-        <span class="marca-tag">JACQUES BOGART</span>
-        <div class="nome-perfume">SILVER SCENT INTENSE EDT</div>
-        
-        <div class="estoque-label">Restam 6 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-silver', -1, 6)">-</button>
-            <input type="text" id="q-silver" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-silver', 1, 6)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-silverscent">
-            <option value="100ml|399.00">100ML - R$ 399,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('SILVER SCENT INTENSE', 'ml-silverscent')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('SILVER SCENT INTENSE', 'ml-silverscent', 'q-silver')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="CALVIN KLEIN" data-secao="alta">
-    <img src="img/ckoneessence.avif" alt="ckoneessence">
-    <div class="info">
-        <span class="marca-tag">CALVIN KLEIN</span>
-        <div class="nome-perfume">CK ONE ESSENCE PARFUM INTENSE</div>
-        
-        <div class="estoque-label">Restam 6 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-ckone', -1, 6)">-</button>
-            <input type="text" id="q-ckone" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-ckone', 1, 6)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-ckoneessence">
-            <option value="100ml|589.00">100ML - R$ 589,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('CK ONE ESSENCE', 'ml-ckoneessence')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('CK ONE ESSENCE', 'ml-ckoneessence', 'q-ckone')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ADOLFO DOMINGUEZ" data-secao="alta">
-    <img src="img/azahar.webp" alt="azahar">
-    <div class="info">
-        <span class="marca-tag">ADOLFO DOMINGUEZ</span>
-        <div class="nome-perfume">ÁGUA FRESCA DE AZAHAR</div>
-        
-        <div class="estoque-label">Restam 4 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-azahar', -1, 4)">-</button>
-            <input type="text" id="q-azahar" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-azahar', 1, 4)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-azahar">
-            <option value="120ml|369.00">120ML - R$ 369,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('ÁGUA FRESCA DE AZAHAR', 'ml-azahar')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('ÁGUA FRESCA DE AZAHAR', 'ml-azahar', 'q-azahar')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="HUGO BOSS" data-secao="alta">
-    <img src="img/hugomen.avif" alt="hugomen">
-    <div class="info">
-        <span class="marca-tag">HUGO BOSS</span>
-        <div class="nome-perfume">HUGO MEN EDT</div>
-        
-        <div class="estoque-label">Resta apenas 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-hugomen', -1, 1)">-</button>
-            <input type="text" id="q-hugomen" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-hugomen', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-hugomen">
-            <option value="75ml|479.00">75ML - R$ 479,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('HUGO MEN EDT', 'ml-hugomen')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('HUGO MEN EDT', 'ml-hugomen', 'q-hugomen')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ANTONIO BANDEIRAS" data-secao="alta">
-    <img src="img/blueseduction.avif" alt="blueseduction">
-    <div class="info">
-        <span class="marca-tag">ANTONIO BANDEIRAS</span>
-        <div class="nome-perfume">BLUE SEDUCTION EDT</div>
-        
-        <div class="estoque-label">Restam 3 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-blue', -1, 3)">-</button>
-            <input type="text" id="q-blue" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-blue', 1, 3)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-blue">
-            <option value="80ml|249.00">80ML - R$ 249,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('BLUE SEDUCTION', 'ml-blue')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('BLUE SEDUCTION', 'ml-blue', 'q-blue')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ANTONIO BANDEIRAS" data-secao="alta">
-    <img src="img/theicon.webp" alt="theicon">
-    <div class="info">
-        <span class="marca-tag">ANTONIO BANDEIRAS</span>
-        <div class="nome-perfume">THE ICON EDP</div>
-        
-        <div class="estoque-label">Restam 2 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-icon', -1, 2)">-</button>
-            <input type="text" id="q-icon" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-icon', 1, 2)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-theicon">
-            <option value="200ml|379.00">200ML - R$ 379,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('THE ICON EDP', 'ml-theicon')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('THE ICON EDP', 'ml-theicon', 'q-icon')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ANTONIO BANDEIRAS" data-secao="alta">
-    <img src="img/powerseduction.avif" alt="powerseduction">
-    <div class="info">
-        <span class="marca-tag">ANTONIO BANDEIRAS</span>
-        <div class="nome-perfume">POWER OF SEDUCTION</div>
-        
-        <div class="estoque-label" style="color: #888;">PRODUTO INDISPONÍVEL</div>
-
-        <div class="qtd-container" style="opacity: 0.5; pointer-events: none;">
-            <button class="btn-qtd">-</button>
-            <input type="text" id="q-power" value="0" readonly class="input-qtd">
-            <button class="btn-qtd">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-powerseduction" disabled style="background: #f0f0f0;">
-            <option value="100ml|0.00">100ML - ESGOTADO</option>
-        </select>
-        
-        <button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>
-        
-        <button class="btn-add-cart" style="display: none;">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="AZZARO" data-secao="alta">
-    <img src="img/azzaropourhomme.avif" alt="azzaropourhomme">
-    <div class="info">
-        <span class="marca-tag">AZZARO</span>
-        <div class="nome-perfume">AZZARO POUR HOMME EDT</div>
-        
-        <div class="estoque-label">Restam 7 unidades (50ml)</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-azzaro', -1, 7)">-</button>
-            <input type="text" id="q-azzaro" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-azzaro', 1, 7)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-azzaropourhomme">
-            <option value="50ml|249.00">50ML - R$ 249,00</option>
-            <option value="100ml|0.00" disabled style="color: #ccc;">100ML - (ESGOTADO)</option>
-        </select>
-        
-        <button onclick="comprarAgora('AZZARO POUR HOMME', 'ml-azzaropourhomme')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('AZZARO POUR HOMME', 'ml-azzaropourhomme', 'q-azzaro')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="MERCEDES BENZ" data-secao="alta">
-    <img src="img/clubblack.avif" alt="clubblack">
-    <div class="info">
-        <span class="marca-tag">MERCEDES BENZ</span>
-        <div class="nome-perfume">MERCEDES BENZ CLUB BLACK EDT</div>
-        
-        <div class="estoque-label">Pronta Entrega (Poucas unidades)</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-clubblack', -1, 3)">-</button>
-            <input type="text" id="q-clubblack" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-clubblack', 1, 3)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-clubblack">
-            <option value="100ml|578.00">100ML - R$ 578,00 (2 unid.)</option>
-            <option value="50ml|470.00">50ML - R$ 470,00 (1 unid.)</option>
-        </select>
-        
-        <button onclick="comprarAgora('MERCEDES BENZ CLUB BLACK', 'ml-clubblack')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('MERCEDES BENZ CLUB BLACK', 'ml-clubblack', 'q-clubblack')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="DAVIDOFF" data-secao="alta">
-    <img src="img/coolwater.webp" alt="coolwater">
-    <div class="info">
-        <span class="marca-tag">DAVIDOFF</span>
-        <div class="nome-perfume">COOL WATER DAVIDOFF EDT</div>
-        
-        <div class="estoque-label">Resta apenas 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-cool', -1, 1)">-</button>
-            <input type="text" id="q-cool" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-cool', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-coolwater">
-            <option value="125ml|289.00">125ML - R$ 289,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('COOL WATER DAVIDOFF', 'ml-coolwater')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('COOL WATER DAVIDOFF', 'ml-coolwater', 'q-cool')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-
-
-<div class="card" data-marca="NAUTICA" data-secao="alta">
-    <img src="img/nauticavoyage.webp" alt="nauticavoyage">
-    <div class="info">
-        <span class="marca-tag">NAUTICA</span>
-        <div class="nome-perfume">NAUTICA VOYAGE EDT</div>
-        
-        <div class="estoque-label">Resta apenas 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-nautica', -1, 1)">-</button>
-            <input type="text" id="q-nautica" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-nautica', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-nauticavoyage">
-            <option value="100ml|199.00">100ML - R$ 199,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('NAUTICA VOYAGE', 'ml-nauticavoyage')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('NAUTICA VOYAGE', 'ml-nauticavoyage', 'q-nautica')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="AL WATANIAH" data-secao="arabe">
-    <img src="img/SabahAlWard.jpg" alt="SABAH AL WARD">
-    <div class="info">
-        <span class="marca-tag">AL WATANIAH</span>
-        <div class="nome-perfume">SABAH AL WARD EDP</div>
-        
-        <div class="estoque-label">Restam 5 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-sabah', -1, 5)">-</button>
-            <input type="text" id="q-sabah" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-sabah', 1, 5)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-sabah">
-            <option value="100ml|359.00">100ML - R$ 359,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('SABAH AL WARD', 'ml-sabah')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('SABAH AL WARD', 'ml-sabah', 'q-sabah')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="AL WATANIAH" data-secao="arabe">
-    <img src="img/bareeq.jpg" alt="bareeq">
-    <div class="info">
-        <span class="marca-tag">AL WATANIAH</span>
-        <div class="nome-perfume">BAREEQ AL DHAHAB EDP</div>
-        
-        <div class="estoque-label">Restam 3 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-bareeq', -1, 3)">-</button>
-            <input type="text" id="q-bareeq" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-bareeq', 1, 3)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-bareeq">
-            <option value="100ml|359.00">100ML - R$ 359,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('BAREEQ AL DHAHAB', 'ml-bareeq')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('BAREEQ AL DHAHAB', 'ml-bareeq', 'q-bareeq')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="LATTAFA" data-secao="arabe">
-    <img src="img/fakharrose.webp" alt="FAKHAR ROSE">
-    <div class="info">
-        <span class="marca-tag">LATTAFA</span>
-        <div class="nome-perfume">FAKHAR ROSE EDP</div>
-        
-        <div class="estoque-label">Resta apenas 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-fakhar', -1, 1)">-</button>
-            <input type="text" id="q-fakhar" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-fakhar', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-fakhar">
-            <option value="100ml|439.00">100ML - R$ 439,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('FAKHAR ROSE', 'ml-fakhar')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('FAKHAR ROSE', 'ml-fakhar', 'q-fakhar')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="LATTAFA" data-secao="arabe">
-    <img src="img/asadlattafa.webp" alt="asadlattafa">
-    <div class="info">
-        <span class="marca-tag">LATTAFA</span>
-        <div class="nome-perfume">ASAD DA LATTAFA EDP</div>
-        
-        <div class="estoque-label">Restam 3 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-asad', -1, 3)">-</button>
-            <input type="text" id="q-asad" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-asad', 1, 3)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-asadlattafa">
-            <option value="100ml|369.00">100ML - R$ 369,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('ASAD LATTAFA', 'ml-asadlattafa')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('ASAD LATTAFA', 'ml-asadlattafa', 'q-asad')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="SHAKIRA" data-secao="kits">
-    <img src="img/kitshakiraamarillo.avif" alt="amarillo">
-    <div class="info">
-        <span class="marca-tag">SHAKIRA</span>
-        <div class="nome-perfume">KIT COFFRET SHAKIRA AMARILLO</div>
-        
-        <div class="estoque-label">Restam 6 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-kitamarillo', -1, 6)">-</button>
-            <input type="text" id="q-kitamarillo" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-kitamarillo', 1, 6)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-kitamarillo">
-            <option value="80ml+10ml|259.00">80ML+10ML - R$ 259,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('KIT SHAKIRA AMARILLO', 'ml-kitamarillo')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('KIT SHAKIRA AMARILLO', 'ml-kitamarillo', 'q-kitamarillo')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="SHAKIRA" data-secao="kits">
-    <img src="img/coffretfucsia.webp" alt="coffretfucsia">
-    <div class="info">
-        <span class="marca-tag">SHAKIRA</span>
-        <div class="nome-perfume">KIT COFFRET SHAKIRA FUCSIA</div>
-        
-        <div class="estoque-label">Resta apenas 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-fucsia', -1, 1)">-</button>
-            <input type="text" id="q-fucsia" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-fucsia', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-coffretfucsia">
-            <option value="80ml+Creme|259.00">80ML + CREME - R$ 259,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('KIT SHAKIRA FUCSIA', 'ml-coffretfucsia')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('KIT SHAKIRA FUCSIA', 'ml-coffretfucsia', 'q-fucsia')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ANTONIO BANDEIRAS" data-secao="kits">
-    <img src="img/bandeirasblueseduction.webp" alt="bandeirasblueseduction">
-    <div class="info">
-        <span class="marca-tag">ANTONIO BANDEIRAS</span>
-        <div class="nome-perfume">KIT BLUE SEDUCTION WOMEN</div>
-        
-        <div class="estoque-label">Resta apenas 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-kitblue', -1, 1)">-</button>
-            <input type="text" id="q-kitblue" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-kitblue', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-kitblue">
-            <option value="80ml+DES|259.00">80ML + DESOD. - R$ 259,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('KIT BLUE SEDUCTION WOMEN', 'ml-kitblue')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('KIT BLUE SEDUCTION WOMEN', 'ml-kitblue', 'q-kitblue')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-</div>
-
-   <script>
-    // 1. Atualiza o ano no rodapé
-    if(document.getElementById("ano-real")) {
-        document.getElementById("ano-real").textContent = new Date().getFullYear();
-    }
-
-    // 2. Variáveis Globais
-    let sacola = []; 
-    let valorFreteGlobal = 0;
-    let categoriaAtual = 'todos';
-
-    // 3. Funções de Interface
-    function toggleCart() { 
-        document.getElementById('cart-modal').classList.toggle('active'); 
-    }
-
-    function alterarQtd(id, val, max) {
-        let input = document.getElementById(id);
-        let n = parseInt(input.value) + val;
-        if (n >= 1 && n <= max) input.value = n;
-    }
-
-    // 4. Filtros
-    function filtrar() {
-        let busca = document.getElementById('buscaInput').value.toLowerCase();
-        let marcaSel = document.getElementById('filtroMarca').value;
-        let cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            let nome = card.querySelector('.nome-perfume').innerText.toLowerCase();
-            let marca = card.getAttribute('data-marca');
-            let secao = card.getAttribute('data-secao');
-            let match = nome.includes(busca) && 
-                        (marcaSel === 'todos' || marca === marcaSel) && 
-                        (categoriaAtual === 'todos' || secao === categoriaAtual);
-            card.classList.toggle('hidden', !match);
-        });
-    }
-
-    function filtrarCategoria(cat, btn) {
-        categoriaAtual = cat;
-        document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        filtrar();
-    }
-
-    // 5. Gestão da Sacola (Nomes dos Produtos)
-    function addCart(nome, mlId, qtdId) {
-        const selectMl = document.getElementById(mlId);
-        const qtdInput = document.getElementById(qtdId);
-        if (!selectMl || !qtdInput) return;
-        
-        const [ml, preco] = selectMl.value.split('|');
-        const precoNum = parseFloat(preco);
-        const qtd = parseInt(qtdInput.value);
-
-        if (precoNum > 0) {
-            sacola.push({ nome, ml, preco: precoNum, qtd });
-            atualizarSacola();
-            if (!document.getElementById('cart-modal').classList.contains('active')) toggleCart();
-        }
-    }
-
-    function removerItem(index) {
-        sacola.splice(index, 1);
-        valorFreteGlobal = 0; 
-        document.getElementById('opcoes-frete').innerHTML = "";
-        atualizarSacola();
-    }
-
-    function atualizarSacola() {
-        const itensCont = document.getElementById('cart-items');
-        const totalCont = document.getElementById('cart-total');
-        const countCont = document.getElementById('cart-count');
-        let totalProdutos = 0;
-        
-        if (sacola.length === 0) {
-            itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
-        } else {
-            itensCont.innerHTML = sacola.map((item, index) => {
-                const sub = item.preco * item.qtd;
-                totalProdutos += sub;
-                return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
-                            <div style="text-align:left;">
-                                <b style="font-size:13px;">${item.nome}</b><br>
-                                <small>${item.ml} | Qtd: ${item.qtd}</small>
+<script>
+// --- CONFIGURAÇÃO DO GITHUB ---
+const REPO_CONFIG = {
+    owner: 'nuvemdeessencias',
+    repo: 'create',
+    path: 'content/produtos',
+    branch: 'teste'
+};
+
+// --- CARREGAMENTO AUTOMÁTICO DOS PRODUTOS ---
+async function carregarProdutos() {
+    const container = document.getElementById('listaProdutos');
+    if (!container) return;
+
+    try {
+        const response = await fetch(`https://api.github.com/repos/${REPO_CONFIG.owner}/${REPO_CONFIG.repo}/contents/${REPO_CONFIG.path}?ref=${REPO_CONFIG.branch}`);
+        const arquivos = await response.json();
+
+        container.innerHTML = ""; 
+
+        for (const arquivo of arquivos) {
+            if (arquivo.name.endsWith('.json')) { 
+                try {
+                    const res = await fetch(arquivo.download_url);
+                    const dados = await res.json();
+
+                    if (dados.title && dados.preco) {
+                        const temEstoque = dados.estoque > 0;
+                        const estoqueTexto = temEstoque ? `Restam ${dados.estoque} unidades` : "PRODUTO INDISPONÍVEL";
+                        const corEstoque = temEstoque ? "#333" : "#888";
+
+                        const prodId = arquivo.name.replace('.json', '');
+                        const mlId = `ml-${prodId}`;
+                        const qtdId = `qtd-${prodId}`;
+
+                        const card = `
+                            <div class="card" data-marca="${dados.marca.toUpperCase()}" data-secao="${dados.categoria || 'alta'}">
+                                <img src="${dados.imagem}" alt="${dados.title}">
+                                <div class="info">
+                                    <span class="marca-tag">${dados.marca.toUpperCase()}</span>
+                                    <div class="nome-perfume">${dados.title.toUpperCase()}</div>
+                                    <div class="estoque-label" style="color: ${corEstoque};">${estoqueTexto}</div>
+                                    
+                                    <div class="qtd-container" style="${temEstoque ? '' : 'opacity: 0.5; pointer-events: none;'}">
+                                        <button class="btn-qtd" onclick="alterarQtd('${qtdId}', -1, ${dados.estoque})">-</button>
+                                        <input type="text" id="${qtdId}" value="${temEstoque ? 1 : 0}" readonly class="input-qtd">
+                                        <button class="btn-qtd" onclick="alterarQtd('${qtdId}', 1, ${dados.estoque})">+</button>
+                                    </div>
+
+                                    <select id="${mlId}" class="seletor-ml" ${temEstoque ? '' : 'disabled'}>
+                                        <option value="${dados.ml}|${dados.preco}">${dados.ml} - R$ ${dados.preco}</option>
+                                    </select>
+                                    
+                                    ${temEstoque 
+                                        ? `<button onclick="comprarAgora('${dados.title}', '${mlId}')" class="btn-whats">COMPRAR AGORA</button>
+                                           <button onclick="addCart('${dados.title}', '${mlId}', '${qtdId}')" class="btn-add-cart">🛒 ADICIONAR À SACOLA</button>`
+                                        : `<button class="btn-whats" style="background: #ccc;" disabled>ESGOTADO</button>`
+                                    }
+                                </div>
                             </div>
-                            <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px;">&times;</button>
-                        </div>`;
-            }).join('');
-        }
-        const totalGeral = totalProdutos + valorFreteGlobal;
-        totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
-        countCont.innerText = sacola.length;
-    }
-
-    // 6. WhatsApp (Finalizar Sacola Completa)
-    function finalizarWhatsApp() {
-        if (sacola.length === 0) return alert("Sacola vazia!");
-        let msg = "Olá! Gostaria de encomendar os seguintes perfumes:\n\n";
-        sacola.forEach((item, i) => {
-            msg += `*${i+1}. ${item.nome}* (${item.ml}) - Qtd: ${item.qtd}\n`;
-        });
-        if (valorFreteGlobal > 0) msg += `\n*Frete:* R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')}`;
-        msg += `\n*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
-        window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    // 7. COMPRA RÁPIDA (Botão de comprar direto no perfume) - CORRIGIDO
-    function comprarAgora(nome, mlId) {
-        const selectMl = document.getElementById(mlId);
-        if (!selectMl) return;
-        const [ml, preco] = selectMl.value.split('|');
-        const precoFormatado = preco.replace('.', ',');
-        const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${precoFormatado}. Está disponível?`;
-        window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    // 8. Frete (Visualização e Marcar Opção)
-    async function calcularFrete() {
-        const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-        const divOpcoes = document.getElementById('opcoes-frete');
-        if (cep.length !== 8) return alert("CEP inválido");
-        divOpcoes.innerHTML = "<p style='color:#666; font-size:12px;'>Buscando frete...</p>";
-        try {
-            const response = await fetch('/.netlify/functions/calcular-frete', {
-                method: 'POST',
-                body: JSON.stringify({ cep_destino: cep, valor_total: 100 })
-            });
-            const data = await response.json();
-            divOpcoes.innerHTML = "";
-            data.forEach(opcao => {
-                if (opcao.price) {
-                    divOpcoes.innerHTML += `
-                        <label style="display:flex; align-items:center; gap:10px; background:#f4f4f4; padding:10px; border:1px solid #ddd; margin-top:8px; border-radius:6px; cursor:pointer; color:#333;">
-                            <input type="radio" name="tipoFrete" onclick="aplicarFrete(${opcao.price})">
-                            <div style="font-size:12px;"><strong>${opcao.name}</strong><br>R$ ${parseFloat(opcao.price).toFixed(2).replace('.', ',')}</div>
-                        </label>`;
+                        `;
+                        container.innerHTML += card;
+                    }
+                } catch (e) {
+                    console.error("Erro ao processar arquivo:", arquivo.name, e);
                 }
-            });
-        } catch (e) { divOpcoes.innerHTML = "Erro ao carregar frete."; }
+            }
+        }
+    } catch (error) {
+        console.error("Erro ao carregar pasta de produtos:", error);
+        container.innerHTML = "<p style='color:white; grid-column: 1 / -1; text-align:center;'>Erro ao carregar produtos. Verifique se a pasta 'content/produtos' existe.</p>";
     }
+}
 
-    function aplicarFrete(valor) {
-        valorFreteGlobal = parseFloat(valor);
+// Inicia o carregamento
+carregarProdutos();
+
+// --- LÓGICA DA SACOLA E INTERFACE ---
+let sacola = []; 
+let valorFreteGlobal = 0;
+let categoriaAtual = 'todos';
+
+function toggleCart() { 
+    document.getElementById('cart-modal').classList.toggle('active'); 
+}
+
+function alterarQtd(id, val, max) {
+    let input = document.getElementById(id);
+    let n = parseInt(input.value) + val;
+    if (n >= 1 && n <= max) input.value = n;
+}
+
+function filtrar() {
+    let busca = document.getElementById('buscaInput').value.toLowerCase();
+    let marcaSel = document.getElementById('filtroMarca').value;
+    let cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        let nome = card.querySelector('.nome-perfume').innerText.toLowerCase();
+        let marca = card.getAttribute('data-marca');
+        let secao = card.getAttribute('data-secao');
+        let match = nome.includes(busca) && 
+                    (marcaSel === 'todos' || marca === marcaSel) && 
+                    (categoriaAtual === 'todos' || secao === categoriaAtual);
+        card.classList.toggle('hidden', !match);
+    });
+}
+
+function filtrarCategoria(cat, btn) {
+    categoriaAtual = cat;
+    document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filtrar();
+}
+
+function addCart(nome, mlId, qtdId) {
+    const selectMl = document.getElementById(mlId);
+    const qtdInput = document.getElementById(qtdId);
+    if (!selectMl || !qtdInput) return;
+    
+    const [ml, preco] = selectMl.value.split('|');
+    const precoNum = parseFloat(preco.replace(',', '.'));
+    const qtd = parseInt(qtdInput.value);
+
+    if (precoNum > 0) {
+        sacola.push({ nome, ml, preco: precoNum, qtd });
         atualizarSacola();
+        if (!document.getElementById('cart-modal').classList.contains('active')) toggleCart();
     }
-       
+}
+
+function removerItem(index) {
+    sacola.splice(index, 1);
+    valorFreteGlobal = 0; 
+    document.getElementById('opcoes-frete').innerHTML = "";
+    atualizarSacola();
+}
+
+function atualizarSacola() {
+    const itensCont = document.getElementById('cart-items');
+    const totalCont = document.getElementById('cart-total');
+    const countCont = document.getElementById('cart-count');
+    let totalProdutos = 0;
+    
+    if (sacola.length === 0) {
+        itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
+    } else {
+        itensCont.innerHTML = sacola.map((item, index) => {
+            const sub = item.preco * item.qtd;
+            totalProdutos += sub;
+            return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
+                        <div style="text-align:left;">
+                            <b style="font-size:13px;">${item.nome}</b><br>
+                            <small>${item.ml} | Qtd: ${item.qtd}</small>
+                        </div>
+                        <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px;">&times;</button>
+                    </div>`;
+        }).join('');
+    }
+    const totalGeral = totalProdutos + valorFreteGlobal;
+    totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
+    countCont.innerText = sacola.length;
+}
+
+function finalizarWhatsApp() {
+    if (sacola.length === 0) return alert("Sacola vazia!");
+    let msg = "Olá! Gostaria de encomendar os seguintes perfumes:\n\n";
+    sacola.forEach((item, i) => {
+        msg += `*${i+1}. ${item.nome}* (${item.ml}) - Qtd: ${item.qtd}\n`;
+    });
+    if (valorFreteGlobal > 0) msg += `\n*Frete:* R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')}`;
+    msg += `\n*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
+    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+function comprarAgora(nome, mlId) {
+    const selectMl = document.getElementById(mlId);
+    if (!selectMl) return;
+    const [ml, preco] = selectMl.value.split('|');
+    const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${preco}. Está disponível?`;
+    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
+}
+
+// --- SISTEMA DE FRETE ---
+async function calcularFrete() {
+    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+    const divOpcoes = document.getElementById('opcoes-frete');
+    if (cep.length !== 8) return alert("CEP inválido");
+    divOpcoes.innerHTML = "<p style='color:#666; font-size:12px;'>Buscando frete...</p>";
+    try {
+        const response = await fetch('/.netlify/functions/calcular-frete', {
+            method: 'POST',
+            body: JSON.stringify({ cep_destino: cep, valor_total: 100 })
+        });
+        const data = await response.json();
+        divOpcoes.innerHTML = "";
+        data.forEach(opcao => {
+            if (opcao.price) {
+                divOpcoes.innerHTML += `
+                    <label style="display:flex; align-items:center; gap:10px; background:#f4f4f4; padding:10px; border:1px solid #ddd; margin-top:8px; border-radius:6px; cursor:pointer; color:#333;">
+                        <input type="radio" name="tipoFrete" onclick="aplicarFrete(${opcao.price})">
+                        <div style="font-size:12px;"><strong>${opcao.name}</strong><br>R$ ${parseFloat(opcao.price).toFixed(2).replace('.', ',')}</div>
+                    </label>`;
+            }
+        });
+    } catch (e) { divOpcoes.innerHTML = "Erro ao carregar frete."; }
+}
+
+function aplicarFrete(valor) {
+    valorFreteGlobal = parseFloat(valor);
+    atualizarSacola();
+}
 </script>
+
 <footer class="rodape-premium">
     <div class="container">
         <div class="secao-marca">
             <p class="slogan no-break">"Sinta o aroma dos sonhos e realce sua beleza!"</p>
             <h1 class="logo-text no-break">NUVEM DE ESSÊNCIAS PERFUMARIA</h1>
         </div>
-
         <hr class="divisor">
-
         <div class="grid-conteudo">
             <div class="coluna">
                 <h3>ATENDIMENTO</h3>
@@ -1122,7 +542,6 @@ header {
                     <a href="https://wa.me/5563992576211" target="_blank">Fale conosco: (63) 99257-6211</a>
                 </div>
             </div>
-
             <div class="coluna">
                 <h3>FORMAS DE PAGAMENTO</h3>
                 <div class="icones-pagamento">
@@ -1133,21 +552,11 @@ header {
                 </div>
             </div>
         </div>
-
         <div class="rodape-legal">
             <p>Nuvem de Essências Perfumaria LTDA | CNPJ: 58.620.682/0001-15</p>
             <p>© 2025 Nuvem de Essências - Todos os direitos reservados.</p>
         </div>
     </div>
-</footer></body>
+</footer>
+</body>
 </html>
-
-
-
-
-
-
-
-
-
-
