@@ -1073,35 +1073,94 @@ header {
         window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
     }
 
-    // 8. Frete (Visualização e Marcar Opção)
-    async function calcularFrete() {
-        const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-        const divOpcoes = document.getElementById('opcoes-frete');
-        if (cep.length !== 8) return alert("CEP inválido");
-        divOpcoes.innerHTML = "<p style='color:#666; font-size:12px;'>Buscando frete...</p>";
-        try {
-            const response = await fetch('/.netlify/functions/calcular-frete', {
-                method: 'POST',
-                body: JSON.stringify({ cep_destino: cep, valor_total: 100 })
-            });
-            const data = await response.json();
-            divOpcoes.innerHTML = "";
-            data.forEach(opcao => {
-                if (opcao.price) {
-                    divOpcoes.innerHTML += `
-                        <label style="display:flex; align-items:center; gap:10px; background:#f4f4f4; padding:10px; border:1px solid #ddd; margin-top:8px; border-radius:6px; cursor:pointer; color:#333;">
-                            <input type="radio" name="tipoFrete" onclick="aplicarFrete(${opcao.price})">
-                            <div style="font-size:12px;"><strong>${opcao.name}</strong><br>R$ ${parseFloat(opcao.price).toFixed(2).replace('.', ',')}</div>
-                        </label>`;
-                }
-            });
-        } catch (e) { divOpcoes.innerHTML = "Erro ao carregar frete."; }
+   // --- LÓGICA DE FRETE COM REGRA DE R$ 600 E PRAZO ---
+
+async function calcularFrete() {
+    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+    const div = document.getElementById('opcoes-frete');
+    
+    // Calculando o subtotal atual da sacola
+    let subtotal = sacola.reduce((acc, item) => acc + item.preco, 0);
+
+    if (cep.length !== 8) return alert("CEP Inválido");
+    
+    div.innerHTML = "Calculando...";
+
+    try {
+        const response = await fetch('/.netlify/functions/calcular-frete', {
+            method: 'POST',
+            body: JSON.stringify({ cep_destino: cep })
+        });
+        const data = await response.json();
+
+        // REGRA: Se o valor for maior que 600, forçamos o frete grátis na lista
+        if (subtotal >= 600) {
+            div.innerHTML = `
+                <div style="background:#e7f3ef; padding:10px; margin-top:5px; border:1px solid #25d366; border-radius:5px; color:#155724; cursor:pointer;" 
+                     onclick="aplicarFrete(0, 'FRETE GRÁTIS')">
+                    <strong>FRETE GRÁTIS (Promoção)</strong><br>
+                    <small>Prazo: 6 a 13 dias úteis</small>
+                </div>`;
+        } else {
+            // Caso contrário, mostra os fretes calculados com o prazo de 6 a 13 dias
+            div.innerHTML = data.map(op => `
+                <div style="background:#fff; padding:10px; margin-top:5px; border:1px solid #ddd; cursor:pointer; border-radius:5px; color:#333;" 
+                     onclick="aplicarFrete(${op.price}, '${op.name}')">
+                    ${op.name}: <b>R$ ${parseFloat(op.price).toFixed(2).replace('.', ',')}</b><br>
+                    <small>Prazo: 6 a 13 dias úteis</small>
+                </div>
+            `).join('');
+        }
+    } catch (e) { 
+        div.innerHTML = "Erro ao calcular. Tente novamente."; 
+    }
+}
+
+function aplicarFrete(valor, nome) {
+    valorFreteGlobal = parseFloat(valor);
+    nomeFreteGlobal = nome; // Guardamos o nome do frete para o WhatsApp
+    atualizarSacola();
+}
+
+function atualizarSacola() {
+    const cont = document.getElementById('cart-items');
+    let subtotal = 0;
+    
+    cont.innerHTML = sacola.length === 0 ? '<p style="text-align:center; color:#999;">Sacola vazia</p>' : 
+        sacola.map(item => {
+            subtotal += item.preco;
+            return `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; color:#333;">
+                <span>${item.nome}</span>
+                <b>R$ ${item.preco.toFixed(2).replace('.', ',')}</b>
+            </div>`;
+        }).join('');
+
+    // Se o subtotal atingir 600 e houver frete selecionado, avisamos
+    if (subtotal >= 600 && valorFreteGlobal > 0) {
+        valorFreteGlobal = 0;
+        nomeFreteGlobal = "FRETE GRÁTIS";
     }
 
-    function aplicarFrete(valor) {
-        valorFreteGlobal = parseFloat(valor);
-        atualizarSacola();
+    const totalFinal = subtotal + valorFreteGlobal;
+    document.getElementById('cart-total').innerText = totalFinal.toFixed(2).replace('.', ',');
+    document.getElementById('cart-count').innerText = sacola.length;
+}
+
+// ATUALIZE TAMBÉM O WHATSAPP PARA INCLUIR O PRAZO
+function finalizarWhatsApp() {
+    if (sacola.length === 0) return alert("Sacola vazia!");
+    let texto = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
+    sacola.forEach(item => texto += `- ${item.nome} (R$ ${item.preco.toFixed(2).replace('.', ',')})\n`);
+    
+    if (valorFreteGlobal === 0 && sacola.reduce((acc, i) => acc + i.preco, 0) >= 600) {
+        texto += `\nFrete: *GRÁTIS* (Prazo: 6 a 13 dias úteis)`;
+    } else if (valorFreteGlobal > 0) {
+        texto += `\nFrete: ${nomeFreteGlobal} (R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')})\nPrazo: 6 a 13 dias úteis`;
     }
+    
+    texto += `\n\n*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
+    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`);
+}
        
 </script>
 <footer class="rodape-premium">
@@ -1141,6 +1200,7 @@ header {
     </div>
 </footer></body>
 </html>
+
 
 
 
