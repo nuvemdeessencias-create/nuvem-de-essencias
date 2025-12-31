@@ -1116,18 +1116,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
-    // 6. WhatsApp (Finalizar Sacola Completa)
-    function finalizarWhatsApp() {
-        if (sacola.length === 0) return alert("Sacola vazia!");
-        let msg = "Olá! Gostaria de encomendar os seguintes perfumes:\n\n";
-        sacola.forEach((item, i) => {
-            msg += `*${i+1}. ${item.nome}* (${item.ml}) - Qtd: ${item.qtd}\n`;
-        });
-        if (valorFreteGlobal > 0) msg += `\n*Frete:* R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')}`;
-        msg += `\n*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
-        window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
+   
     // 7. COMPRA RÁPIDA (Botão de comprar direto no perfume) - CORRIGIDO
     function comprarAgora(nome, mlId) {
         const selectMl = document.getElementById(mlId);
@@ -1265,6 +1254,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
