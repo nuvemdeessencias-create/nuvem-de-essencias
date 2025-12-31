@@ -981,77 +981,79 @@ header {
         document.getElementById("ano-real").textContent = new Date().getFullYear();
     }
 
-    // 2. Variáveis Globais
-    let sacola = []; 
-    let valorFreteGlobal = 0;
-    let categoriaAtual = 'todos';
+  // 1. Variáveis Globais
+let sacola = []; 
+let valorFreteGlobal = 0;
+let nomeFreteGlobal = "";
+let categoriaAtual = 'todos';
 
-    // 3. Funções de Interface
-    function toggleCart() { 
-        document.getElementById('cart-modal').classList.toggle('active'); 
+// 2. Event Listeners (Garante que tudo funcione sem travar)
+document.addEventListener('DOMContentLoaded', function() {
+    // Ativa o cálculo de frete
+    const btnFrete = document.getElementById('btn-calcular-frete');
+    if (btnFrete) btnFrete.addEventListener('click', calcularFrete);
+
+    // Ativa o botão de Enviar Pedido (Preto)
+    const btnEnviar = document.getElementById('btn-enviar-pedido');
+    if (btnEnviar) btnEnviar.addEventListener('click', finalizarWhatsApp);
+});
+
+// 3. Funções de Interface
+function toggleCart() { 
+    document.getElementById('cart-modal').classList.toggle('active'); 
+}
+
+function alterarQtd(id, val, max) {
+    let input = document.getElementById(id);
+    let n = parseInt(input.value) + val;
+    if (n >= 1 && n <= max) input.value = n;
+}
+
+// 4. Filtros
+function filtrar() {
+    let busca = document.getElementById('buscaInput').value.toLowerCase();
+    let marcaSel = document.getElementById('filtroMarca').value;
+    let cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        let nome = card.querySelector('.nome-perfume').innerText.toLowerCase();
+        let marca = card.getAttribute('data-marca');
+        let secao = card.getAttribute('data-secao');
+        let match = nome.includes(busca) && 
+                    (marcaSel === 'todos' || marca === marcaSel) && 
+                    (categoriaAtual === 'todos' || secao === categoriaAtual);
+        card.classList.toggle('hidden', !match);
+    });
+}
+
+function filtrarCategoria(cat, btn) {
+    categoriaAtual = cat;
+    document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    filtrar();
+}
+
+// 5. Gestão da Sacola
+function addCart(nome, mlId, qtdId) {
+    const selectMl = document.getElementById(mlId);
+    const qtdInput = document.getElementById(qtdId);
+    if (!selectMl || !qtdInput) return;
+    
+    const [ml, preco] = selectMl.value.split('|');
+    const precoNum = parseFloat(preco);
+    const qtd = parseInt(qtdInput.value);
+
+    if (precoNum > 0) {
+        sacola.push({ nome, ml, preco: precoNum, qtd });
+        atualizarSacola();
+        if (!document.getElementById('cart-modal').classList.contains('active')) toggleCart();
     }
+}
 
-    function alterarQtd(id, val, max) {
-        let input = document.getElementById(id);
-        let n = parseInt(input.value) + val;
-        if (n >= 1 && n <= max) input.value = n;
-    }
-
-    // 4. Filtros
-    function filtrar() {
-        let busca = document.getElementById('buscaInput').value.toLowerCase();
-        let marcaSel = document.getElementById('filtroMarca').value;
-        let cards = document.querySelectorAll('.card');
-        cards.forEach(card => {
-            let nome = card.querySelector('.nome-perfume').innerText.toLowerCase();
-            let marca = card.getAttribute('data-marca');
-            let secao = card.getAttribute('data-secao');
-            let match = nome.includes(busca) && 
-                        (marcaSel === 'todos' || marca === marcaSel) && 
-                        (categoriaAtual === 'todos' || secao === categoriaAtual);
-            card.classList.toggle('hidden', !match);
-        });
-    }
-
-    function filtrarCategoria(cat, btn) {
-        categoriaAtual = cat;
-        document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        filtrar();
-    }
-
-    // 5. Gestão da Sacola (Nomes dos Produtos)
-    function addCart(nome, mlId, qtdId) {
-        const selectMl = document.getElementById(mlId);
-        const qtdInput = document.getElementById(qtdId);
-        if (!selectMl || !qtdInput) return;
-        
-        const [ml, preco] = selectMl.value.split('|');
-        const precoNum = parseFloat(preco);
-        const qtd = parseInt(qtdInput.value);
-
-        if (precoNum > 0) {
-            sacola.push({ nome, ml, preco: precoNum, qtd });
-            atualizarSacola();
-            if (!document.getElementById('cart-modal').classList.contains('active')) toggleCart();
-        }
-    }
-
-    function removerItem(index) {
-    // Remove o item do array
+function removerItem(index) {
     sacola.splice(index, 1);
-    
-    // Reseta o frete para obrigar um novo cálculo com o carrinho novo
-    if (typeof valorFreteGlobal !== 'undefined') {
-        valorFreteGlobal = 0;
-    }
-    
+    valorFreteGlobal = 0;
     const opcoesFrete = document.getElementById('opcoes-frete');
-    if (opcoesFrete) {
-        opcoesFrete.innerHTML = "";
-    }
-    
-    // Atualiza a visualização
+    if (opcoesFrete) opcoesFrete.innerHTML = "";
     atualizarSacola();
 }
 
@@ -1059,80 +1061,50 @@ function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
     const countCont = document.getElementById('cart-count');
-    let totalProdutos = 0;
+    let subtotal = 0;
     
     if (!itensCont) return;
 
     if (sacola.length === 0) {
         itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
     } else {
-        // Renderiza os itens na tela
         itensCont.innerHTML = sacola.map((item, index) => {
-            const sub = item.preco * item.qtd;
-            totalProdutos += sub;
+            const valorItem = item.preco * item.qtd;
+            subtotal += valorItem;
             return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
                         <div style="text-align:left;">
                             <b style="font-size:13px;">${item.nome}</b><br>
                             <small>${item.ml} | Qtd: ${item.qtd}</small>
                         </div>
-                        <button class="btn-remover-item" data-index="${index}" style="background:none; border:none; color:red; font-size:22px; cursor:pointer; font-weight:bold; padding: 5px;">&times;</button>
+                        <button class="btn-remover-item" data-index="${index}" style="background:none; border:none; color:red; font-size:22px; cursor:pointer; font-weight:bold;">&times;</button>
                     </div>`;
         }).join('');
 
-        // Ativa o clique de remover de forma segura (sem usar onclick no HTML)
+        // Reativa os cliques de remover
         document.querySelectorAll('.btn-remover-item').forEach(btn => {
             btn.addEventListener('click', function() {
-                const idx = parseInt(this.getAttribute('data-index'));
-                removerItem(idx);
+                removerItem(parseInt(this.getAttribute('data-index')));
             });
         });
     }
 
-    // Calcula e mostra o total (Soma dos produtos + Frete)
-    const frete = (typeof valorFreteGlobal !== 'undefined') ? valorFreteGlobal : 0;
-    const totalGeral = totalProdutos + frete;
-    
-    if (totalCont) {
-        totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
+    if (subtotal >= 700) {
+        valorFreteGlobal = 0;
+        nomeFreteGlobal = "FRETE GRÁTIS";
     }
-    if (countCont) {
-        countCont.innerText = sacola.length;
-    }
+
+    const totalFinal = subtotal + valorFreteGlobal;
+    if (totalCont) totalCont.innerText = totalFinal.toLocaleString('pt-br', { minimumFractionDigits: 2 });
+    if (countCont) countCont.innerText = sacola.length;
 }
 
-// Ativa o botão de frete de forma segura logo após o carregamento
-document.addEventListener('DOMContentLoaded', function() {
-    const botaoFrete = document.getElementById('btn-calcular-frete');
-    if (botaoFrete) {
-        botaoFrete.addEventListener('click', function() {
-            if (typeof calcularFrete === 'function') {
-                calcularFrete();
-            }
-        });
-    }
-});
-   
-    // 7. COMPRA RÁPIDA (Botão de comprar direto no perfume) - CORRIGIDO
-    function comprarAgora(nome, mlId) {
-        const selectMl = document.getElementById(mlId);
-        if (!selectMl) return;
-        const [ml, preco] = selectMl.value.split('|');
-        const precoFormatado = preco.replace('.', ',');
-        const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${precoFormatado}. Está disponível?`;
-        window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-   // --- LÓGICA DE FRETE COM REGRA DE R$ 700 E PRAZO ---
-
+// 6. Frete e Compra
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
     const div = document.getElementById('opcoes-frete');
-    
-    // Calculando o subtotal atual da sacola
-    let subtotal = sacola.reduce((acc, item) => acc + item.preco, 0);
+    let subtotal = sacola.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
 
     if (cep.length !== 8) return alert("CEP Inválido");
-    
     div.innerHTML = "Calculando...";
 
     try {
@@ -1142,73 +1114,50 @@ async function calcularFrete() {
         });
         const data = await response.json();
 
-        // REGRA: Se o valor for maior que 700, forçamos o frete grátis na lista
         if (subtotal >= 700) {
-            div.innerHTML = `
-                <div style="background:#e7f3ef; padding:10px; margin-top:5px; border:1px solid #25d366; border-radius:5px; color:#155724; cursor:pointer;" 
-                     onclick="aplicarFrete(0, 'FRETE GRÁTIS')">
-                    <strong>FRETE GRÁTIS (Promoção)</strong><br>
-                    <small>Prazo: 6 a 13 dias úteis</small>
-                </div>`;
+            div.innerHTML = `<div style="background:#e7f3ef; padding:10px; margin-top:5px; border:1px solid #25d366; border-radius:5px; color:#155724; cursor:pointer;" id="frete-gratis-clique">
+                <strong>FRETE GRÁTIS (Promoção)</strong><br><small>Prazo: 6 a 13 dias úteis</small></div>`;
+            document.getElementById('frete-gratis-clique').addEventListener('click', () => aplicarFrete(0, 'FRETE GRÁTIS'));
         } else {
-            // Caso contrário, mostra os fretes calculados com o prazo de 6 a 13 dias
-            div.innerHTML = data.map(op => `
-                <div style="background:#fff; padding:10px; margin-top:5px; border:1px solid #ddd; cursor:pointer; border-radius:5px; color:#333;" 
-                     onclick="aplicarFrete(${op.price}, '${op.name}')">
-                    ${op.name}: <b>R$ ${parseFloat(op.price).toFixed(2).replace('.', ',')}</b><br>
-                    <small>Prazo: 6 a 13 dias úteis</small>
-                </div>
-            `).join('');
+            div.innerHTML = data.map((op, i) => `
+                <div style="background:#fff; padding:10px; margin-top:5px; border:1px solid #ddd; cursor:pointer; border-radius:5px; color:#333;" class="opcao-frete-clique" data-price="${op.price}" data-name="${op.name}">
+                    ${op.name}: <b>R$ ${parseFloat(op.price).toFixed(2).replace('.', ',')}</b><br><small>Prazo: 6 a 13 dias úteis</small>
+                </div>`).join('');
+            
+            document.querySelectorAll('.opcao-frete-clique').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    aplicarFrete(this.getAttribute('data-price'), this.getAttribute('data-name'));
+                });
+            });
         }
-    } catch (e) { 
-        div.innerHTML = "Erro ao calcular. Tente novamente."; 
-    }
+    } catch (e) { div.innerHTML = "Erro ao calcular. Tente novamente."; }
 }
 
 function aplicarFrete(valor, nome) {
     valorFreteGlobal = parseFloat(valor);
-    nomeFreteGlobal = nome; // Guardamos o nome do frete para o WhatsApp
+    nomeFreteGlobal = nome;
     atualizarSacola();
 }
 
-function atualizarSacola() {
-    const cont = document.getElementById('cart-items');
-    let subtotal = 0;
-    
-    cont.innerHTML = sacola.length === 0 ? '<p style="text-align:center; color:#999;">Sacola vazia</p>' : 
-        sacola.map(item => {
-            subtotal += item.preco;
-            return `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; color:#333;">
-                <span>${item.nome}</span>
-                <b>R$ ${item.preco.toFixed(2).replace('.', ',')}</b>
-            </div>`;
-        }).join('');
-
-    // Se o subtotal atingir 700 e houver frete selecionado, avisamos
-    if (subtotal >= 700 && valorFreteGlobal > 0) {
-        valorFreteGlobal = 0;
-        nomeFreteGlobal = "FRETE GRÁTIS";
-    }
-
-    const totalFinal = subtotal + valorFreteGlobal;
-    document.getElementById('cart-total').innerText = totalFinal.toFixed(2).replace('.', ',');
-    document.getElementById('cart-count').innerText = sacola.length;
-}
-
-// ATUALIZE TAMBÉM O WHATSAPP PARA INCLUIR O PRAZO
 function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
     let texto = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
-    sacola.forEach(item => texto += `- ${item.nome} (R$ ${item.preco.toFixed(2).replace('.', ',')})\n`);
+    sacola.forEach(item => texto += `- ${item.nome} (${item.ml}) x${item.qtd}: R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n`);
     
-    if (valorFreteGlobal === 0 && sacola.reduce((acc, i) => acc + i.preco, 0) >= 600) {
-        texto += `\nFrete: *GRÁTIS* (Prazo: 6 a 13 dias úteis)`;
-    } else if (valorFreteGlobal > 0) {
-        texto += `\nFrete: ${nomeFreteGlobal} (R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')})\nPrazo: 6 a 13 dias úteis`;
+    if (nomeFreteGlobal) {
+        texto += `\nFrete: *${nomeFreteGlobal}* ${valorFreteGlobal > 0 ? '(R$ '+valorFreteGlobal.toFixed(2).replace('.', ',')+')' : ''}\nPrazo: 6 a 13 dias úteis`;
     }
     
     texto += `\n\n*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
-    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`);
+    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
+}
+
+function comprarAgora(nome, mlId) {
+    const selectMl = document.getElementById(mlId);
+    if (!selectMl) return;
+    const [ml, preco] = selectMl.value.split('|');
+    const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${preco.replace('.', ',')}. Está disponível?`;
+    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
 }
        
 </script>
@@ -1249,6 +1198,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
