@@ -306,57 +306,62 @@ header {
 
 <div class="container" id="listaProdutos">
 
-   <div class="container" id="listaProdutos"></div>
+
 
 <script src="produtos.js"></script>
 <script>
-    // Inicie a função assim que a página carregar
-    window.onload = function() {
-        if (typeof carregarProdutos === "function") {
-            carregarProdutos();
-        }
-    };
-
-    // 'meusProdutos' vem do arquivo produtos.js
-    meusProdutos.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.setAttribute('data-marca', p.marca.toUpperCase());
-        card.setAttribute('data-secao', p.secao);
-
-        // Lógica para botões de compra ou esgotado
-        const btnWhats = p.disponivel 
-            ? `<button onclick="comprarAgora('${p.nome}', 'ml-${p.id}')" class="btn-whats">COMPRAR AGORA</button>`
-            : `<button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>`;
+    // Função principal para renderizar os produtos
+    function carregarProdutos() {
+        const container = document.getElementById('listaProdutos');
+        if (!container) return;
         
-        const btnCart = p.disponivel 
-            ? `<button onclick="addCart('${p.nome}', 'ml-${p.id}', 'q-${p.id}')" class="btn-add-cart">+ Adicionar à Sacola</button>`
-            : "";
+        container.innerHTML = ""; // Limpa o container antes de carregar
 
-        card.innerHTML = `
-            <img src="${p.imagem}" alt="${p.nome}">
-            <div class="info">
-                <span class="marca-tag">${p.marca}</span>
-                <div class="nome-perfume">${p.nome}</div>
-                <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'PRODUTO INDISPONÍVEL'}</div>
-                
-                <div class="qtd-container" ${p.disponivel ? "" : "style='opacity: 0.5; pointer-events: none;'"}>
-                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
-                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
-                </div>
+        if (typeof meusProdutos !== 'undefined') {
+            meusProdutos.forEach(p => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.setAttribute('data-marca', p.marca.toUpperCase());
+                card.setAttribute('data-secao', p.secao);
 
-                <select class="seletor-ml" id="ml-${p.id}" ${p.disponivel ? "" : "disabled"}>
-                    ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
-                </select>
+                // Lógica para botões de compra ou esgotado
+                const btnWhats = p.disponivel 
+                    ? `<button onclick="comprarAgora('${p.nome}', 'ml-${p.id}')" class="btn-whats">COMPRAR AGORA</button>`
+                    : `<button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>`;
                 
-                ${btnWhats}
-                ${btnCart}
-            </div>
-        `;
-        container.appendChild(card);
-    });
-}
+                const btnCart = p.disponivel 
+                    ? `<button onclick="addCart('${p.nome}', 'ml-${p.id}', 'q-${p.id}')" class="btn-add-cart">+ Adicionar à Sacola</button>`
+                    : "";
+
+                card.innerHTML = `
+                    <img src="${p.imagem}" alt="${p.nome}">
+                    <div class="info">
+                        <span class="marca-tag">${p.marca}</span>
+                        <div class="nome-perfume">${p.nome}</div>
+                        <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'PRODUTO INDISPONÍVEL'}</div>
+                        
+                        <div class="qtd-container" ${p.disponivel ? "" : "style='opacity: 0.5; pointer-events: none;'"}>
+                            <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
+                            <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
+                            <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
+                        </div>
+
+                        <select class="seletor-ml" id="ml-${p.id}" ${p.disponivel ? "" : "disabled"}>
+                            ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
+                        </select>
+                        
+                        ${btnWhats}
+                        ${btnCart}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+    }
+
+    // Garante que os produtos carreguem assim que o script e o HTML estiverem prontos
+    window.addEventListener('DOMContentLoaded', carregarProdutos);
+</script>
 
    <script>
     // 1. Atualiza o ano no rodapé
@@ -619,6 +624,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
