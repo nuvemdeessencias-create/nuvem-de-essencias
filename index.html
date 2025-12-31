@@ -1019,38 +1019,54 @@ header {
     }
 
     function removerItem(index) {
-        sacola.splice(index, 1);
-        valorFreteGlobal = 0; 
-        document.getElementById('opcoes-frete').innerHTML = "";
-        atualizarSacola();
+    sacola.splice(index, 1);
+    // Reseta o frete ao remover itens para evitar valores errados
+    if (typeof valorFreteGlobal !== 'undefined') valorFreteGlobal = 0; 
+    const opcoesFrete = document.getElementById('opcoes-frete');
+    if (opcoesFrete) opcoesFrete.innerHTML = "";
+    atualizarSacola();
+}
+
+function atualizarSacola() {
+    const itensCont = document.getElementById('cart-items');
+    const totalCont = document.getElementById('cart-total');
+    const countCont = document.getElementById('cart-count');
+    let totalProdutos = 0;
+    
+    if (!itensCont) return;
+
+    if (sacola.length === 0) {
+        itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
+    } else {
+        // Renderiza os itens primeiro
+        itensCont.innerHTML = sacola.map((item, index) => {
+            const sub = item.preco * item.qtd;
+            totalProdutos += sub;
+            return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
+                        <div style="text-align:left;">
+                            <b style="font-size:13px;">${item.nome}</b><br>
+                            <small>${item.ml} | Qtd: ${item.qtd}</small>
+                        </div>
+                        <button class="btn-remover-item" data-index="${index}" style="background:none; border:none; color:red; font-size:22px; cursor:pointer; font-weight:bold;">&times;</button>
+                    </div>`;
+        }).join('');
+
+        // AGORA a parte importante: Adiciona o clique de forma segura
+        document.querySelectorAll('.btn-remover-item').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const idx = parseInt(this.getAttribute('data-index'));
+                removerItem(idx);
+            });
+        });
     }
 
-    function atualizarSacola() {
-        const itensCont = document.getElementById('cart-items');
-        const totalCont = document.getElementById('cart-total');
-        const countCont = document.getElementById('cart-count');
-        let totalProdutos = 0;
-        
-        if (sacola.length === 0) {
-            itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
-        } else {
-            itensCont.innerHTML = sacola.map((item, index) => {
-                const sub = item.preco * item.qtd;
-                totalProdutos += sub;
-                return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
-                            <div style="text-align:left;">
-                                <b style="font-size:13px;">${item.nome}</b><br>
-                                <small>${item.ml} | Qtd: ${item.qtd}</small>
-                            </div>
-                            <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px;">&times;</button>
-                        </div>`;
-            }).join('');
-        }
-        const totalGeral = totalProdutos + valorFreteGlobal;
-        totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
-        countCont.innerText = sacola.length;
-    }
-
+    // Atualiza os valores totais
+    const frete = (typeof valorFreteGlobal !== 'undefined') ? valorFreteGlobal : 0;
+    const totalGeral = totalProdutos + frete;
+    
+    if (totalCont) totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
+    if (countCont) countCont.innerText = sacola.length;
+}
     // 6. WhatsApp (Finalizar Sacola Completa)
     function finalizarWhatsApp() {
         if (sacola.length === 0) return alert("Sacola vazia!");
@@ -1200,6 +1216,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
