@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline' https://fonts.googleapis.com; font-src * https://fonts.gstatic.com;">
     <title>Nuvem De Essências | Catálogo Oficial</title>
     <style>
        /* 1. CONFIGURAÇÕES GERAIS E CORES */
@@ -149,6 +150,28 @@ header {
     font-weight: bold;
     cursor: pointer;
     font-size: 16px;
+}
+
+/* Estilo para fixar o WhatsApp no canto da tela */
+.whatsapp-flutuante {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #25d366;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    text-decoration: none;
+}
+
+.whatsapp-flutuante img {
+    width: 35px;
+    height: 35px;
 }
         /* FILTROS */
         .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -1242,6 +1265,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
