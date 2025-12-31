@@ -210,16 +210,17 @@ header {
         </div>
 
         <div style="font-family: 'Inter', sans-serif; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-            <h3 style="font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: #1a1a1a;">ENTREGA</h3>
-            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
-            
-            <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
-                <input type="text" id="cep-cliente" placeholder="Digite o CEP">
-                <button onclick="calcularFrete()" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase;">
-                    CALCULAR
-                </button>
-            </div>
-
+    <h3 style="font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: #1a1a1a;">ENTREGA</h3>
+    <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
+    
+    <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
+        <input type="text" id="cep-cliente" placeholder="Digite o CEP" style="flex:1; border:none; padding:0 15px; outline:none;">
+        
+        <button id="btn-calcular-frete" type="button" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase;">
+            CALCULAR
+        </button>
+    </div>
+</div>
             <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer" style="display: block; font-size: 12px; color: #1a1a1a; text-decoration: underline; font-style: italic;">
                 Não sei meu CEP
             </a>
@@ -1019,11 +1020,20 @@ header {
     }
 
     function removerItem(index) {
+    // Remove o item do array
     sacola.splice(index, 1);
-    // Reseta o frete ao remover itens para evitar valores errados
-    if (typeof valorFreteGlobal !== 'undefined') valorFreteGlobal = 0; 
+    
+    // Reseta o frete para obrigar um novo cálculo com o carrinho novo
+    if (typeof valorFreteGlobal !== 'undefined') {
+        valorFreteGlobal = 0;
+    }
+    
     const opcoesFrete = document.getElementById('opcoes-frete');
-    if (opcoesFrete) opcoesFrete.innerHTML = "";
+    if (opcoesFrete) {
+        opcoesFrete.innerHTML = "";
+    }
+    
+    // Atualiza a visualização
     atualizarSacola();
 }
 
@@ -1038,7 +1048,7 @@ function atualizarSacola() {
     if (sacola.length === 0) {
         itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
     } else {
-        // Renderiza os itens primeiro
+        // Renderiza os itens na tela
         itensCont.innerHTML = sacola.map((item, index) => {
             const sub = item.preco * item.qtd;
             totalProdutos += sub;
@@ -1047,11 +1057,11 @@ function atualizarSacola() {
                             <b style="font-size:13px;">${item.nome}</b><br>
                             <small>${item.ml} | Qtd: ${item.qtd}</small>
                         </div>
-                        <button class="btn-remover-item" data-index="${index}" style="background:none; border:none; color:red; font-size:22px; cursor:pointer; font-weight:bold;">&times;</button>
+                        <button class="btn-remover-item" data-index="${index}" style="background:none; border:none; color:red; font-size:22px; cursor:pointer; font-weight:bold; padding: 5px;">&times;</button>
                     </div>`;
         }).join('');
 
-        // AGORA a parte importante: Adiciona o clique de forma segura
+        // Ativa o clique de remover de forma segura (sem usar onclick no HTML)
         document.querySelectorAll('.btn-remover-item').forEach(btn => {
             btn.addEventListener('click', function() {
                 const idx = parseInt(this.getAttribute('data-index'));
@@ -1060,13 +1070,29 @@ function atualizarSacola() {
         });
     }
 
-    // Atualiza os valores totais
+    // Calcula e mostra o total (Soma dos produtos + Frete)
     const frete = (typeof valorFreteGlobal !== 'undefined') ? valorFreteGlobal : 0;
     const totalGeral = totalProdutos + frete;
     
-    if (totalCont) totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
-    if (countCont) countCont.innerText = sacola.length;
+    if (totalCont) {
+        totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
+    }
+    if (countCont) {
+        countCont.innerText = sacola.length;
+    }
 }
+
+// Ativa o botão de frete de forma segura logo após o carregamento
+document.addEventListener('DOMContentLoaded', function() {
+    const botaoFrete = document.getElementById('btn-calcular-frete');
+    if (botaoFrete) {
+        botaoFrete.addEventListener('click', function() {
+            if (typeof calcularFrete === 'function') {
+                calcularFrete();
+            }
+        });
+    }
+});
     // 6. WhatsApp (Finalizar Sacola Completa)
     function finalizarWhatsApp() {
         if (sacola.length === 0) return alert("Sacola vazia!");
@@ -1216,6 +1242,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
