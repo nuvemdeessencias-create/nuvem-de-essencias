@@ -1041,7 +1041,8 @@ function addCart(nome, mlId, qtdId) {
 
 function removerItem(index) {
     sacola.splice(index, 1);
-    valorFreteGlobal = 0;
+    valorFreteGlobal = 0; // Reseta o frete ao remover itens
+    nomeFreteGlobal = "";
     const opcoesFrete = document.getElementById('opcoes-frete');
     if (opcoesFrete) opcoesFrete.innerHTML = "";
     atualizarSacola();
@@ -1070,7 +1071,6 @@ function atualizarSacola() {
                     </div>`;
         }).join('');
 
-        // Reativa os cliques de remover
         document.querySelectorAll('.btn-remover-item').forEach(btn => {
             btn.addEventListener('click', function() {
                 removerItem(parseInt(this.getAttribute('data-index')));
@@ -1078,6 +1078,7 @@ function atualizarSacola() {
         });
     }
 
+    // Regra de Frete Grátis Automática
     if (subtotal >= 700) {
         valorFreteGlobal = 0;
         nomeFreteGlobal = "FRETE GRÁTIS";
@@ -1092,8 +1093,9 @@ async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
     const div = document.getElementById('opcoes-frete');
     
-    // Calcula o subtotal atual da sacola
-    let subtotal = sacola.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+    // IMPORTANTE: Pegamos os valores que o arquivo .js na Vercel exige
+    const subtotal = sacola.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+    const qtdTotal = sacola.reduce((acc, item) => acc + item.qtd, 0);
 
     if (cep.length !== 8) {
         alert("CEP Inválido. Digite os 8 números.");
@@ -1105,60 +1107,44 @@ async function calcularFrete() {
     try {
         const response = await fetch('/api/calcular-frete', {
             method: 'POST',
-            body: JSON.stringify({ cep_destino: cep })
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                cep_destino: cep,
+                quantidade: qtdTotal, 
+                valor_total: subtotal 
+            })
         });
-        const data = await response.json();
 
-        // Limpa a div para inserir os novos botões
+        const data = await response.json();
         div.innerHTML = "";
 
-        if (subtotal >= 700) {
-            // Criar botão de Frete Grátis
-            const btnGratis = document.createElement('div');
-            btnGratis.style = "background:#e7f3ef; padding:12px; margin-top:10px; border:2px solid #25d366; border-radius:8px; color:#155724; cursor:pointer;";
-            btnGratis.innerHTML = `<strong>FRETE GRÁTIS (Promoção)</strong><br><small>Prazo: 6 a 13 dias úteis</small>`;
-            
-            // O segredo está aqui: Adicionamos o evento sem usar onclick no HTML
-            btnGratis.addEventListener('click', () => aplicarFrete(0, 'FRETE GRÁTIS'));
-            div.appendChild(btnGratis);
-        } else {
-            // Criar botões para cada opção da API
-            data.forEach(op => {
-                const btnOpcao = document.createElement('div');
-                btnOpcao.style = "background:#fff; padding:12px; margin-top:8px; border:1px solid #ddd; cursor:pointer; border-radius:8px; color:#333; transition: 0.2s;";
-                btnOpcao.innerHTML = `
-                    <div style="display:flex; justify-content:space-between;">
-                        <span>${op.name}</span>
-                        <b>R$ ${parseFloat(op.price).toFixed(2).replace('.', ',')}</b>
-                    </div>
-                    <small style="color: #888;">Prazo: 6 a 13 dias úteis</small>
-                `;
-                
-                btnOpcao.addEventListener('mouseover', () => btnOpcao.style.borderColor = "#b89356");
-                btnOpcao.addEventListener('mouseout', () => btnOpcao.style.borderColor = "#ddd");
-                
-                // Aplica o frete ao clicar
-                btnOpcao.addEventListener('click', () => aplicarFrete(op.price, op.name));
-                
-                div.appendChild(btnOpcao);
-            });
+        if (!Array.isArray(data) || data.length === 0) {
+            div.innerHTML = "<p style='color:orange; font-size:12px;'>Nenhum frete disponível.</p>";
+            return;
         }
+
+        data.forEach(op => {
+            if (op.error) return;
+
+            const preco = parseFloat(op.price || 0);
+            const nome = op.name;
+            const btnOpcao = document.createElement('div');
+            
+            btnOpcao.style = "background:#fff; padding:12px; margin-top:8px; border:1px solid #ddd; cursor:pointer; border-radius:8px; color:#333; transition: 0.2s;";
+            btnOpcao.innerHTML = `
+                <div style="display:flex; justify-content:space-between;">
+                    <span>${nome}</span>
+                    <b>${preco === 0 ? 'GRÁTIS' : 'R$ ' + preco.toFixed(2).replace('.', ',')}</b>
+                </div>
+                <small style="color: #888;">Prazo: ${op.delivery_time || '6-13'} dias úteis</small>
+            `;
+
+            btnOpcao.addEventListener('click', () => aplicarFrete(preco, nome));
+            div.appendChild(btnOpcao);
+        });
     } catch (e) { 
         div.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular. Verifique sua conexão.</p>"; 
     }
-}
-
-function aplicarFrete(valor, nome) {
-    valorFreteGlobal = parseFloat(valor);
-    nomeFreteGlobal = nome; // Guarda o nome (Ex: PAC ou SEDEX) para o WhatsApp
-    
-    // Mostra um aviso rápido que o frete foi selecionado
-    const div = document.getElementById('opcoes-frete');
-    div.innerHTML = `<div style="background:#f0f7ff; padding:10px; border-radius:8px; border:1px solid #007bff; color:#004085; font-size:13px; text-align:center;">
-        ✅ <b>${nome}</b> selecionado!
-    </div>`;
-    
-    atualizarSacola();
 }
 
 function finalizarWhatsApp() {
@@ -1220,6 +1206,7 @@ function comprarAgora(nome, mlId) {
     </div>
 </footer></body>
 </html>
+
 
 
 
