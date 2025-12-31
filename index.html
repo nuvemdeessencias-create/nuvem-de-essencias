@@ -252,15 +252,22 @@ header {
         </div>
     </div>
 
-    <div class="cart-footer">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333; font-size: 18px;">
-            <span>Total:</span>
-            <span>R$ <span id="cart-total">0,00</span></span>
-        </div>
-        <button class="btn-whats" onclick="finalizarWhatsApp()">
-            ENVIAR PEDIDO
-        </button>
+ <div class="cart-footer">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 18px; color: #333;">
+        <span>Total:</span>
+        <span>R$ <span id="cart-total">0,00</span></span>
     </div>
+
+    <button id="btn-enviar-pedido" class="btn-whats" style="margin-bottom: 10px; background-color: #1a1a1a;">
+        ENVIAR PEDIDO
+    </button>
+
+    <a href="https://wa.me/5563992576211" target="_blank" style="text-decoration: none;">
+        <button type="button" class="btn-whats" style="background-color: #25d366; display: flex; align-items: center; justify-content: center; gap: 10px;">
+            <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" width="20" height="20" alt="WhatsApp">
+            FINALIZAR VIA WHATSAPP
+        </button>
+    </a>
 </div>
 
 <div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; margin-bottom: 20px; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
@@ -1254,6 +1261,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
