@@ -1088,14 +1088,19 @@ function atualizarSacola() {
     if (countCont) countCont.innerText = sacola.length;
 }
 
-// 6. Frete e Compra
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
     const div = document.getElementById('opcoes-frete');
+    
+    // Calcula o subtotal atual da sacola
     let subtotal = sacola.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
 
-    if (cep.length !== 8) return alert("CEP Inválido");
-    div.innerHTML = "Calculando...";
+    if (cep.length !== 8) {
+        alert("CEP Inválido. Digite os 8 números.");
+        return;
+    }
+    
+    div.innerHTML = "<p style='color: #666; font-size: 13px;'>Calculando opções...</p>";
 
     try {
         const response = await fetch('/api/calcular-frete', {
@@ -1104,28 +1109,55 @@ async function calcularFrete() {
         });
         const data = await response.json();
 
+        // Limpa a div para inserir os novos botões
+        div.innerHTML = "";
+
         if (subtotal >= 700) {
-            div.innerHTML = `<div style="background:#e7f3ef; padding:10px; margin-top:5px; border:1px solid #25d366; border-radius:5px; color:#155724; cursor:pointer;" id="frete-gratis-clique">
-                <strong>FRETE GRÁTIS (Promoção)</strong><br><small>Prazo: 6 a 13 dias úteis</small></div>`;
-            document.getElementById('frete-gratis-clique').addEventListener('click', () => aplicarFrete(0, 'FRETE GRÁTIS'));
-        } else {
-            div.innerHTML = data.map((op, i) => `
-                <div style="background:#fff; padding:10px; margin-top:5px; border:1px solid #ddd; cursor:pointer; border-radius:5px; color:#333;" class="opcao-frete-clique" data-price="${op.price}" data-name="${op.name}">
-                    ${op.name}: <b>R$ ${parseFloat(op.price).toFixed(2).replace('.', ',')}</b><br><small>Prazo: 6 a 13 dias úteis</small>
-                </div>`).join('');
+            // Criar botão de Frete Grátis
+            const btnGratis = document.createElement('div');
+            btnGratis.style = "background:#e7f3ef; padding:12px; margin-top:10px; border:2px solid #25d366; border-radius:8px; color:#155724; cursor:pointer;";
+            btnGratis.innerHTML = `<strong>FRETE GRÁTIS (Promoção)</strong><br><small>Prazo: 6 a 13 dias úteis</small>`;
             
-            document.querySelectorAll('.opcao-frete-clique').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    aplicarFrete(this.getAttribute('data-price'), this.getAttribute('data-name'));
-                });
+            // O segredo está aqui: Adicionamos o evento sem usar onclick no HTML
+            btnGratis.addEventListener('click', () => aplicarFrete(0, 'FRETE GRÁTIS'));
+            div.appendChild(btnGratis);
+        } else {
+            // Criar botões para cada opção da API
+            data.forEach(op => {
+                const btnOpcao = document.createElement('div');
+                btnOpcao.style = "background:#fff; padding:12px; margin-top:8px; border:1px solid #ddd; cursor:pointer; border-radius:8px; color:#333; transition: 0.2s;";
+                btnOpcao.innerHTML = `
+                    <div style="display:flex; justify-content:space-between;">
+                        <span>${op.name}</span>
+                        <b>R$ ${parseFloat(op.price).toFixed(2).replace('.', ',')}</b>
+                    </div>
+                    <small style="color: #888;">Prazo: 6 a 13 dias úteis</small>
+                `;
+                
+                btnOpcao.addEventListener('mouseover', () => btnOpcao.style.borderColor = "#b89356");
+                btnOpcao.addEventListener('mouseout', () => btnOpcao.style.borderColor = "#ddd");
+                
+                // Aplica o frete ao clicar
+                btnOpcao.addEventListener('click', () => aplicarFrete(op.price, op.name));
+                
+                div.appendChild(btnOpcao);
             });
         }
-    } catch (e) { div.innerHTML = "Erro ao calcular. Tente novamente."; }
+    } catch (e) { 
+        div.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular. Verifique sua conexão.</p>"; 
+    }
 }
 
 function aplicarFrete(valor, nome) {
     valorFreteGlobal = parseFloat(valor);
-    nomeFreteGlobal = nome;
+    nomeFreteGlobal = nome; // Guarda o nome (Ex: PAC ou SEDEX) para o WhatsApp
+    
+    // Mostra um aviso rápido que o frete foi selecionado
+    const div = document.getElementById('opcoes-frete');
+    div.innerHTML = `<div style="background:#f0f7ff; padding:10px; border-radius:8px; border:1px solid #007bff; color:#004085; font-size:13px; text-align:center;">
+        ✅ <b>${nome}</b> selecionado!
+    </div>`;
+    
     atualizarSacola();
 }
 
@@ -1188,6 +1220,7 @@ function comprarAgora(nome, mlId) {
     </div>
 </footer></body>
 </html>
+
 
 
 
