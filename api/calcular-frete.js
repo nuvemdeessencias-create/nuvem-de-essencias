@@ -1,34 +1,41 @@
 export default async function handler(req, res) {
-  // A Vercel já faz o parse do corpo da requisição automaticamente
+  // Configuração de CORS para permitir que o seu site acesse a API sem bloqueios
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Responde rapidamente a requisições de verificação do navegador
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+
   const { cep_destino, quantidade, valor_total } = req.body;
   const token = process.env.MELHOR_ENVIO_TOKEN;
 
   try {
     // --- 1. REGRA DE FRETE GRÁTIS POR VALOR ---
-    if (valor_total >= 700) {
+    if (parseFloat(valor_total) >= 700) {
       return res.status(200).json([
-        { name: "Frete Grátis (Promoção)", price: "0.00", delivery_time: "6-13" }
+        { name: "Frete Grátis (Promoção)", price: 0, delivery_time: "6-13" }
       ]);
     }
 
     // --- 2. REGRA PARA ARAGUAÍNA ---
-    if (cep_destino && cep_destino.startsWith("778")) {
+    if (cep_destino && (cep_destino.startsWith("778") || cep_destino.startsWith("7780"))) {
       return res.status(200).json([
-        { name: "Entrega Local (Araguaína)", price: "0.00", delivery_time: "1" },
-        { name: "Retirada no Local", price: "0.00", delivery_time: "0" }
+        { name: "Entrega Local (Araguaína)", price: 0, delivery_time: "1" },
+        { name: "Retirada no Local", price: 0, delivery_time: "0" }
       ]);
     }
 
-    // --- 3. CÁLCULO COM CAIXA DEITADA (24x15x14) ---
-    const pesoTotal = (quantidade || 1) * 0.7;
+    // --- 3. CÁLCULO MELHOR ENVIO ---
+    const pesoTotal = (parseInt(quantidade) || 1) * 0.7;
     const payload = {
       "from": { "postal_code": "77809270" },
       "to": { "postal_code": cep_destino },
       "products": [{
         "id": "perfumes-nuvem",
-        "width": 15,   // largura
-        "height": 14,  // altura
-        "length": 24,  // comprimento (deitado)
+        "width": 15, "height": 14, "length": 24,
         "weight": pesoTotal,
         "insurance_value": valor_total || 100,
         "quantity": 1
@@ -47,7 +54,7 @@ export default async function handler(req, res) {
     });
 
     const data = await response.json();
-    return res.status(200).json(data);
+    return res.status(200).json(Array.isArray(data) ? data : []);
 
   } catch (error) {
     return res.status(500).json({ error: "Erro interno", mensagem: error.message });
