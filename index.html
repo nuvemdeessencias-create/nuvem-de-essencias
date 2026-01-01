@@ -556,41 +556,54 @@ function filtrar() {
     });
 }
 
-// 3. Função de Frete para Vercel (Pasta /api)
 async function calcularFrete() {
-    const cep = document.getElementById('cep-cliente').value;
+    const cepInput = document.getElementById('cep-cliente').value;
+    const cep = cepInput.replace(/\D/g, ''); // Remove traços
     const resultado = document.getElementById('opcoes-frete');
+    
+    // Pega a quantidade total de itens na sacola para o cálculo de peso
+    const qtdTotal = sacola.reduce((acc, item) => acc + item.qtd, 0);
+    const valorTotal = sacola.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
 
     if (cep.length !== 8) {
         alert("Digite um CEP válido com 8 números.");
         return;
     }
 
-    resultado.innerHTML = "Consultando Correios...";
+    resultado.innerHTML = "Calculando frete...";
 
     try {
-        // Chamada para sua pasta /api na Vercel
-        const response = await fetch(`/api/calcular-frete?cep=${cep}`);
+        const response = await fetch('/api/calcular-frete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                cep_destino: cep,
+                quantidade: qtdTotal || 1,
+                valor_total: valorTotal
+            })
+        });
+
         const dados = await response.json();
 
         if (dados.error) {
-            resultado.innerHTML = "CEP não encontrado.";
-        } else {
-            // Ajuste conforme o que sua API retorna
-            resultado.innerHTML = `
-                <div style="background:#f9f9f9; padding:10px; border-radius:5px; margin-top:10px;">
-                    <p style="margin:5px 0;"><strong>Valor:</strong> R$ ${dados.valor}</p>
-                    <p style="margin:5px 0;"><strong>Prazo:</strong> ${dados.prazo} dias úteis</p>
-                </div>
-            `;
+            resultado.innerHTML = "Erro ao calcular.";
+            return;
         }
+
+        // Renderiza as opções retornadas pela sua API
+        resultado.innerHTML = dados.map(opcao => `
+            <div style="border: 1px solid #ddd; padding: 8px; margin-bottom: 5px; border-radius: 4px;">
+                <strong>${opcao.name}</strong><br>
+                Valor: R$ ${opcao.price.toFixed(2).replace('.', ',')}<br>
+                Prazo: ${opcao.delivery_time} dias úteis
+            </div>
+        `).join('');
+
     } catch (error) {
-        console.error("Erro na API:", error);
-        resultado.innerHTML = "Erro ao calcular frete.";
+        console.error("Erro frete:", error);
+        resultado.innerHTML = "Erro na conexão com o frete.";
     }
 }
-// --- FIM DO BLOCO ---
-</script>
     
 </script>
     
@@ -639,6 +652,7 @@ async function calcularFrete() {
     </div>
 </footer></body>
 </html>
+
 
 
 
