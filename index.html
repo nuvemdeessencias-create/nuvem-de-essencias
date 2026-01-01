@@ -415,13 +415,19 @@ function abrirDetalhes(p) {
     const modal = document.getElementById('modal-detalhes');
     if (!modal) return;
 
+    // Preenche as informações do modal com os dados do produtos.js
     document.getElementById('detalhe-img').src = p.imagem;
     document.getElementById('detalhe-nome').innerText = p.nome;
     document.getElementById('detalhe-marca').innerText = p.marca;
-    document.getElementById('detalhe-descricao').innerText = p.descricao || "Descrição detalhada em breve.";
     
+    // Aqui garantimos que a descrição seja exibida
+    document.getElementById('detalhe-descricao').innerText = p.descricao || "Descrição indisponível.";
+    
+    // Configura o botão de compra direta dentro do modal
     const btnWhatsModal = document.getElementById('detalhe-btn-whats');
-    btnWhatsModal.onclick = () => comprarAgora(p.nome, `ml-${p.id}`);
+    if(btnWhatsModal) {
+        btnWhatsModal.onclick = () => comprarAgora(p.nome, `ml-${p.id}`);
+    }
     
     modal.style.display = 'flex';
 }
@@ -633,6 +639,7 @@ async function calcularFrete() {
     </div>
 </footer></body>
 </html>
+
 
 
 
