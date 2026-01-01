@@ -439,7 +439,7 @@ function atualizarSacola() {
     if(countCont) countCont.innerText = sacola.length;
 }
 
-// Cálculo de Frete
+// Função para calcular o frete com as novas regras
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
     const resultadoDiv = document.getElementById('opcoes-frete');
@@ -447,7 +447,7 @@ async function calcularFrete() {
     if (sacola.length === 0) return alert("Adicione produtos primeiro.");
     if (cep.length !== 8) return alert("CEP inválido.");
 
-    resultadoDiv.innerHTML = "<p style='font-size:12px; color:#666;'>Calculando...</p>";
+    resultadoDiv.innerHTML = "<p style='font-size:12px; color:#666;'>Calculando frete...</p>";
 
     try {
         const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
@@ -458,24 +458,62 @@ async function calcularFrete() {
         });
 
         const opcoes = await response.json();
-        const validas = opcoes.filter(op => op.custom || (op.price !== undefined));
+        
+        // Filtra opções válidas
+        let validas = opcoes.filter(op => op.custom || (op.price !== undefined));
 
-        resultadoDiv.innerHTML = validas.map(op => {
+        // REGRA: Se o valor for >= 700, força apenas Frete Grátis
+        if (subtotal >= 700) {
+            validas = [{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "Consulte" }];
+        }
+
+        resultadoDiv.innerHTML = validas.map((op, index) => {
             const preco = parseFloat(op.price) || 0;
             const precoTxt = preco === 0 ? "GRÁTIS" : preco.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
-            return `<div onclick="selecionarFrete('${op.name}', ${preco})" style="display:flex; justify-content:space-between; padding:10px; border:1px solid #eee; margin-top:5px; cursor:pointer; background:white; color:#333; border-radius:5px;">
-                <span>${op.name}</span><strong>${precoTxt}</strong>
+            
+            // Geramos um ID único para cada opção para facilitar a seleção visual
+            return `
+            <div id="frete-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${preco}, 'frete-op-${index}')" 
+                 style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px; transition: 0.3s;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="radio-fake" style="width: 18px; height: 18px; border: 2px solid #b89356; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <div class="radio-inner" style="width: 10px; height: 10px; background: transparent; border-radius: 50%;"></div>
+                    </div>
+                    <div style="text-align:left;">
+                        <strong style="font-size:13px;">${op.name}</strong><br>
+                        <small style="color:#888;">${op.delivery_time ? op.delivery_time + ' dias' : ''}</small>
+                    </div>
+                </div>
+                <strong style="color:#b89356;">${precoTxt}</strong>
             </div>`;
         }).join('');
     } catch (e) {
-        resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular.</p>";
+        resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular. Verifique sua conexão.</p>";
     }
 }
 
-function selecionarFrete(nome, valor) {
+// Função para selecionar o frete com feedback visual e soma no total
+function selecionarFreteVisual(nome, valor, elementId) {
+    // 1. Atualiza variáveis globais
     valorFreteGlobal = valor;
     nomeFreteGlobal = nome;
-    alert("Selecionado: " + nome);
+
+    // 2. Reseta visual de todos os cards de frete
+    document.querySelectorAll('.opcao-frete-card').forEach(card => {
+        card.style.borderColor = '#eee';
+        card.style.backgroundColor = 'white';
+        card.querySelector('.radio-inner').style.background = 'transparent';
+    });
+
+    // 3. Destaca o selecionado
+    const selecionado = document.getElementById(elementId);
+    if (selecionado) {
+        selecionado.style.borderColor = '#b89356';
+        selecionado.style.backgroundColor = '#fdfaf4';
+        selecionado.querySelector('.radio-inner').style.background = '#b89356';
+    }
+
+    // 4. Atualiza a sacola para somar o valor no Total
     atualizarSacola();
 }
 
@@ -571,4 +609,5 @@ function filtrarCategoria(cat, el) {
         </div>
     </div>
 </footer>
+
 
