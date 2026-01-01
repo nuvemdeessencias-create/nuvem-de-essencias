@@ -5,14 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuvem De Essências | Catálogo Oficial</title>
     <style>
-       /* 1. CONFIGURAÇÕES GERAIS E CORES */
+/* 1. CONFIGURAÇÕES GERAIS E CORES */
 :root {
     --azul-fundo: #020b1f; 
     --azul-card: #ffffff; 
     --dourado: #b89356;
     --texto-escuro: #333333;
     --verde-whats: #25d366;
-    --cinza-botao: #333333;
+    --cinza-botao: #000000; /* ALTERADO: De #333333 para #000000 (Preto) */
+}
+
+/* Certifique-se que o botão está usando essa variável */
+.btn-add-sacola {
+    background-color: var(--cinza-botao) !important;
+    color: #ffffff !important; /* Garante que o nome fique branco */
+    cursor: pointer;
 }
 
 body { 
@@ -292,6 +299,9 @@ header {
             <optgroup label="CASA">
                 <option value="VELAS AROMATICAS">VELAS AROMÁTICAS</option>
             </optgroup>
+             <optgroup label="MAQUIAGEM">
+                <option value="BATONS">BATONS</option>
+            </optgroup>
         </select>
         <input type="text" id="buscaInput" onkeyup="filtrar()" placeholder="PESQUISAR...">
     </div>
@@ -302,6 +312,7 @@ header {
         <button class="btn-categoria" onclick="filtrarCategoria('arabe', this)">PERFUMES ÁRABES</button>
         <button class="btn-categoria" onclick="filtrarCategoria('casa', this)">CASA & VELAS</button>
         <button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
+         <button class="btn-categoria" onclick="filtrarCategoria('maquiagem', this)">MAQUIAGEM</button>
     </div>
 </div>
 
@@ -499,6 +510,82 @@ function comprarAgora(nome, mlId) {
     const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${precoFormatado}. Está disponível?`;
     window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
 }
+
+// 1. Função para filtrar por Categoria (Abas: Alta Perfumaria, Árabes, etc)
+function filtrarCategoria(categoria, elemento) {
+    // Atualiza visual dos botões
+    const botoes = document.querySelectorAll('.btn-categoria');
+    botoes.forEach(btn => btn.classList.remove('active'));
+    if (elemento) elemento.classList.add('active');
+
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const secaoProduto = card.getAttribute('data-secao');
+        if (categoria === 'todos' || secaoProduto === categoria) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+// 2. Função para filtrar por Marca (Select) e Pesquisa (Input)
+function filtrar() {
+    const marcaSelecionada = document.getElementById('filtroMarca').value.toUpperCase();
+    const termoPesquisa = document.getElementById('buscaInput').value.toUpperCase();
+    const cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+        const marcaProduto = card.getAttribute('data-marca');
+        const nomeProduto = card.querySelector('.nome-perfume').innerText.toUpperCase();
+
+        const bateMarca = (marcaSelecionada === 'TODOS' || marcaProduto === marcaSelecionada);
+        const batePesquisa = nomeProduto.includes(termoPesquisa);
+
+        if (bateMarca && batePesquisa) {
+            card.style.display = "block";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+// 3. Função de Frete para Vercel (Pasta /api)
+async function calcularFrete() {
+    const cep = document.getElementById('cep-cliente').value;
+    const resultado = document.getElementById('opcoes-frete');
+
+    if (cep.length !== 8) {
+        alert("Digite um CEP válido com 8 números.");
+        return;
+    }
+
+    resultado.innerHTML = "Consultando Correios...";
+
+    try {
+        // Chamada para sua pasta /api na Vercel
+        const response = await fetch(`/api/calcular-frete?cep=${cep}`);
+        const dados = await response.json();
+
+        if (dados.error) {
+            resultado.innerHTML = "CEP não encontrado.";
+        } else {
+            // Ajuste conforme o que sua API retorna
+            resultado.innerHTML = `
+                <div style="background:#f9f9f9; padding:10px; border-radius:5px; margin-top:10px;">
+                    <p style="margin:5px 0;"><strong>Valor:</strong> R$ ${dados.valor}</p>
+                    <p style="margin:5px 0;"><strong>Prazo:</strong> ${dados.prazo} dias úteis</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error("Erro na API:", error);
+        resultado.innerHTML = "Erro ao calcular frete.";
+    }
+}
+// --- FIM DO BLOCO ---
+</script>
+    
 </script>
     
    <script>
@@ -546,6 +633,7 @@ function comprarAgora(nome, mlId) {
     </div>
 </footer></body>
 </html>
+
 
 
 
