@@ -310,300 +310,195 @@ header {
 
 <script src="produtos.js"></script>
 <script>
-    // Função principal para renderizar os produtos
     function carregarProdutos() {
-        const container = document.getElementById('listaProdutos');
-        if (!container) return;
-        
-        container.innerHTML = ""; // Limpa o container antes de carregar
+    const container = document.getElementById('listaProdutos');
+    if (!container || typeof meusProdutos === 'undefined') return;
+    
+    container.innerHTML = ""; 
 
-        if (typeof meusProdutos !== 'undefined') {
-            meusProdutos.forEach(p => {
-                const card = document.createElement('div');
-                card.className = 'card';
-                card.setAttribute('data-marca', p.marca.toUpperCase());
-                card.setAttribute('data-secao', p.secao);
+    meusProdutos.forEach(p => {
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.setAttribute('data-marca', p.marca.toUpperCase());
+        card.setAttribute('data-secao', p.secao);
 
-                // Lógica para botões de compra ou esgotado
-                const btnWhats = p.disponivel 
-                    ? `<button onclick="comprarAgora('${p.nome}', 'ml-${p.id}')" class="btn-whats">COMPRAR AGORA</button>`
-                    : `<button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>`;
+        card.innerHTML = `
+            <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" class="img-clicavel">
+            <div class="info">
+                <span class="marca-tag">${p.marca}</span>
+                <div class="nome-perfume">${p.nome}</div>
+                <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'PRODUTO INDISPONÍVEL'}</div>
                 
-                const btnCart = p.disponivel 
-                    ? `<button onclick="addCart('${p.nome}', 'ml-${p.id}', 'q-${p.id}')" class="btn-add-cart">+ Adicionar à Sacola</button>`
-                    : "";
+                <div class="qtd-container" ${p.disponivel ? "" : "style='opacity: 0.5; pointer-events: none;'"}>
+                    <button class="btn-menos">-</button>
+                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
+                    <button class="btn-mais">+</button>
+                </div>
 
-                card.innerHTML = `
-                    <img src="${p.imagem}" alt="${p.nome}">
-                    <div class="info">
-                        <span class="marca-tag">${p.marca}</span>
-                        <div class="nome-perfume">${p.nome}</div>
-                        <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'PRODUTO INDISPONÍVEL'}</div>
-                        
-                        <div class="qtd-container" ${p.disponivel ? "" : "style='opacity: 0.5; pointer-events: none;'"}>
-                            <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                            <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
-                            <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
-                        </div>
+                <select class="seletor-ml" id="ml-${p.id}" ${p.disponivel ? "" : "disabled"}>
+                    ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
+                </select>
+                
+                <button class="btn-detalhes" ${!p.disponivel ? 'disabled style="background:#ccc;"' : ''}>
+                    ${p.disponivel ? 'VER DETALHES / COMPRAR' : 'ESGOTADO'}
+                </button>
+                ${p.disponivel ? `<button class="btn-add-sacola">+ Adicionar à Sacola</button>` : ''}
+            </div>
+        `;
 
-                        <select class="seletor-ml" id="ml-${p.id}" ${p.disponivel ? "" : "disabled"}>
-                            ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
-                        </select>
-                        
-                        ${btnWhats}
-                        ${btnCart}
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-    }
+        // --- LÓGICA DE EVENTOS (SEM BUGS) ---
+        const img = card.querySelector('.img-clicavel');
+        const btnD = card.querySelector('.btn-detalhes');
+        const btnS = card.querySelector('.btn-add-sacola');
+        const bMais = card.querySelector('.btn-mais');
+        const bMenos = card.querySelector('.btn-menos');
 
-    // Garante que os produtos carreguem assim que o script e o HTML estiverem prontos
-    window.addEventListener('DOMContentLoaded', carregarProdutos);
-</script>
+        // Abrir Modal de Detalhes (Na imagem e no botão principal)
+        const acaoAbrir = () => abrirDetalhes(p);
+        img.onclick = acaoAbrir;
+        btnD.onclick = acaoAbrir;
 
-   <script>
-    // 1. Atualiza o ano no rodapé
-    if(document.getElementById("ano-real")) {
-        document.getElementById("ano-real").textContent = new Date().getFullYear();
-    }
+        // Adicionar à Sacola
+        if(btnS) btnS.onclick = () => addCart(p.nome, `ml-${p.id}`, `q-${p.id}`);
 
-    // 2. Variáveis Globais
-    let sacola = []; 
-    let valorFreteGlobal = 0;
-    let categoriaAtual = 'todos';
+        // Controle de Quantidade
+        if(bMais) bMais.onclick = () => alterarQtd(`q-${p.id}`, 1, p.estoque);
+        if(bMenos) bMenos.onclick = () => alterarQtd(`q-${p.id}`, -1, p.estoque);
 
-    // 3. Funções de Interface
-    function toggleCart() { 
-        document.getElementById('cart-modal').classList.toggle('active'); 
-    }
-
-    function alterarQtd(id, val, max) {
-        let input = document.getElementById(id);
-        let n = parseInt(input.value) + val;
-        if (n >= 1 && n <= max) input.value = n;
-    }
-
-    // No topo do seu script, certifique-se de que essa variável existe:
-let categoriaAtual = 'todos'; 
-
-// No topo do seu script, certifique-se de que essa variável existe:
-let categoriaAtual = 'todos'; 
-
-function filtrar() {
-    // Pegamos o que foi digitado e a marca selecionada
-    let busca = document.getElementById('buscaInput').value.toLowerCase();
-    let marcaSel = document.getElementById('filtroMarca').value.toUpperCase(); // Forçamos maiúsculas
-    let cards = document.querySelectorAll('.card');
-
-    cards.forEach(card => {
-        let nome = card.querySelector('.nome-perfume').innerText.toLowerCase();
-        let marca = card.getAttribute('data-marca').toUpperCase(); // Pegamos a marca do card em maiúsculas
-        let secao = card.getAttribute('data-secao');
-
-        // Lógica de comparação
-        let bateuBusca = nome.includes(busca);
-        let bateuMarca = (marcaSel === 'TODOS' || marca === marcaSel);
-        let bateuCategoria = (categoriaAtual === 'todos' || secao === categoriaAtual);
-
-        // Se passar em todos os filtros, mostra. Se não, esconde.
-        if (bateuBusca && bateuMarca && bateuCategoria) {
-            card.style.display = "block"; 
-        } else {
-            card.style.display = "none";
-        }
+        container.appendChild(card);
     });
 }
+</script>
+ <script>
+    // 1. Variáveis Globais
+let sacola = []; 
+let valorFreteGlobal = 0;
+let nomeFreteGlobal = "";
+let categoriaAtual = 'todos';
 
-function filtrarCategoria(cat, btn) {
-    categoriaAtual = cat;
-    // Estética dos botões
-    document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    
-    // Chama a função de busca para atualizar a tela
-    filtrar();
+// 2. Funções de Interface
+function toggleCart() { 
+    document.getElementById('cart-modal').classList.toggle('active'); 
 }
-    // 5. Gestão da Sacola (Nomes dos Produtos)
-    function addCart(nome, mlId, qtdId) {
-        const selectMl = document.getElementById(mlId);
-        const qtdInput = document.getElementById(qtdId);
-        if (!selectMl || !qtdInput) return;
-        
-        const [ml, preco] = selectMl.value.split('|');
-        const precoNum = parseFloat(preco);
-        const qtd = parseInt(qtdInput.value);
 
-        if (precoNum > 0) {
-            sacola.push({ nome, ml, preco: precoNum, qtd });
-            atualizarSacola();
-            if (!document.getElementById('cart-modal').classList.contains('active')) toggleCart();
-        }
-    }
+function fecharDetalhes() {
+    document.getElementById('modal-detalhes').style.display = 'none';
+}
 
-    function removerItem(index) {
-        sacola.splice(index, 1);
-        valorFreteGlobal = 0; 
-        document.getElementById('opcoes-frete').innerHTML = "";
+// 3. Abrir Detalhes (Puxando da pasta de produtos definida no produtos.js)
+function abrirDetalhes(p) {
+    const modal = document.getElementById('modal-detalhes');
+    if (!modal) return;
+
+    document.getElementById('detalhe-img').src = p.imagem; // O caminho já vem como 'img/nome.jpg'
+    document.getElementById('detalhe-nome').innerText = p.nome;
+    document.getElementById('detalhe-marca').innerText = p.marca;
+    document.getElementById('detalhe-descricao').innerText = p.descricao || "Descrição detalhada em breve.";
+    
+    const btnWhatsModal = document.getElementById('detalhe-btn-whats');
+    // Aqui usamos o ID do seletor que está lá no card do produto
+    btnWhatsModal.onclick = () => comprarAgora(p.nome, `ml-${p.id}`);
+    
+    modal.style.display = 'flex';
+}
+
+// 4. Gestão da Sacola
+function addCart(nome, mlId, qtdId) {
+    const selectMl = document.getElementById(mlId);
+    const qtdInput = document.getElementById(qtdId);
+    if (!selectMl || !qtdInput) return;
+    
+    const [ml, preco] = selectMl.value.split('|');
+    const precoNum = parseFloat(preco);
+    const qtd = parseInt(qtdInput.value);
+
+    if (precoNum > 0) {
+        sacola.push({ nome, ml, preco: precoNum, qtd });
         atualizarSacola();
-    }
-
-    function atualizarSacola() {
-        const itensCont = document.getElementById('cart-items');
-        const totalCont = document.getElementById('cart-total');
-        const countCont = document.getElementById('cart-count');
-        let totalProdutos = 0;
-        
-        if (sacola.length === 0) {
-            itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
-        } else {
-            itensCont.innerHTML = sacola.map((item, index) => {
-                const sub = item.preco * item.qtd;
-                totalProdutos += sub;
-                return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
-                            <div style="text-align:left;">
-                                <b style="font-size:13px;">${item.nome}</b><br>
-                                <small>${item.ml} | Qtd: ${item.qtd}</small>
-                            </div>
-                            <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px;">&times;</button>
-                        </div>`;
-            }).join('');
-        }
-        const totalGeral = totalProdutos + valorFreteGlobal;
-        totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
-        countCont.innerText = sacola.length;
-    }
-
-    // 6. WhatsApp (Finalizar Sacola Completa)
-    function finalizarWhatsApp() {
-        if (sacola.length === 0) return alert("Sacola vazia!");
-        let msg = "Olá! Gostaria de encomendar os seguintes perfumes:\n\n";
-        sacola.forEach((item, i) => {
-            msg += `*${i+1}. ${item.nome}* (${item.ml}) - Qtd: ${item.qtd}\n`;
-        });
-        if (valorFreteGlobal > 0) msg += `\n*Frete:* R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')}`;
-        msg += `\n*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
-        window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-    // 7. COMPRA RÁPIDA (Botão de comprar direto no perfume) - CORRIGIDO
-    function comprarAgora(nome, mlId) {
-        const selectMl = document.getElementById(mlId);
-        if (!selectMl) return;
-        const [ml, preco] = selectMl.value.split('|');
-        const precoFormatado = preco.replace('.', ',');
-        const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${precoFormatado}. Está disponível?`;
-        window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
-    }
-
-   // --- LÓGICA DE FRETE COM REGRA DE R$ 700 E PRAZO ---
-
-async function calcularFrete() {
-    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    const div = document.getElementById('opcoes-frete');
-    
-    // Calculando o subtotal atual da sacola
-    let subtotal = sacola.reduce((acc, item) => acc + item.preco, 0);
-
-    if (cep.length !== 8) return alert("CEP Inválido");
-    
-    div.innerHTML = "Calculando...";
-
-    try {
-        const response = await fetch('/.netlify/functions/calcular-frete', {
-            method: 'POST',
-            body: JSON.stringify({ cep_destino: cep })
-        });
-        const data = await response.json();
-
-        // REGRA: Se o valor for maior que 700, forçamos o frete grátis na lista
-        if (subtotal >= 700) {
-            div.innerHTML = `
-                <div style="background:#e7f3ef; padding:10px; margin-top:5px; border:1px solid #25d366; border-radius:5px; color:#155724; cursor:pointer;" 
-                     onclick="aplicarFrete(0, 'FRETE GRÁTIS')">
-                    <strong>FRETE GRÁTIS (Promoção)</strong><br>
-                    <small>Prazo: 6 a 13 dias úteis</small>
-                </div>`;
-        } else {
-            // Caso contrário, mostra os fretes calculados com o prazo de 6 a 13 dias
-            div.innerHTML = data.map(op => `
-                <div style="background:#fff; padding:10px; margin-top:5px; border:1px solid #ddd; cursor:pointer; border-radius:5px; color:#333;" 
-                     onclick="aplicarFrete(${op.price}, '${op.name}')">
-                    ${op.name}: <b>R$ ${parseFloat(op.price).toFixed(2).replace('.', ',')}</b><br>
-                    <small>Prazo: 6 a 13 dias úteis</small>
-                </div>
-            `).join('');
-        }
-    } catch (e) { 
-        div.innerHTML = "Erro ao calcular. Tente novamente."; 
+        if (!document.getElementById('cart-modal').classList.contains('active')) toggleCart();
     }
 }
 
-function aplicarFrete(valor, nome) {
-    valorFreteGlobal = parseFloat(valor);
-    nomeFreteGlobal = nome; // Guardamos o nome do frete para o WhatsApp
+function removerItem(index) {
+    sacola.splice(index, 1);
+    valorFreteGlobal = 0; 
+    document.getElementById('opcoes-frete').innerHTML = "";
     atualizarSacola();
 }
 
+// 5. Atualização da Sacola com Regra de Frete Grátis (R$ 700)
 function atualizarSacola() {
-    const cont = document.getElementById('cart-items');
+    const itensCont = document.getElementById('cart-items');
+    const totalCont = document.getElementById('cart-total');
+    const countCont = document.getElementById('cart-count');
     let subtotal = 0;
     
-    cont.innerHTML = sacola.length === 0 ? '<p style="text-align:center; color:#999;">Sacola vazia</p>' : 
-        sacola.map(item => {
-            subtotal += item.preco;
-            return `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:13px; color:#333;">
-                <span>${item.nome}</span>
-                <b>R$ ${item.preco.toFixed(2).replace('.', ',')}</b>
-            </div>`;
+    if (sacola.length === 0) {
+        itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
+    } else {
+        itensCont.innerHTML = sacola.map((item, index) => {
+            const sub = item.preco * item.qtd;
+            subtotal += sub;
+            return `
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
+                    <div style="text-align:left;">
+                        <b style="font-size:13px;">${item.nome}</b><br>
+                        <small>${item.ml} | Qtd: ${item.qtd}</small>
+                    </div>
+                    <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px; cursor:pointer;">&times;</button>
+                </div>`;
         }).join('');
+    }
 
-    // Se o subtotal atingir 700 e houver frete selecionado, avisamos
-    if (subtotal >= 700 && valorFreteGlobal > 0) {
+    // Regra de Frete Automático na Sacola
+    if (subtotal >= 700) {
         valorFreteGlobal = 0;
         nomeFreteGlobal = "FRETE GRÁTIS";
     }
 
-    const totalFinal = subtotal + valorFreteGlobal;
-    document.getElementById('cart-total').innerText = totalFinal.toFixed(2).replace('.', ',');
-    document.getElementById('cart-count').innerText = sacola.length;
+    const totalGeral = subtotal + valorFreteGlobal;
+    totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
+    countCont.innerText = sacola.length;
 }
 
-// ATUALIZE TAMBÉM O WHATSAPP PARA INCLUIR O PRAZO
+// 6. WhatsApp Final (Sacola)
 function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
-    let texto = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
-    sacola.forEach(item => texto += `- ${item.nome} (R$ ${item.preco.toFixed(2).replace('.', ',')})\n`);
+    let subtotal = sacola.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
     
-    if (valorFreteGlobal === 0 && sacola.reduce((acc, i) => acc + i.preco, 0) >= 600) {
+    let texto = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
+    sacola.forEach((item, i) => {
+        texto += `*${i+1}. ${item.nome}* (${item.ml}) - Qtd: ${item.qtd}\n`;
+    });
+    
+    if (subtotal >= 700) {
         texto += `\nFrete: *GRÁTIS* (Prazo: 6 a 13 dias úteis)`;
     } else if (valorFreteGlobal > 0) {
         texto += `\nFrete: ${nomeFreteGlobal} (R$ ${valorFreteGlobal.toFixed(2).replace('.', ',')})\nPrazo: 6 a 13 dias úteis`;
     }
     
     texto += `\n\n*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
-    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`);
+    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
-       <div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:3000; align-items:center; justify-content:center; padding: 20px;">
-    <div style="background:white; width:100%; max-width:800px; border-radius:15px; overflow:hidden; position:relative; display:flex; flex-wrap:wrap; max-height: 90vh;">
-        <span style="position:absolute; top:10px; right:15px; font-size:30px; cursor:pointer; color:#333; z-index:10;" onclick="fecharDetalhes()">×</span>
-        
-        <div style="flex:1; min-width:300px; background:#f9f9f9; display:flex; align-items:center; justify-content:center; padding:20px;">
-            <img id="detalhe-img" src="" style="max-width:100%; max-height:350px; object-fit:contain;">
-        </div>
+// 7. Compra Direta (Botão Comprar Agora)
+function comprarAgora(nome, mlId) {
+    const selectMl = document.getElementById(mlId);
+    if (!selectMl) return;
+    const [ml, preco] = selectMl.value.split('|');
+    const precoFormatado = preco.replace('.', ',');
+    const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${precoFormatado}. Está disponível?`;
+    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
+}
+ <script>
+    
+   <script>
+    // 1. Atualiza o ano no rodapé
+    if(document.getElementById("ano-real")) {
+        document.getElementById("ano-real").textContent = new Date().getFullYear();
+    }
 
-        <div style="flex:1; min-width:300px; padding:30px; color:#333; overflow-y:auto;">
-            <h2 id="detalhe-nome" style="margin-top:0; color:#020b1f; font-family:'Playfair Display', serif;"></h2>
-            <span id="detalhe-marca" style="color:#b89356; font-weight:bold; font-size:12px; text-transform:uppercase;"></span>
-            <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-            <p id="detalhe-descricao" style="line-height:1.6; color:#666; font-size:14px; margin-bottom:20px;"></p>
-            <button id="detalhe-btn-whats" class="btn-whats">PEDIR VIA WHATSAPP</button>
-        </div>
-    </div>
-</div>
-       
+        
 </script>
 <footer class="rodape-premium">
     <div class="container">
@@ -642,6 +537,7 @@ function finalizarWhatsApp() {
     </div>
 </footer></body>
 </html>
+
 
 
 
