@@ -53,28 +53,26 @@ header {
 
 #cart-count { background: white; color: var(--azul-fundo); padding: 2px 6px; border-radius: 50%; font-size: 11px; }
 
-/* Garante que a sacola apareça quando estiver ativa */
-.cart-modal.active {
-    right: 0;
-}
-
-/* Botão "+ Adicionar à Sacola" nos Cards */
-.btn-add-sacola {
-    background-color: #000000 !important;
-    color: #ffffff !important;
-    border: none;
-    padding: 10px;
+/* 3. ESTRUTURA DA SACOLA (MODAL) */
+.cart-modal {
+    position: fixed;
+    top: 0;
+    right: -100%;
     width: 100%;
-    border-radius: 5px;
-    cursor: pointer;
-    font-weight: bold;
-    margin-top: 5px;
-    transition: 0.3s;
+    max-width: 380px;
+    height: 100vh;
+    background: white;
+    z-index: 2000;
+    transition: 0.4s;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.5);
 }
 
-.btn-add-sacola:hover {
-    background-color: #333333 !important;
-}
+.cart-modal.active { right: 0; }
+
 #cart-scroll-area {
     flex: 1;
     overflow-y: auto;
@@ -101,6 +99,7 @@ header {
     flex-shrink: 0;
     z-index: 10;
 }
+
 
 /* 4. RODAPÉ PREMIUM (FONTES E ESTILO) */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap');
@@ -547,6 +546,7 @@ function comprarAgora(nome, mlId) {
     </div>
 </footer></body>
 </html>
+
 
 
 
