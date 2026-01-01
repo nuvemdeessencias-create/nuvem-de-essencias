@@ -557,56 +557,78 @@ function filtrar() {
 }
 
 async function calcularFrete() {
-    const cepInput = document.getElementById('cep-cliente').value;
-    const cep = cepInput.replace(/\D/g, ''); // Remove traços
-    const resultado = document.getElementById('opcoes-frete');
+    // Corrigido para o ID que está no seu HTML (cep-cliente)
+    const cepInput = document.getElementById('cep-cliente');
+    const cep = cepInput ? cepInput.value.replace(/\D/g, '') : '';
+    const resultadoDiv = document.getElementById('opcoes-frete');
     
-    // Pega a quantidade total de itens na sacola para o cálculo de peso
-    const qtdTotal = sacola.reduce((acc, item) => acc + item.qtd, 0);
-    const valorTotal = sacola.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
-
     if (cep.length !== 8) {
-        alert("Digite um CEP válido com 8 números.");
+        alert("Por favor, digite um CEP válido com 8 dígitos.");
         return;
     }
 
-    resultado.innerHTML = "Calculando frete...";
+    resultadoDiv.innerHTML = "<p style='color:#666; font-size:12px;'>Calculando frete...</p>";
 
     try {
+        // Corrigido para usar a sua variável 'sacola'
+        const totalCarrinho = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
+        const totalItens = sacola.reduce((sum, item) => sum + item.qtd, 0);
+
         const response = await fetch('/api/calcular-frete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+            body: JSON.stringify({ 
                 cep_destino: cep,
-                quantidade: qtdTotal || 1,
-                valor_total: valorTotal
+                quantidade: totalItens,
+                valor_total: totalCarrinho 
             })
         });
 
-        const dados = await response.json();
+        const opcoes = await response.json();
 
-        if (dados.error) {
-            resultado.innerHTML = "Erro ao calcular.";
+        if (!opcoes || opcoes.length === 0 || opcoes.error) {
+            resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular. Verifique o CEP.</p>";
             return;
         }
 
-        // Renderiza as opções retornadas pela sua API
-        resultado.innerHTML = dados.map(opcao => `
-            <div style="border: 1px solid #ddd; padding: 8px; margin-bottom: 5px; border-radius: 4px;">
-                <strong>${opcao.name}</strong><br>
-                Valor: R$ ${opcao.price.toFixed(2).replace('.', ',')}<br>
-                Prazo: ${opcao.delivery_time} dias úteis
-            </div>
-        `).join('');
+        resultadoDiv.innerHTML = opcoes.map(op => {
+            const preco = op.price == 0 ? "Grátis" : `R$ ${parseFloat(op.price).toFixed(2)}`;
+            const prazo = op.delivery_time ? `${op.delivery_time} dias` : `${op.delivery_range.min}-${op.delivery_range.max} dias`;
+            
+            // Estilização para combinar com sua sacola
+            return `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid #eee; border-radius:4px; margin-top:10px; color:#333;">
+                    <span style="font-size:12px;"><strong>${op.name || op.company.name}</strong><br><small>Prazo: ${prazo}</small></span>
+                    <span style="color: #b89356; font-weight:bold;">${preco}</span>
+                </div>
+            `;
+        }).join('');
 
     } catch (error) {
         console.error("Erro frete:", error);
-        resultado.innerHTML = "Erro na conexão com o frete.";
+        resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Serviço indisponível no momento.</p>";
     }
 }
+
+    // COLE AS NOVAS FUNÇÕES LOGO ABAIXO:
+function abrirImagem(src, nome) {
+    const modal = document.getElementById('modal-imagem');
+    document.getElementById('img-expandida').src = src;
+    document.getElementById('nome-expandido').innerText = nome;
+    modal.style.display = 'flex';
+}
+
+function fecharImagem() {
+    document.getElementById('modal-imagem').style.display = 'none';
+}
+    
     
 </script>
-    
+    <div id="modal-imagem" onclick="fecharImagem()" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:9999; align-items:center; justify-content:center; cursor:pointer;">
+    <span style="position:absolute; top:20px; right:30px; color:white; font-size:40px;">&times;</span>
+    <img id="img-expandida" src="" style="max-width:90%; max-height:80%; border-radius:8px; border: 2px solid #b89356; cursor:default;" onclick="event.stopPropagation()">
+    <p id="nome-expandido" style="color:white; position:absolute; bottom:5%; font-family:serif; font-size:22px; text-shadow: 2px 2px 4px #000;"></p>
+</div>
    <script>
     // 1. Atualiza o ano no rodapé
     if(document.getElementById("ano-real")) {
@@ -652,6 +674,7 @@ async function calcularFrete() {
     </div>
 </footer></body>
 </html>
+
 
 
 
