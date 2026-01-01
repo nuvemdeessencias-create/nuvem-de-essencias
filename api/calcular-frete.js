@@ -1,72 +1,71 @@
 export default async function handler(req, res) {
-  // Configuração de CORS para permitir que o seu site acesse a api sem bloqueios
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-  // Responde rapidamente a requisições de verificação do navegador
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  if (req.method === 'OPTIONS') return res.status(200).end();
 
   const { cep_destino, quantidade, valor_total } = req.body;
   const token = process.env.MELHOR_ENVIO_TOKEN;
+  const cepLimpo = cep_destino ? cep_destino.replace(/\D/g, '') : "";
+  const valorNum = parseFloat(valor_total) || 0;
 
- try {
-    let opcoesPersonalizadas = [];
+  try {
+    let opcoesFinais = [];
 
-    // --- 1. REGRA DE FRETE GRÁTIS (Soma à lista, não para a execução) ---
-    if (parseFloat(valor_total) >= 700) {
-      opcoesPersonalizadas.push({ 
+    // 1. REGRA ARAGUAÍNA
+    if (cepLimpo.startsWith("778")) {
+      opcoesFinais.push(
+        { name: "Entrega Local (Araguaína)", price: 0, delivery_time: "1", custom: true },
+        { name: "Retirada no Local", price: 0, delivery_time: "0", custom: true }
+      );
+    }
+
+    // 2. REGRA FRETE GRÁTIS
+    if (valorNum >= 700) {
+      opcoesFinais.push({ 
         name: "Frete Grátis (Promoção)", 
         price: 0, 
-        delivery_time: "7 a 13",
+        delivery_time: "7-13", 
         custom: true 
       });
     }
 
-    // --- 2. REGRA PARA ARAGUAÍNA (Soma à lista) ---
-    const cepLimpo = cep_destino ? cep_destino.replace(/\D/g, '') : "";
-    if (cepLimpo.startsWith("778")) {
-      opcoesPersonalizadas.push(
-        { name: "Entrega em Casa (Araguaína)", price: 0, delivery_time: "Até 1 dia útil", custom: true },
-        { name: "Retirada no Local", price: 0, delivery_time: "Imediato (Combinar)", custom: true }
-      );
+    // 3. BUSCA NO MELHOR ENVIO (Sempre tenta buscar, a menos que o CEP seja inválido)
+    if (cepLimpo.length === 8) {
+      const pesoTotal = (parseInt(quantidade) || 1) * 0.7;
+      const payload = {
+        "from": { "postal_code": "77809270" },
+        "to": { "postal_code": cepLimpo },
+        "package": { "height": 15, "width": 15, "length": 15, "weight": pesoTotal },
+        "options": { "insurance_value": valorNum, "receipt": false, "own_hand": false }
+      };
+
+      const response = await fetch('https://www.melhorenvio.com.br/api/v2/me/shipment/calculate', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'User-Agent': 'Nuvem de Essencias'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          // Filtra apenas as que têm preço e junta com as personalizadas
+          const transportadoras = data.filter(op => op.price && !op.error);
+          opcoesFinais = [...opcoesFinais, ...transportadoras];
+        }
+      }
     }
 
-    // --- 3. CÁLCULO MELHOR ENVIO (Sempre executa para mostrar as outras opções) ---
-    const pesoTotal = (parseInt(quantidade) || 1) * 0.6;
-    const payload = {
-      "from": { "postal_code": "77809270" },
-      "to": { "postal_code": cepLimpo },
-      "package": { // Melhor usar 'package' para múltiplos itens
-        "width": 15, "height": 14, "length": 24, "weight": pesoTotal
-      },
-      "options": {
-        "insurance_value": parseFloat(valor_total) || 100, // SEGURO HABILITADO AQUI
-        "receipt": false,
-        "own_hand": false
-      }
-    };
-
-    const response = await fetch('https://www.melhorenvio.com.br/api/v2/me/shipment/calculate', {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`,
-        'User-Agent': 'Nuvem de Essencias (contato@nuvemdeessencias.com.br)'
-      },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await response.json();
-    
-    // Junta as opções do Melhor Envio com as suas personalizadas
-    const todasOpcoes = Array.isArray(data) ? [...opcoesPersonalizadas, ...data] : opcoesPersonalizadas;
-    
-    return res.status(200).json(todasOpcoes);
+    return res.status(200).json(opcoesFinais);
 
   } catch (error) {
-    return res.status(500).json({ error: "Erro interno", mensagem: error.message });
+    console.error("Erro na API:", error);
+    return res.status(500).json({ error: "Erro ao calcular", details: error.message });
   }
+}
