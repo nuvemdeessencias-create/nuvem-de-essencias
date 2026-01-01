@@ -439,7 +439,6 @@ function atualizarSacola() {
     if(countCont) countCont.innerText = sacola.length;
 }
 
-// Função para calcular o frete com as novas regras
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
     const resultadoDiv = document.getElementById('opcoes-frete');
@@ -449,29 +448,40 @@ async function calcularFrete() {
 
     resultadoDiv.innerHTML = "<p style='font-size:12px; color:#666;'>Calculando frete...</p>";
 
+    // Faixa de CEPs de Araguaína (Iniciam com 778)
+    const ehAraguaina = cep.startsWith('778');
+
     try {
         const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
-        const response = await fetch('/api/calcular-frete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cep_destino: cep, valor_total: subtotal, quantidade: sacola.length })
-        });
-
-        const opcoes = await response.json();
         
-        // Filtra opções válidas
-        let validas = opcoes.filter(op => op.custom || (op.price !== undefined));
+        let validas = [];
 
-        // REGRA: Se o valor for >= 700, força apenas Frete Grátis
-        if (subtotal >= 700) {
-            validas = [{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "Consulte" }];
+        if (ehAraguaina) {
+            // Se for Araguaína, define APENAS as opções locais e ignora o resto
+            validas = [
+                { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "Até 1 dia útil" },
+                { name: "Retirada no Local", price: 0, delivery_time: "Imediato" }
+            ];
+        } else {
+            // Se NÃO for Araguaína, busca nos correios/melhor envio
+            const response = await fetch('/api/calcular-frete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cep_destino: cep, valor_total: subtotal, quantidade: sacola.length })
+            });
+            const opcoes = await response.json();
+            validas = opcoes.filter(op => op.custom || (op.price !== undefined));
+
+            // REGRA: Se o valor for >= 700 e NÃO for Araguaína, força apenas Frete Grátis
+            if (subtotal >= 700) {
+                validas = [{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "Consulte" }];
+            }
         }
 
         resultadoDiv.innerHTML = validas.map((op, index) => {
             const preco = parseFloat(op.price) || 0;
             const precoTxt = preco === 0 ? "GRÁTIS" : preco.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
             
-            // Geramos um ID único para cada opção para facilitar a seleção visual
             return `
             <div id="frete-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${preco}, 'frete-op-${index}')" 
                  style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px; transition: 0.3s;">
@@ -481,17 +491,17 @@ async function calcularFrete() {
                     </div>
                     <div style="text-align:left;">
                         <strong style="font-size:13px;">${op.name}</strong><br>
-                        <small style="color:#888;">${op.delivery_time ? op.delivery_time + ' dias' : ''}</small>
+                        <small style="color:#888;">${op.delivery_time}</small>
                     </div>
                 </div>
                 <strong style="color:#b89356;">${precoTxt}</strong>
             </div>`;
         }).join('');
+
     } catch (e) {
-        resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular. Verifique sua conexão.</p>";
+        resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular frete.</p>";
     }
 }
-
 // Função para selecionar o frete com feedback visual e soma no total
 function selecionarFreteVisual(nome, valor, elementId) {
     // 1. Atualiza variáveis globais
@@ -609,5 +619,6 @@ function filtrarCategoria(cat, el) {
         </div>
     </div>
 </footer>
+
 
 
