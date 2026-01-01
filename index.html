@@ -304,12 +304,29 @@ header {
     </div>
 </div>
 
-<div class="container" id="listaProdutos">
+<div class="container" id="listaProdutos"></div>
 
 <script src="produtos.js"></script>
-<script src="js/script.js"></script>    
+
 <script>
-    function carregarProdutos() {
+// 1. Variáveis Globais
+let sacola = []; 
+let valorFreteGlobal = 0;
+let nomeFreteGlobal = "";
+let categoriaAtual = 'todos';
+
+// 2. COMANDO DE INICIALIZAÇÃO (O que faltava para os produtos aparecerem)
+window.onload = function() {
+    console.log("Página carregada, iniciando vitrine...");
+    if (typeof meusProdutos !== 'undefined') {
+        carregarProdutos();
+    } else {
+        console.error("Erro: A variável 'meusProdutos' não foi encontrada. Verifique o arquivo produtos.js");
+    }
+};
+
+// 3. Função para renderizar os produtos
+function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
     if (!container || typeof meusProdutos === 'undefined') return;
     
@@ -341,67 +358,62 @@ header {
                 <button class="btn-detalhes" ${!p.disponivel ? 'disabled style="background:#ccc;"' : ''}>
                     ${p.disponivel ? 'VER DETALHES / COMPRAR' : 'ESGOTADO'}
                 </button>
-                ${p.disponivel ? `<button class="btn-add-sacola">+ Adicionar à Sacola</button>` : ''}
+                ${p.disponivel ? '<button class="btn-add-sacola">+ Adicionar à Sacola</button>' : ''}
             </div>
         `;
 
-        // --- LÓGICA DE EVENTOS (SEM BUGS) ---
+        // Eventos
         const img = card.querySelector('.img-clicavel');
         const btnD = card.querySelector('.btn-detalhes');
         const btnS = card.querySelector('.btn-add-sacola');
         const bMais = card.querySelector('.btn-mais');
         const bMenos = card.querySelector('.btn-menos');
 
-        // Abrir Modal de Detalhes (Na imagem e no botão principal)
-        const acaoAbrir = () => abrirDetalhes(p);
-        img.onclick = acaoAbrir;
-        btnD.onclick = acaoAbrir;
-
-        // Adicionar à Sacola
+        img.onclick = () => abrirDetalhes(p);
+        btnD.onclick = () => abrirDetalhes(p);
         if(btnS) btnS.onclick = () => addCart(p.nome, `ml-${p.id}`, `q-${p.id}`);
-
-        // Controle de Quantidade
         if(bMais) bMais.onclick = () => alterarQtd(`q-${p.id}`, 1, p.estoque);
         if(bMenos) bMenos.onclick = () => alterarQtd(`q-${p.id}`, -1, p.estoque);
 
         container.appendChild(card);
     });
 }
-</script>
- <script>
-    // 1. Variáveis Globais
-let sacola = []; 
-let valorFreteGlobal = 0;
-let nomeFreteGlobal = "";
-let categoriaAtual = 'todos';
 
-// 2. Funções de Interface
+// 4. Função auxiliar para quantidade (Faltava no seu trecho)
+function alterarQtd(id, delta, max) {
+    const input = document.getElementById(id);
+    let atual = parseInt(input.value);
+    let novo = atual + delta;
+    if (novo >= 1 && novo <= max) {
+        input.value = novo;
+    }
+}
+
+// 5. Funções de Interface e Sacola
 function toggleCart() { 
     document.getElementById('cart-modal').classList.toggle('active'); 
 }
 
 function fecharDetalhes() {
-    document.getElementById('modal-detalhes').style.display = 'none';
+    const modal = document.getElementById('modal-detalhes');
+    if(modal) modal.style.display = 'none';
 }
 
-// 3. Abrir Detalhes (Puxando da pasta de produtos definida no produtos.js)
 function abrirDetalhes(p) {
     const modal = document.getElementById('modal-detalhes');
     if (!modal) return;
 
-    document.getElementById('detalhe-img').src = p.imagem; // O caminho já vem como 'img/nome.jpg'
+    document.getElementById('detalhe-img').src = p.imagem;
     document.getElementById('detalhe-nome').innerText = p.nome;
     document.getElementById('detalhe-marca').innerText = p.marca;
     document.getElementById('detalhe-descricao').innerText = p.descricao || "Descrição detalhada em breve.";
     
     const btnWhatsModal = document.getElementById('detalhe-btn-whats');
-    // Aqui usamos o ID do seletor que está lá no card do produto
     btnWhatsModal.onclick = () => comprarAgora(p.nome, `ml-${p.id}`);
     
     modal.style.display = 'flex';
 }
 
-// 4. Gestão da Sacola
 function addCart(nome, mlId, qtdId) {
     const selectMl = document.getElementById(mlId);
     const qtdInput = document.getElementById(qtdId);
@@ -421,11 +433,11 @@ function addCart(nome, mlId, qtdId) {
 function removerItem(index) {
     sacola.splice(index, 1);
     valorFreteGlobal = 0; 
-    document.getElementById('opcoes-frete').innerHTML = "";
+    const fArea = document.getElementById('opcoes-frete');
+    if(fArea) fArea.innerHTML = "";
     atualizarSacola();
 }
 
-// 5. Atualização da Sacola com Regra de Frete Grátis (R$ 700)
 function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
@@ -449,7 +461,6 @@ function atualizarSacola() {
         }).join('');
     }
 
-    // Regra de Frete Automático na Sacola
     if (subtotal >= 700) {
         valorFreteGlobal = 0;
         nomeFreteGlobal = "FRETE GRÁTIS";
@@ -460,7 +471,6 @@ function atualizarSacola() {
     countCont.innerText = sacola.length;
 }
 
-// 6. WhatsApp Final (Sacola)
 function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
     let subtotal = sacola.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
@@ -480,7 +490,6 @@ function finalizarWhatsApp() {
     window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
-// 7. Compra Direta (Botão Comprar Agora)
 function comprarAgora(nome, mlId) {
     const selectMl = document.getElementById(mlId);
     if (!selectMl) return;
@@ -489,7 +498,7 @@ function comprarAgora(nome, mlId) {
     const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${precoFormatado}. Está disponível?`;
     window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
 }
- <script>
+</script>
     
    <script>
     // 1. Atualiza o ano no rodapé
@@ -536,6 +545,7 @@ function comprarAgora(nome, mlId) {
     </div>
 </footer></body>
 </html>
+
 
 
 
