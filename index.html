@@ -462,8 +462,10 @@ function atualizarSacola() {
     const countCont = document.getElementById('cart-count');
     let subtotal = 0;
     
+    // 1. Renderiza os itens e calcula o subtotal
     if (sacola.length === 0) {
         itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
+        valorFreteGlobal = 0; // zera o frete se a sacola esvaziar
     } else {
         itensCont.innerHTML = sacola.map((item, index) => {
             const sub = item.preco * item.qtd;
@@ -479,14 +481,18 @@ function atualizarSacola() {
         }).join('');
     }
 
+    // 2. REGRA DE OURO: Se passar de 700, o frete vira 0 automaticamente
     if (subtotal >= 700) {
         valorFreteGlobal = 0;
         nomeFreteGlobal = "FRETE GRÁTIS";
     }
 
+    // 3. CALCULA O TOTAL FINAL (Produtos + Frete Selecionado)
     const totalGeral = subtotal + valorFreteGlobal;
+
+    // 4. ATUALIZA A TELA
     totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
-    countCont.innerText = sacola.length;
+    countCont.innerText = sacola.reduce((acc, item) => acc + item.qtd, 0); // Soma a quantidade real de itens
 }
 
 function finalizarWhatsApp() {
@@ -600,23 +606,24 @@ async function calcularFrete() {
             return;
         }
 
-      // Filtra apenas as transportadoras que retornaram um preço real
-const opcoesValidas = opcoes.filter(op => op.price && parseFloat(op.price) > 0);
+      // Agora aceita preço 0 (Frete Grátis) ou campos personalizados
+const opcoesValidas = opcoes.filter(op => op.custom || (op.price !== undefined && op.price !== null));
 
 if (opcoesValidas.length === 0) {
-    resultadoDiv.innerHTML = '<p style="color:red; font-size:12px; margin-top:10px;">Nenhuma transportadora disponível para este CEP.</p>';
+    resultadoDiv.innerHTML = '<p style="color:red; font-size:12px; margin-top:10px;">Nenhuma transportadora disponível.</p>';
 } else {
     resultadoDiv.innerHTML = opcoesValidas.map(op => {
         const nomeEntrega = op.name || (op.company ? op.company.name : "Entrega");
-        const precoNum = parseFloat(op.price);
-        const precoFormatado = precoNum.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+        const precoNum = parseFloat(op.price) || 0;
+        
+        // Se o preço for 0, escreve "GRÁTIS"
+        const precoFormatado = precoNum === 0 ? "GRÁTIS" : precoNum.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+        
         const prazo = op.delivery_time ? `${op.delivery_time} dias` : "";
 
         return `
             <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; border-radius:8px; margin-top:10px; background:#fff; cursor:pointer; transition: 0.3s;" 
-                 onclick="selecionarFrete('${nomeEntrega}', ${precoNum})"
-                 onmouseover="this.style.borderColor='#b89356'" 
-                 onmouseout="this.style.borderColor='#eee'">
+                 onclick="selecionarFrete('${nomeEntrega}', ${precoNum})">
                 <div style="text-align:left;">
                     <strong style="font-size:13px; color:#333;">${nomeEntrega}</strong><br>
                     <small style="color:#666;">Prazo estimado: ${prazo}</small>
@@ -626,11 +633,23 @@ if (opcoesValidas.length === 0) {
         `;
     }).join('');
 }
-
     } catch (error) {
         console.error("Erro frete:", error);
         resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Ocorreu um erro ao calcular. Tente novamente.</p>";
     }
+}
+    let valorFreteGlobal = 0;
+let nomeFreteGlobal = "";
+
+function selecionarFrete(nome, valor) {
+    valorFreteGlobal = valor;
+    nomeFreteGlobal = nome;
+    
+    // Mostra um alerta simples para o usuário saber que selecionou
+    alert("Frete selecionado: " + nome);
+    
+    // Atualiza o total da sacola na tela
+    atualizarSacola();
 }
 
     // COLE AS NOVAS FUNÇÕES LOGO ABAIXO:
@@ -712,6 +731,7 @@ function fecharImagem() {
     </div>
 </footer></body>
 </html>
+
 
 
 
