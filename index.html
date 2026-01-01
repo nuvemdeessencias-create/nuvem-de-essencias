@@ -221,14 +221,14 @@ header {
             <h3 style="font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: #1a1a1a;">ENTREGA</h3>
             <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
             
-           <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
-                <input type="text" id="cep-cliente" placeholder="Digite o CEP" style="flex:1; border:none; padding:0 15px; outline:none; color: #333;">
-                <button id="btn-calcular-frete" type="button" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase;">
+            <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
+                <input type="text" id="cep-cliente" placeholder="Digite o CEP">
+                <button onclick="calcularFrete()" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase;">
                     CALCULAR
                 </button>
             </div>
 
-             <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer" style="display: block; font-size: 12px; color: #1a1a1a; text-decoration: underline; font-style: italic; margin-bottom: 10px;">
+            <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer" style="display: block; font-size: 12px; color: #1a1a1a; text-decoration: underline; font-style: italic;">
                 Não sei meu CEP
             </a>
 
@@ -236,8 +236,8 @@ header {
         </div>
     </div>
 
-      </div> <div class="cart-footer" style="padding: 20px; border-top: 1px solid #eee; background: white;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 18px; color: #333;">
+    <div class="cart-footer">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333; font-size: 18px;">
             <span>Total:</span>
             <span>R$ <span id="cart-total">0,00</span></span>
         </div>
@@ -326,12 +326,6 @@ let sacola = [];
 let valorFreteGlobal = 0;
 let nomeFreteGlobal = "";
 let categoriaAtual = 'todos';
-
-    // 2. Event Listeners (Garante que tudo funcione sem travar)
-document.addEventListener('DOMContentLoaded', function() {
-    // Ativa o cálculo de frete
-    const btnFrete = document.getElementById('btn-calcular-frete');
-    if (btnFrete) btnFrete.addEventListener('click', calcularFrete);
 
 // 2. COMANDO DE INICIALIZAÇÃO (O que faltava para os produtos aparecerem)
 window.onload = function() {
@@ -563,60 +557,56 @@ function filtrar() {
 }
 
 async function calcularFrete() {
-    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    const div = document.getElementById('opcoes-frete');
+    // Corrigido para o ID que está no seu HTML (cep-cliente)
+    const cepInput = document.getElementById('cep-cliente');
+    const cep = cepInput ? cepInput.value.replace(/\D/g, '') : '';
+    const resultadoDiv = document.getElementById('opcoes-frete');
     
-    // IMPORTANTE: Pegamos os valores que o arquivo .js na Vercel exige
-    const subtotal = sacola.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
-    const qtdTotal = sacola.reduce((acc, item) => acc + item.qtd, 0);
-
     if (cep.length !== 8) {
-        alert("CEP Inválido. Digite os 8 números.");
+        alert("Por favor, digite um CEP válido com 8 dígitos.");
         return;
     }
-    
-    div.innerHTML = "<p style='color: #666; font-size: 13px;'>Calculando opções...</p>";
+
+    resultadoDiv.innerHTML = "<p style='color:#666; font-size:12px;'>Calculando frete...</p>";
 
     try {
+        // Corrigido para usar a sua variável 'sacola'
+        const totalCarrinho = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
+        const totalItens = sacola.reduce((sum, item) => sum + item.qtd, 0);
+
         const response = await fetch('/api/calcular-frete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
                 cep_destino: cep,
-                quantidade: qtdTotal, 
-                valor_total: subtotal 
+                quantidade: totalItens,
+                valor_total: totalCarrinho 
             })
         });
 
-        const data = await response.json();
-        div.innerHTML = "";
+        const opcoes = await response.json();
 
-        if (!Array.isArray(data) || data.length === 0) {
-            div.innerHTML = "<p style='color:orange; font-size:12px;'>Nenhum frete disponível.</p>";
+        if (!opcoes || opcoes.length === 0 || opcoes.error) {
+            resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular. Verifique o CEP.</p>";
             return;
         }
 
-        data.forEach(op => {
-            if (op.error) return;
-
-            const preco = parseFloat(op.price || 0);
-            const nome = op.name;
-            const btnOpcao = document.createElement('div');
+        resultadoDiv.innerHTML = opcoes.map(op => {
+            const preco = op.price == 0 ? "Grátis" : `R$ ${parseFloat(op.price).toFixed(2)}`;
+            const prazo = op.delivery_time ? `${op.delivery_time} dias` : `${op.delivery_range.min}-${op.delivery_range.max} dias`;
             
-            btnOpcao.style = "background:#fff; padding:12px; margin-top:8px; border:1px solid #ddd; cursor:pointer; border-radius:8px; color:#333; transition: 0.2s;";
-            btnOpcao.innerHTML = `
-                <div style="display:flex; justify-content:space-between;">
-                    <span>${nome}</span>
-                    <b>${preco === 0 ? 'GRÁTIS' : 'R$ ' + preco.toFixed(2).replace('.', ',')}</b>
+            // Estilização para combinar com sua sacola
+            return `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid #eee; border-radius:4px; margin-top:10px; color:#333;">
+                    <span style="font-size:12px;"><strong>${op.name || op.company.name}</strong><br><small>Prazo: ${prazo}</small></span>
+                    <span style="color: #b89356; font-weight:bold;">${preco}</span>
                 </div>
-                <small style="color: #888;">Prazo: ${op.delivery_time || '6-13'} dias úteis</small>
             `;
+        }).join('');
 
-            btnOpcao.addEventListener('click', () => aplicarFrete(preco, nome));
-            div.appendChild(btnOpcao);
-        });
-    } catch (e) { 
-        div.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular. Verifique sua conexão.</p>"; 
+    } catch (error) {
+        console.error("Erro frete:", error);
+        resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Serviço indisponível no momento.</p>";
     }
 }
 
@@ -700,38 +690,4 @@ function fecharImagem() {
     </div>
 </footer></body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
