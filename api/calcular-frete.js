@@ -37,7 +37,7 @@ export default async function handler(req, res) {
       const payload = {
         "from": { "postal_code": "77809270" },
         "to": { "postal_code": cepLimpo },
-        "package": { "height": 15, "width": 15, "length": 15, "weight": pesoTotal },
+        "package": { "height": 14, "width": 15, "length": 25, "weight": pesoTotal },
         "options": { "insurance_value": valorNum, "receipt": false, "own_hand": false }
       };
 
