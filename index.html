@@ -557,20 +557,24 @@ function filtrar() {
 }
 
 async function calcularFrete() {
-    // Corrigido para o ID que está no seu HTML (cep-cliente)
     const cepInput = document.getElementById('cep-cliente');
     const cep = cepInput ? cepInput.value.replace(/\D/g, '') : '';
     const resultadoDiv = document.getElementById('opcoes-frete');
     
+    if (sacola.length === 0) {
+        alert("Adicione produtos à sacola antes de calcular o frete.");
+        return;
+    }
+
     if (cep.length !== 8) {
-        alert("Por favor, digite um CEP válido com 8 dígitos.");
+        alert("Por favor, digite um CEP válido.");
         return;
     }
 
     resultadoDiv.innerHTML = "<p style='color:#666; font-size:12px;'>Calculando frete...</p>";
 
     try {
-        // Corrigido para usar a sua variável 'sacola'
+        // Cálculo preciso dos valores para a API
         const totalCarrinho = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
         const totalItens = sacola.reduce((sum, item) => sum + item.qtd, 0);
 
@@ -584,21 +588,30 @@ async function calcularFrete() {
             })
         });
 
+        // Verificação se a resposta foi bem sucedida
+        if (!response.ok) {
+            throw new Error('Erro na resposta do servidor');
+        }
+
         const opcoes = await response.json();
 
-        if (!opcoes || opcoes.length === 0 || opcoes.error) {
-            resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular. Verifique o CEP.</p>";
+        if (opcoes.error || !Array.isArray(opcoes) || opcoes.length === 0) {
+            resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Indisponível para este CEP ou valor.</p>";
             return;
         }
 
         resultadoDiv.innerHTML = opcoes.map(op => {
-            const preco = op.price == 0 ? "Grátis" : `R$ ${parseFloat(op.price).toFixed(2)}`;
-            const prazo = op.delivery_time ? `${op.delivery_time} dias` : `${op.delivery_range.min}-${op.delivery_range.max} dias`;
+            // Tratamento para diferentes formatos de resposta (Melhor Envio ou Simulação)
+            const nomeEntrega = op.name || (op.company ? op.company.name : "Entrega");
+            const preco = parseFloat(op.price) === 0 ? "Grátis" : `R$ ${parseFloat(op.price).toFixed(2).replace('.', ',')}`;
+            const prazo = op.delivery_time ? `${op.delivery_time} dias` : "Consultar";
             
-            // Estilização para combinar com sua sacola
             return `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid #eee; border-radius:4px; margin-top:10px; color:#333;">
-                    <span style="font-size:12px;"><strong>${op.name || op.company.name}</strong><br><small>Prazo: ${prazo}</small></span>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid #eee; border-radius:4px; margin-top:10px; color:#333; background: #f9f9f9;">
+                    <span style="font-size:12px; text-align:left;">
+                        <strong>${nomeEntrega}</strong><br>
+                        <small>Prazo: ${prazo}</small>
+                    </span>
                     <span style="color: #b89356; font-weight:bold;">${preco}</span>
                 </div>
             `;
@@ -606,7 +619,7 @@ async function calcularFrete() {
 
     } catch (error) {
         console.error("Erro frete:", error);
-        resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Serviço indisponível no momento.</p>";
+        resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Ocorreu um erro ao calcular. Tente novamente.</p>";
     }
 }
 
@@ -690,4 +703,5 @@ function fecharImagem() {
     </div>
 </footer></body>
 </html>
+
 
