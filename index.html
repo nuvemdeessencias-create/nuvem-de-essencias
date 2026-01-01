@@ -370,10 +370,9 @@ function carregarProdutos() {
                     ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
                 </select>
                 
-                <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="margin-bottom:5px; background:#f8f8f8; color:#333; border:1px solid #ddd; width:100%; border-radius:8px; cursor:pointer; padding:8px;">
-                    VER DETALHES
-                </button>
-
+               <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="margin-bottom:5px; background:#b89356; color:white; border:1px solid #a67c3c; width:100%; border-radius:8px; cursor:pointer; padding:8px; font-weight:bold; text-transform:uppercase;">
+    VER DETALHES
+</button>
                 ${p.disponivel ? `<button class="btn-add-sacola" onclick="addCart('${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="background:black; color:white; width:100%; padding:10px; border-radius:8px; border:none; cursor:pointer;">+ Adicionar à Sacola</button>` : ''}
             </div>
         `;
@@ -572,3 +571,4 @@ function filtrarCategoria(cat, el) {
         </div>
     </div>
 </footer>
+
