@@ -600,22 +600,25 @@ async function calcularFrete() {
             return;
         }
 
-        resultadoDiv.innerHTML = opcoes.map(op => {
-            // Tratamento para diferentes formatos de resposta (Melhor Envio ou Simulação)
-            const nomeEntrega = op.name || (op.company ? op.company.name : "Entrega");
-            const preco = parseFloat(op.price) === 0 ? "Grátis" : `R$ ${parseFloat(op.price).toFixed(2).replace('.', ',')}`;
-            const prazo = op.delivery_time ? `${op.delivery_time} dias` : "Consultar";
-            
-            return `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid #eee; border-radius:4px; margin-top:10px; color:#333; background: #f9f9f9;">
-                    <span style="font-size:12px; text-align:left;">
-                        <strong>${nomeEntrega}</strong><br>
-                        <small>Prazo: ${prazo}</small>
-                    </span>
-                    <span style="color: #b89356; font-weight:bold;">${preco}</span>
-                </div>
-            `;
-        }).join('');
+       resultadoDiv.innerHTML = opcoes.map(op => {
+    const nomeEntrega = op.name || (op.company ? op.company.name : "Entrega");
+    
+    // Proteção contra valores inválidos (NaN)
+    const precoBruto = parseFloat(op.price);
+    const precoFormatado = isNaN(precoBruto) ? "Consultar" : (precoBruto === 0 ? "Grátis" : `R$ ${precoBruto.toFixed(2).replace('.', ',')}`);
+    
+    const prazo = op.delivery_time ? `${op.delivery_time} dias` : "Consultar";
+    
+    return `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid #eee; border-radius:4px; margin-top:10px; color:#333; background: #f9f9f9;">
+            <span style="font-size:12px; text-align:left;">
+                <strong>${nomeEntrega}</strong><br>
+                <small>Prazo: ${prazo}</small>
+            </span>
+            <span style="color: #b89356; font-weight:bold;">${precoFormatado}</span>
+        </div>
+    `;
+}).join('');
 
     } catch (error) {
         console.error("Erro frete:", error);
@@ -703,5 +706,6 @@ function fecharImagem() {
     </div>
 </footer></body>
 </html>
+
 
 
