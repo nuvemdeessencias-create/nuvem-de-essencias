@@ -29,13 +29,13 @@ export default async function handler(req, res) {
     const cepLimpo = cep_destino ? cep_destino.replace(/\D/g, '') : "";
     if (cepLimpo.startsWith("778")) {
       opcoesPersonalizadas.push(
-        { name: "Entrega Local (Araguaína)", price: 0, delivery_time: "Até 1 dia útil", custom: true },
+        { name: "Entrega em Casa (Araguaína)", price: 0, delivery_time: "Até 1 dia útil", custom: true },
         { name: "Retirada no Local", price: 0, delivery_time: "Imediato (Combinar)", custom: true }
       );
     }
 
     // --- 3. CÁLCULO MELHOR ENVIO (Sempre executa para mostrar as outras opções) ---
-    const pesoTotal = (parseInt(quantidade) || 1) * 0.7;
+    const pesoTotal = (parseInt(quantidade) || 1) * 0.6;
     const payload = {
       "from": { "postal_code": "77809270" },
       "to": { "postal_code": cepLimpo },
