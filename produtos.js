@@ -1,14 +1,15 @@
 const meusProdutos = [
     {
-        id: "fucsia",
-        marca: "SHAKIRA",
-        nome: "SHAKIRA FUCSIA EDP",
-        imagem: "img/shakira.avif",
-        secao: "alta",
-        estoque: 1,
-        disponivel: true,
-        opcoes: [{ texto: "80ML - R$ 239,00", valor: "80ml|239.00" }]
-    },
+    id: "fucsia",
+    marca: "SHAKIRA",
+    nome: "SHAKIRA FUCSIA EDP",
+    descricao: "Uma fragrância vibrante e feminina. Notas de saída de frutas cítricas, coração floral e fundo amadeirado. Perfeito para mulheres decididas.",
+    imagem: "img/shakira.avif",
+    secao: "alta",
+    estoque: 1,
+    disponivel: true,
+    opcoes: [{ texto: "80ML - R$ 239,00", valor: "80ml|239.00" }]
+}
     {
         id: "rojo",
         marca: "SHAKIRA",
