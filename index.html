@@ -600,25 +600,32 @@ async function calcularFrete() {
             return;
         }
 
-       resultadoDiv.innerHTML = opcoes.map(op => {
-    const nomeEntrega = op.name || (op.company ? op.company.name : "Entrega");
-    
-    // Proteção contra valores inválidos (NaN)
-    const precoBruto = parseFloat(op.price);
-    const precoFormatado = isNaN(precoBruto) ? "Consultar" : (precoBruto === 0 ? "Grátis" : `R$ ${precoBruto.toFixed(2).replace('.', ',')}`);
-    
-    const prazo = op.delivery_time ? `${op.delivery_time} dias` : "Consultar";
-    
-    return `
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; border:1px solid #eee; border-radius:4px; margin-top:10px; color:#333; background: #f9f9f9;">
-            <span style="font-size:12px; text-align:left;">
-                <strong>${nomeEntrega}</strong><br>
-                <small>Prazo: ${prazo}</small>
-            </span>
-            <span style="color: #b89356; font-weight:bold;">${precoFormatado}</span>
-        </div>
-    `;
-}).join('');
+      // Filtra apenas as transportadoras que retornaram um preço real
+const opcoesValidas = opcoes.filter(op => op.price && parseFloat(op.price) > 0);
+
+if (opcoesValidas.length === 0) {
+    resultadoDiv.innerHTML = '<p style="color:red; font-size:12px; margin-top:10px;">Nenhuma transportadora disponível para este CEP.</p>';
+} else {
+    resultadoDiv.innerHTML = opcoesValidas.map(op => {
+        const nomeEntrega = op.name || (op.company ? op.company.name : "Entrega");
+        const precoNum = parseFloat(op.price);
+        const precoFormatado = precoNum.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+        const prazo = op.delivery_time ? `${op.delivery_time} dias` : "";
+
+        return `
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; border-radius:8px; margin-top:10px; background:#fff; cursor:pointer; transition: 0.3s;" 
+                 onclick="selecionarFrete('${nomeEntrega}', ${precoNum})"
+                 onmouseover="this.style.borderColor='#b89356'" 
+                 onmouseout="this.style.borderColor='#eee'">
+                <div style="text-align:left;">
+                    <strong style="font-size:13px; color:#333;">${nomeEntrega}</strong><br>
+                    <small style="color:#666;">Prazo estimado: ${prazo}</small>
+                </div>
+                <span style="color:#b89356; font-weight:bold;">${precoFormatado}</span>
+            </div>
+        `;
+    }).join('');
+}
 
     } catch (error) {
         console.error("Erro frete:", error);
@@ -706,6 +713,7 @@ function fecharImagem() {
     </div>
 </footer></body>
 </html>
+
 
 
 
