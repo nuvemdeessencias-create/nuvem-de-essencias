@@ -629,6 +629,22 @@ function fecharImagem() {
     <img id="img-expandida" src="" style="max-width:90%; max-height:80%; border-radius:8px; border: 2px solid #b89356; cursor:default;" onclick="event.stopPropagation()">
     <p id="nome-expandido" style="color:white; position:absolute; bottom:5%; font-family:serif; font-size:22px; text-shadow: 2px 2px 4px #000;"></p>
 </div>
+
+    <div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; position:relative; color:#333; text-align:center;">
+        <span onclick="fecharDetalhes()" style="position:absolute; top:10px; right:15px; font-size:25px; cursor:pointer;">&times;</span>
+        <img id="detalhe-img" src="" style="width:100%; height:200px; object-fit:contain; margin-bottom:15px;">
+        <h2 id="detalhe-nome" style="margin:5px 0; color:#020b1f;"></h2>
+        <p id="detalhe-marca" style="color:#b89356; font-weight:bold; text-transform:uppercase; font-size:12px; margin-bottom:10px;"></p>
+        <div style="border-top:1px solid #eee; padding-top:10px;">
+            <p id="detalhe-descricao" style="font-size:14px; line-height:1.5; color:#666; text-align:left; max-height:150px; overflow-y:auto;"></p>
+        </div>
+        <button id="detalhe-btn-whats" style="background:#25d366; color:white; border:none; padding:12px; width:100%; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:15px;">
+            COMPRAR PELO WHATSAPP
+        </button>
+    </div>
+</div>
+    
    <script>
     // 1. Atualiza o ano no rodapé
     if(document.getElementById("ano-real")) {
@@ -674,6 +690,7 @@ function fecharImagem() {
     </div>
 </footer></body>
 </html>
+
 
 
 
