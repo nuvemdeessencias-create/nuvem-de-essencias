@@ -451,68 +451,65 @@ async function calcularFrete() {
     
     if (sacola.length === 0) return alert("Adicione produtos primeiro.");
     if (cep.length !== 8) return alert("CEP inválido.");
-resultadoDiv.innerHTML = "<p style='font-size:12px; color:#666;'>Calculando frete...</p>";
 
-// Faixa de CEPs de Araguaína (Iniciam com 778)
-const ehAraguaina = cep.startsWith('778');
+     resultadoDiv.innerHTML = "<p style='font-size:12px; color:#666;'>Calculando frete...</p>";
 
-try {
-    const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
-    let validas = [];
+    // Faixa de CEPs de Araguaína (Iniciam com 778)
+    const ehAraguaina = cep.startsWith('778');
 
-    if (ehAraguaina) {
-        // Se for Araguaína, define APENAS as opções locais
-        validas = [
-            { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "1" },
-            { name: "Retirada no Local", price: 0, delivery_time: "0" }
-        ];
-    } else {
-        const response = await fetch('/api/calcular-frete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cep_destino: cep, valor_total: subtotal, quantidade: sacola.length })
-        });
-        const opcoes = await response.json();
-        validas = opcoes.filter(op => op.custom || (op.price !== undefined));
-
-        if (subtotal >= 700) {
-            validas = [{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "Consulte" }];
-        }
-    }
-
-    // AQUI ESTÁ A PARTE QUE VOCÊ DEVE SUBSTITUIR/ADICIONAR:
-    resultadoDiv.innerHTML = validas.map((op, index) => {
-        const preco = parseFloat(op.price) || 0;
-        const precoTxt = preco === 0 ? "GRÁTIS" : preco.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
+    try {
+        const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
         
-        // Lógica para garantir a palavra "dias"
-        let prazoExibicao = "";
-        if (op.delivery_time) {
-            let p = op.delivery_time.toString().replace(/\D/g, ''); // Pega só o número
-            prazoExibicao = (p === "0" || p === "") ? "Imediato" : p + " dias"; 
+        let validas = [];
+
+        if (ehAraguaina) {
+            // Se for Araguaína, define APENAS as opções locais e ignora o resto
+            validas = [
+                { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "Até 1 dia útil" },
+                { name: "Retirada no Local", price: 0, delivery_time: "Imediato" }
+            ];
         } else {
-            prazoExibicao = "Imediato";
+            // Se NÃO for Araguaína, busca nos correios/melhor envio
+            const response = await fetch('/api/calcular-frete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cep_destino: cep, valor_total: subtotal, quantidade: sacola.length })
+            });
+            const opcoes = await response.json();
+            validas = opcoes.filter(op => op.custom || (op.price !== undefined));
+
+            // REGRA: Se o valor for >= 700 e NÃO for Araguaína, força apenas Frete Grátis
+            if (subtotal >= 700) {
+                validas = [{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "Consulte" }];
+            }
         }
 
-        return `
-        <div id="frete-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${preco}, 'frete-op-${index}')" 
-             style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <div class="radio-fake" style="width: 18px; height: 18px; border: 2px solid #b89356; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                    <div class="radio-inner" style="width: 10px; height: 10px; background: transparent; border-radius: 50%;"></div>
+        resultadoDiv.innerHTML = validas.map((op, index) => {
+            const preco = parseFloat(op.price) || 0;
+            const precoTxt = preco === 0 ? "GRÁTIS" : preco.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
+            
+            return `
+            <div id="frete-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${preco}, 'frete-op-${index}')" 
+                 style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px; transition: 0.3s;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="radio-fake" style="width: 18px; height: 18px; border: 2px solid #b89356; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                        <div class="radio-inner" style="width: 10px; height: 10px; background: transparent; border-radius: 50%;"></div>
+                    </div>
+                    <div style="text-align:left;">
+                        <strong style="font-size:13px;">${op.name}</strong><br>
+                        <small style="color:#888;">${op.delivery_time}</small>
+                    </div>
                 </div>
-                <div style="text-align:left;">
-                    <strong style="font-size:13px; display:block;">${op.name}</strong>
-                    <small style="color:#888; display:block;">Prazo: ${prazoExibicao}</small>
-                </div>
-            </div>
-            <strong style="color:#b89356;">${precoTxt}</strong>
-        </div>`;
-    }).join('');
+                <strong style="color:#b89356;">${precoTxt}</strong>
+            </div>`;
+        }).join('');
 
-} catch (e) {
-    resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular frete.</p>";
+    } catch (e) {
+        resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular frete.</p>";
+    }
 }
+    
+
    
 // Função para selecionar o frete com feedback visual e soma no total
 function selecionarFreteVisual(nome, valor, elementId) {
@@ -631,6 +628,7 @@ function filtrarCategoria(cat, el) {
         </div>
     </div>
 </footer>
+
 
 
 
