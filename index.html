@@ -421,20 +421,37 @@ function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
     const countCont = document.getElementById('cart-count');
-    let subtotal = 0;
 
+    // 1. CALCULE O SUBTOTAL PRIMEIRO (Soma tudo antes de mostrar)
+    let subtotal = sacola.reduce((total, item) => {
+        return total + (parseFloat(item.preco) * parseInt(item.qtd));
+    }, 0);
+
+    // 2. ATUALIZE OS CONTADORES E TOTAIS NA TELA
+    if (totalCont) totalCont.innerText = subtotal.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
+    if (countCont) countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
+
+    // 3. RENDERIZE OS ITENS
     if (sacola.length === 0) {
         itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
     } else {
         itensCont.innerHTML = sacola.map((item, index) => {
-            subtotal += (item.preco * item.qtd);
             return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
-                <div style="text-align:left;"><b style="font-size:13px;">${item.nome}</b><br><small>${item.ml} | Qtd: ${item.qtd}</small></div>
+                <div style="text-align:left;">
+                    <b style="font-size:13px;">${item.nome}</b><br>
+                    <small>${item.ml} | Qtd: ${item.qtd}</small>
+                </div>
                 <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px; cursor:pointer;">&times;</button>
             </div>`;
         }).join('');
     }
 
+    // 4. RECALCULA O FRETE CASO O CEP JÁ ESTEJA PREENCHIDO
+    const cepInput = document.getElementById('cep-input');
+    if (cepInput && cepInput.value.replace(/\D/g, '').length === 8) {
+        calcularFrete();
+    }
+}
    if (subtotal >= 700) {
     // Tentamos encontrar o prazo do PAC nas opções que vieram da API
     let opcaoPac = opcoes.find(o => o.name.toLowerCase().includes("pac") || o.name.toLowerCase().includes(".package"));
