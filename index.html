@@ -435,10 +435,17 @@ function atualizarSacola() {
         }).join('');
     }
 
-    if (subtotal >= 700) {
-        valorFreteGlobal = 0;
-        nomeFreteGlobal = "FRETE GRÁTIS";
-    }
+   if (subtotal >= 700) {
+    // Tentamos encontrar o prazo do PAC nas opções que vieram da API
+    let opcaoPac = opcoes.find(o => o.name.toLowerCase().includes("pac") || o.name.toLowerCase().includes(".package"));
+    let prazoPac = opcaoPac ? opcaoPac.delivery_time : "6 a 14"; // Se não achar, usa o padrão 6 a 14
+
+    validas = [{ 
+        name: "Frete Grátis (Promoção)", 
+        price: 0, 
+        delivery_time: prazoPac 
+    }];
+}
 
     const totalGeral = subtotal + valorFreteGlobal;
     totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
@@ -635,6 +642,7 @@ function filtrarCategoria(cat, el) {
         </div>
     </div>
 </footer>
+
 
 
 
