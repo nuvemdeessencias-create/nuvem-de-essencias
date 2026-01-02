@@ -417,17 +417,22 @@ function removerItem(index) {
     atualizarSacola();
 }
 
+// --- FUNÇÃO ATUALIZAR SACOLA CORRIGIDA ---
 function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
     const countCont = document.getElementById('cart-count');
-    let subtotal = 0;
+    
+    // 1. Cálculo centralizado e limpo do Subtotal
+    let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
 
     if (sacola.length === 0) {
         itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
+        valorFreteGlobal = 0;
+        nomeFreteGlobal = "";
+        document.getElementById('opcoes-frete').innerHTML = "";
     } else {
         itensCont.innerHTML = sacola.map((item, index) => {
-            subtotal += (item.preco * item.qtd);
             return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
                 <div style="text-align:left;"><b style="font-size:13px;">${item.nome}</b><br><small>${item.ml} | Qtd: ${item.qtd}</small></div>
                 <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px; cursor:pointer;">&times;</button>
@@ -435,23 +440,20 @@ function atualizarSacola() {
         }).join('');
     }
 
-   if (subtotal >= 700) {
-    // Tentamos encontrar o prazo do PAC nas opções que vieram da API
-    let opcaoPac = opcoes.find(o => o.name.toLowerCase().includes("pac") || o.name.toLowerCase().includes(".package"));
-    let prazoPac = opcaoPac ? opcaoPac.delivery_time : "6 a 14"; // Se não achar, usa o padrão 6 a 14
-
-    validas = [{ 
-        name: "Frete Grátis (Promoção)", 
-        price: 0, 
-        delivery_time: prazoPac 
-    }];
-}
-
+    // 2. Cálculo do Total Geral (Subtotal + Frete selecionado)
     const totalGeral = subtotal + valorFreteGlobal;
-    totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
-    if(countCont) countCont.innerText = sacola.length;
+    totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    
+    if(countCont) countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
+
+    // 3. Auto-recalcula frete se o CEP já estiver preenchido
+    const cepAtual = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+    if (cepAtual.length === 8 && sacola.length > 0) {
+        // Chamada silenciosa ou manual aqui se desejar atualizar prazos ao mudar qtd
+    }
 }
 
+// --- FUNÇÃO CALCULAR FRETE CORRIGIDA ---
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
     const resultadoDiv = document.getElementById('opcoes-frete');
@@ -459,36 +461,35 @@ async function calcularFrete() {
     if (sacola.length === 0) return alert("Adicione produtos primeiro.");
     if (cep.length !== 8) return alert("CEP inválido.");
 
-     resultadoDiv.innerHTML = "<p style='font-size:12px; color:#666;'>Calculando frete...</p>";
+    resultadoDiv.innerHTML = "<p style='font-size:12px; color:#666;'>Calculando frete...</p>";
 
-    // Faixa de CEPs de Araguaína (Iniciam com 778)
     const ehAraguaina = cep.startsWith('778');
 
     try {
         const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
-        
         let validas = [];
 
-       if (ehAraguaina) {
-    validas = [
-        { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "1" }, 
-        { name: "Retirada no Local", price: 0, delivery_time: "0" }
-    ];
-}
-        
-        else {
-            // Se NÃO for Araguaína, busca nos correios/melhor envio
-            const response = await fetch('/api/calcular-frete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ cep_destino: cep, valor_total: subtotal, quantidade: sacola.length })
-            });
-            const opcoes = await response.json();
-            validas = opcoes.filter(op => op.custom || (op.price !== undefined));
-
-            // REGRA: Se o valor for >= 700 e NÃO for Araguaína, força apenas Frete Grátis
+        if (ehAraguaina) {
+            validas = [
+                { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "1" }, 
+                { name: "Retirada no Local", price: 0, delivery_time: "0" }
+            ];
+        } else {
+            // Regra de Frete Grátis Nacional (Acima de R$ 700)
             if (subtotal >= 700) {
-                validas = [{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "Consulte" }];
+                validas = [{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "" }];
+            } else {
+                const response = await fetch('/api/calcular-frete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        cep_destino: cep, 
+                        valor_total: subtotal, 
+                        quantidade: sacola.length 
+                    })
+                });
+                const opcoes = await response.json();
+                validas = opcoes.filter(op => op.price !== undefined);
             }
         }
 
@@ -496,22 +497,30 @@ async function calcularFrete() {
             const preco = parseFloat(op.price) || 0;
             const precoTxt = preco === 0 ? "GRÁTIS" : preco.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
             
+            // Lógica de prazos que remove "Consulte" e "dias dias"
+            let apenasNumeros = op.delivery_time ? op.delivery_time.toString().replace(/\D/g, '') : "";
+            let prazoFinal = "";
+
+            if (apenasNumeros === "0" || op.name.toLowerCase().includes("retirada")) {
+                prazoFinal = "Hoje mesmo";
+            } else if (apenasNumeros === "1") {
+                prazoFinal = "1 dia";
+            } else if (apenasNumeros === "") {
+                prazoFinal = "6 a 14 dias"; 
+            } else {
+                prazoFinal = apenasNumeros + " dias";
+            }
+
             return `
             <div id="frete-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${preco}, 'frete-op-${index}')" 
-                 style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px; transition: 0.3s;">
+                 style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div class="radio-fake" style="width: 18px; height: 18px; border: 2px solid #b89356; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                         <div class="radio-inner" style="width: 10px; height: 10px; background: transparent; border-radius: 50%;"></div>
                     </div>
                     <div style="text-align:left;">
-                        <strong style="font-size:13px;">${op.name}</strong><br>
-                        <small style="color:#888; display:block;">
-    Prazo: ${
-        op.delivery_time == "0" ? "Hoje mesmo" : 
-        op.delivery_time == "1" ? "1 dia" : 
-        op.delivery_time + " dias"
-    }
-</small>
+                        <strong style="font-size:13px; display:block;">${op.name}</strong>
+                        <small style="color:#888; display:block;">Prazo: ${prazoFinal}</small>
                     </div>
                 </div>
                 <strong style="color:#b89356;">${precoTxt}</strong>
@@ -642,3 +651,4 @@ function filtrarCategoria(cat, el) {
         </div>
     </div>
 </footer>
+
