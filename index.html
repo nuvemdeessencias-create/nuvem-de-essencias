@@ -422,21 +422,22 @@ function atualizarSacola() {
     const totalCont = document.getElementById('cart-total');
     const countCont = document.getElementById('cart-count');
 
-    // 1. CALCULE O SUBTOTAL PRIMEIRO (Soma tudo antes de mostrar)
+    // 1. CÁLCULO DO SUBTOTAL (Soma correta de todos os itens)
     let subtotal = sacola.reduce((total, item) => {
         return total + (parseFloat(item.preco) * parseInt(item.qtd));
     }, 0);
 
-    // 2. ATUALIZE OS CONTADORES E TOTAIS NA TELA
+    // 2. ATUALIZAÇÃO DOS TOTAIS NA INTERFACE
     if (totalCont) totalCont.innerText = subtotal.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
     if (countCont) countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
 
-    // 3. RENDERIZE OS ITENS
+    // 3. RENDERIZAÇÃO DOS ITENS NA SACOLA
     if (sacola.length === 0) {
         itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
     } else {
         itensCont.innerHTML = sacola.map((item, index) => {
-            return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
+            return `
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
                 <div style="text-align:left;">
                     <b style="font-size:13px;">${item.nome}</b><br>
                     <small>${item.ml} | Qtd: ${item.qtd}</small>
@@ -446,10 +447,11 @@ function atualizarSacola() {
         }).join('');
     }
 
-    // 4. RECALCULA O FRETE CASO O CEP JÁ ESTEJA PREENCHIDO
+    // 4. RECALCULO DO FRETE (Se houver CEP)
     const cepInput = document.getElementById('cep-input');
     if (cepInput && cepInput.value.replace(/\D/g, '').length === 8) {
-        calcularFrete();
+        // Chamamos a função de cálculo que você já tem
+        calcularFrete(); 
     }
 }
    if (subtotal >= 700) {
@@ -667,6 +669,7 @@ function filtrarCategoria(cat, el) {
         </div>
     </div>
 </footer>
+
 
 
 
