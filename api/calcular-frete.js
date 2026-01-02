@@ -28,14 +28,14 @@ export default async function handler(req, res) {
       opcoesFinais.push({ 
         name: "Frete Grátis (Promoção)", 
         price: 0, 
-        delivery_time: "7 a 13", 
+        delivery_time: "6 a 14", 
         custom: true 
       });
     }
 
     // 3. BUSCA NO MELHOR ENVIO
     if (cepLimpo.length === 8) {
-      const pesoTotal = (parseInt(quantidade) || 1) * 0.7;
+      const pesoTotal = (parseInt(quantidade) || 1) * 0.6;
       const payload = {
         "from": { "postal_code": "77809270" },
         "to": { "postal_code": cepLimpo },
