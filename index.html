@@ -353,35 +353,40 @@ function carregarProdutos() {
 
         const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
-        card.innerHTML = `
-            <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
-            <div class="info">
-                <span class="marca-tag">${p.marca}</span>
-                <div class="nome-perfume">${p.nome}</div>
-                <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'PRODUTO INDISPONÍVEL'}</div>
-                
-                <div class="qtd-container" ${p.disponivel ? "" : "style='opacity: 0.5; pointer-events: none;'"}>
-                    <button class="btn-menos" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
-                    <button class="btn-mais" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
-                </div>
+      // Localize onde o preço e os botões são criados dentro do card.innerHTML
+card.innerHTML = `
+    <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
+    <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
+        <span class="marca-tag">${p.marca}</span>
+        <div class="nome-perfume">${p.nome}</div>
+        <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'PRODUTO INDISPONÍVEL'}</div>
+        
+        <div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 10px;">
+            
+            <div class="qtd-container" style="display: flex; justify-content: center; width: 100%;">
+                <button class="btn-menos" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
+                <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
+                <button class="btn-mais" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
+            </div>
 
-                <select class="seletor-ml" id="ml-${p.id}" ${p.disponivel ? "" : "disabled"}>
-                    ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
-                </select>
-                
-             <div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 8px; margin-top: 10px;">
-    <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" 
-        style="background:#b89356; color:white; border:none; width:95%; border-radius:8px; cursor:pointer; padding:10px; font-weight:bold; text-transform:uppercase; font-size:11px;">
-        VER DETALHES
-    </button>
+            <select class="seletor-ml" id="ml-${p.id}" style="width: 100%; max-width: 220px; margin: 0 auto;">
+                ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
+            </select>
+            
+            <div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 8px;">
+                <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" 
+                    style="background:#b89356; color:white; border:none; width:100%; max-width: 220px; border-radius:8px; cursor:pointer; padding:12px; font-weight:bold; text-transform:uppercase; font-size:11px;">
+                    VER DETALHES
+                </button>
 
-    ${p.disponivel ? `
-    <button class="btn-add-sacola" onclick="addCart('${p.nome}', 'ml-${p.id}', 'q-${p.id}')" 
-        style="background:black; color:white; width:95%; padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase; font-size:11px;">
-        + Adicionar à Sacola
-    </button>` : ''}
-</div>        `;
+                ${p.disponivel ? `
+                <button class="btn-add-sacola" onclick="addCart('${p.nome}', 'ml-${p.id}', 'q-${p.id}')" 
+                    style="background:black; color:white; width:100%; max-width: 220px; padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase; font-size:11px;">
+                    + Adicionar à Sacola
+                </button>` : ''}
+            </div>
+        </div>
+    </div>`; 
         container.appendChild(card);
     });
 }
@@ -651,4 +656,5 @@ function filtrarCategoria(cat, el) {
         </div>
     </div>
 </footer>
+
 
