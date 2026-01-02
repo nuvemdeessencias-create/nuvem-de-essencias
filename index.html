@@ -495,23 +495,31 @@ async function calcularFrete() {
         resultadoDiv.innerHTML = validas.map((op, index) => {
             const preco = parseFloat(op.price) || 0;
             const precoTxt = preco === 0 ? "GRÁTIS" : preco.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
-            
-            return `
+
+            // ... dentro do validas.map((op, index) => {
+let apenasNumeros = op.delivery_time ? op.delivery_time.toString().replace(/\D/g, '') : "";
+let prazoFinal = "";
+
+if (apenasNumeros === "0" || op.name.toLowerCase().includes("retirada")) {
+    prazoFinal = "Hoje mesmo";
+} else if (apenasNumeros === "1") {
+    prazoFinal = "1 dia";
+} else if (apenasNumeros === "") {
+    // Resolve o problema do Frete Grátis que ficava "Consulte dias"
+    prazoFinal = "6 a 14 dias"; 
+} else {
+    prazoFinal = apenasNumeros + " dias";
+}
+             return `
             <div id="frete-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${preco}, 'frete-op-${index}')" 
-                 style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px; transition: 0.3s;">
+                 style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div class="radio-fake" style="width: 18px; height: 18px; border: 2px solid #b89356; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                         <div class="radio-inner" style="width: 10px; height: 10px; background: transparent; border-radius: 50%;"></div>
                     </div>
                     <div style="text-align:left;">
-                        <strong style="font-size:13px;">${op.name}</strong><br>
-                        <small style="color:#888; display:block;">
-    Prazo: ${
-        op.delivery_time == "0" ? "Hoje mesmo" : 
-        op.delivery_time == "1" ? "1 dia" : 
-        op.delivery_time + " dias"
-    }
-</small>
+                        <strong style="font-size:13px; display:block;">${op.name}</strong>
+                        <small style="color:#888; display:block;">Prazo: ${prazoFinal}</small>
                     </div>
                 </div>
                 <strong style="color:#b89356;">${precoTxt}</strong>
@@ -642,6 +650,7 @@ function filtrarCategoria(cat, el) {
         </div>
     </div>
 </footer>
+
 
 
 
