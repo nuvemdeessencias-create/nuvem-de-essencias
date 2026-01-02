@@ -466,9 +466,11 @@ async function calcularFrete() {
             // Se for Araguaína, define APENAS as opções locais e ignora o resto
             validas = [
                 { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "Até 1 dia útil" },
-                { name: "Retirada no Local", price: 0, delivery_time: "Imediato" }
+                { name: "Retirada no Local", price: 0, delivery_time: "Hoje mesmo" }
             ];
-        } else {
+        }
+        
+        else {
             // Se NÃO for Araguaína, busca nos correios/melhor envio
             const response = await fetch('/api/calcular-frete', {
                 method: 'POST',
@@ -497,7 +499,13 @@ async function calcularFrete() {
                     </div>
                     <div style="text-align:left;">
                         <strong style="font-size:13px;">${op.name}</strong><br>
-                        <small style="color:#888;">${op.delivery_time}</small>
+                        <small style="color:#888; display:block;">
+    Prazo: ${
+        op.delivery_time == "0" ? "Hoje mesmo" : 
+        op.delivery_time == "1" ? "1 dia" : 
+        op.delivery_time + " dias"
+    }
+</small>
                     </div>
                 </div>
                 <strong style="color:#b89356;">${precoTxt}</strong>
@@ -628,6 +636,7 @@ function filtrarCategoria(cat, el) {
         </div>
     </div>
 </footer>
+
 
 
 
