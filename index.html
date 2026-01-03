@@ -145,55 +145,52 @@ header {
     color: #333;
 }
 
-/* --- ESTILO SELEÇÃO DE ML NUVEM --- */
+/* Container que alinha os botões lado a lado */
 .variacao-container {
     display: flex;
     gap: 8px;
     justify-content: center;
-    margin: 15px 0;
+    margin: 10px 0;
     flex-wrap: wrap;
 }
 
+/* O botão agora é um QUADRADO pequeno */
 .btn-ml-nuvem {
+    width: 55px;               /* Largura fixa para ser quadrado */
+    height: 55px;              /* Altura fixa igual à largura */
     border: 1px solid #d1d9e6;
-    background: #f0f4f8; /* Azul Nuvem Suave */
-    padding: 10px 14px;
-    border-radius: 8px;
+    background: #f0f4f8;       /* Seu azul Nuvem */
+    border-radius: 6px;        /* Bordas levemente arredondadas */
     cursor: pointer;
-    min-width: 85px;
-    text-align: center;
-    transition: all 0.2s ease;
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;   /* Centraliza o texto no meio do quadrado */
+    padding: 0;                /* Remove padding para não deformar o quadrado */
+    transition: all 0.2s ease;
 }
 
+/* Quando selecionado (Borda Azul Destaque) */
 .btn-ml-nuvem.active {
-    border: 2px solid #007bff !important; /* Azul destaque */
+    border: 2px solid #007bff !important; 
     background-color: #e1ecf7 !important;
-    transform: scale(1.05);
 }
 
+/* Texto do ML dentro do quadrado */
 .btn-ml-nuvem span {
-    font-size: 14px;
+    font-size: 12px;           /* Texto menor para caber no quadrado */
     font-weight: bold;
     color: #333;
+    line-height: 1.1;
 }
 
+/* Tag PIX OFF menorzinha */
 .tag-pix-btn {
-    font-size: 10px;
+    font-size: 8px;            /* Bem pequena para caber embaixo do ML */
     color: #28a745;
     font-weight: bold;
     margin-top: 2px;
 }
-
-/* Container de Preço */
-.preco-display {
-    margin: 10px 0;
-    text-align: center;
-    min-height: 50px;
-}
-
 /* FILTROS */
 .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .busca-grupo { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
@@ -623,6 +620,7 @@ function finalizarWhatsApp() {
         <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
     </div>
 </footer>
+
 
 
 
