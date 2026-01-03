@@ -8,7 +8,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 1,
         disponivel: true,
-        opcoes: [{ texto: "80ML - R$ 239,00", valor: "80ml|239.00" }]
+        opcoes: [{ texto: "80ML", valor: "80ml|239.00", promoPix: false }]
     },
     {
         id: "rojo",
@@ -19,7 +19,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 5,
         disponivel: true,
-        opcoes: [{ texto: "80ML - R$ 239,00", valor: "80ml|239.00" }]
+        opcoes: [{ texto: "80ML", valor: "80ml|239.00", promoPix: false }]
     },
     {
         id: "shakira-ama",
@@ -30,7 +30,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 0,
         disponivel: false,
-        opcoes: [{ texto: "80ML - INDISPONÍVEL", valor: "80ml|0.00" }]
+        opcoes: [{ texto: "80ML - INDISPONÍVEL", valor: "80ml|0.00", promoPix: false }]
     },
     {
         id: "chloe",
@@ -42,8 +42,8 @@ const meusProdutos = [
         estoque: 7,
         disponivel: true,
         opcoes: [
-            { texto: "50ML (2 unidades) - R$ 809,00", valor: "50ml|809.00" },
-            { texto: "75ML (5 unidades) - R$ 939,00", valor: "75ml|939.00" }
+            { texto: "50ML", valor: "50ml|809.00", promoPix: false },
+            { texto: "75ML", valor: "75ml|939.00", promoPix: false }
         ]
     },
     {
@@ -55,7 +55,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 2,
         disponivel: true,
-        opcoes: [{ texto: "60ML - R$ 169,00", valor: "60ml|169.00" }]
+        opcoes: [{ texto: "60ML", valor: "60ml|169.00", promoPix: false }]
     },
     {
         id: "lady",
@@ -66,18 +66,18 @@ const meusProdutos = [
         secao: "alta",
         estoque: 4,
         disponivel: true,
-        opcoes: [{ texto: "80ML - R$ 869,00", valor: "80ml|869.00" }]
+        opcoes: [{ texto: "80ML", valor: "80ml|869.00", promoPix: false }]
     },
     {
         id: "invictus",
         marca: "PACO RABANNE",
         nome: "INVICTUS EDT",
-        descricao: "A essência da vitória. Notas oceânicas, toranja e folhas de louro. Um perfume amadeirado aquático que exala frescor e sensualidade para o homem moderno e competitivo.",
+        descricao: "A essência da victory. Notas oceânicas, toranja e folhas de louro. Um perfume amadeirado aquático que exala frescor e sensualidade para o homem moderno e competitivo.",
         imagem: "img/invictus.jpg",
         secao: "alta",
         estoque: 0,
         disponivel: false,
-        opcoes: [{ texto: "100ML - ESGOTADO", valor: "100ml|0.00" }]
+        opcoes: [{ texto: "100ML - ESGOTADO", valor: "100ml|0.00", promoPix: false }]
     },
     {
         id: "diamond",
@@ -88,7 +88,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 0,
         disponivel: false,
-        opcoes: [{ texto: "100ML - INDISPONÍVEL", valor: "100ml|0.00" }]
+        opcoes: [{ texto: "100ML", valor: "100ml|0.00", promoPix: false }]
     },
     {
         id: "animale-f",
@@ -99,7 +99,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 5,
         disponivel: true,
-        opcoes: [{ texto: "100ML - R$ 598,00", valor: "100ml|598.00" }]
+        opcoes: [{ texto: "100ML", valor: "100ml|598.00", promoPix: false }]
     },
     {
         id: "animale-m",
@@ -110,7 +110,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 4,
         disponivel: true,
-        opcoes: [{ texto: "100ML - R$ 478,00", valor: "100ml|478.00" }]
+        opcoes: [{ texto: "100ML", valor: "100ml|478.00", promoPix: false }]
     },
     {
         id: "silver",
@@ -121,7 +121,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 6,
         disponivel: true,
-        opcoes: [{ texto: "100ML - R$ 399,00", valor: "100ml|399.00" }]
+        opcoes: [{ texto: "100ML", valor: "100ml|399.00", promoPix: false }]
     },
     {
         id: "ckone",
@@ -132,7 +132,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 6,
         disponivel: true,
-        opcoes: [{ texto: "100ML - R$ 589,00", valor: "100ml|589.00" }]
+        opcoes: [{ texto: "100ML", valor: "100ml|589.00", promoPix: true }]
     },
     {
         id: "azahar",
@@ -143,7 +143,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 4,
         disponivel: true,
-        opcoes: [{ texto: "120ML - R$ 369,00", valor: "120ml|369.00" }]
+        opcoes: [{ texto: "120ML", valor: "120ml|369.00", promoPix: false }]
     },
     {
         id: "hugomen",
@@ -154,7 +154,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 1,
         disponivel: true,
-        opcoes: [{ texto: "75ML - R$ 479,00", valor: "75ml|479.00" }]
+        opcoes: [{ texto: "75ML", valor: "75ml|479.00", promoPix: false }]
     },
     {
         id: "blue",
@@ -165,7 +165,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 3,
         disponivel: true,
-        opcoes: [{ texto: "80ML - R$ 249,00", valor: "80ml|249.00" }]
+        opcoes: [{ texto: "80ML", valor: "80ml|249.00", promoPix: false }]
     },
     {
         id: "icon",
@@ -176,7 +176,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 2,
         disponivel: true,
-        opcoes: [{ texto: "200ML - R$ 379,00", valor: "200ml|379.00" }]
+        opcoes: [{ texto: "200ML", valor: "200ml|379.00", promoPix: false }]
     },
     {
         id: "power",
@@ -187,7 +187,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 0,
         disponivel: false,
-        opcoes: [{ texto: "100ML - ESGOTADO", valor: "100ml|0.00" }]
+        opcoes: [{ texto: "100ML", valor: "100ml|0.00", promoPix: false }]
     },
     {
         id: "azzaro",
@@ -198,9 +198,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 7,
         disponivel: true,
-        opcoes: [
-            { texto: "50ML - R$ 249,00", valor: "50ml|249.00" }
-        ]
+        opcoes: [{ texto: "50ML", valor: "50ml|249.00", promoPix: false }]
     },
     {
         id: "clubblack",
@@ -212,8 +210,8 @@ const meusProdutos = [
         estoque: 3,
         disponivel: true,
         opcoes: [
-            { texto: "100ML - R$ 578,00 (2 unid.)", valor: "100ml|578.00" },
-            { texto: "50ML - R$ 470,00 (1 unid.)", valor: "50ml|470.00" }
+            { texto: "100ML", valor: "100ml|578.00", promoPix: true },
+            { texto: "50ML", valor: "50ml|470.00", promoPix: false }
         ]
     },
     {
@@ -225,7 +223,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 1,
         disponivel: true,
-        opcoes: [{ texto: "125ML - R$ 289,00", valor: "125ml|289.00" }]
+        opcoes: [{ texto: "125ML", valor: "125ml|289.00", promoPix: false }]
     },
     {
         id: "nautica",
@@ -236,7 +234,7 @@ const meusProdutos = [
         secao: "alta",
         estoque: 1,
         disponivel: true,
-        opcoes: [{ texto: "100ML - R$ 199,00", valor: "100ml|199.00" }]
+        opcoes: [{ texto: "100ML", valor: "100ml|199.00", promoPix: false }]
     },
     {
         id: "sabah",
@@ -247,7 +245,7 @@ const meusProdutos = [
         secao: "arabe",
         estoque: 5,
         disponivel: true,
-        opcoes: [{ texto: "100ML - R$ 359,00", valor: "100ml|359.00" }]
+        opcoes: [{ texto: "100ML", valor: "100ml|359.00", promoPix: false }]
     },
     {
         id: "bareeq",
@@ -258,7 +256,7 @@ const meusProdutos = [
         secao: "arabe",
         estoque: 3,
         disponivel: true,
-        opcoes: [{ texto: "100ML - R$ 359,00", valor: "100ml|359.00" }]
+        opcoes: [{ texto: "100ML", valor: "100ml|359.00", promoPix: false }]
     },
     {
         id: "fakhar",
@@ -269,7 +267,7 @@ const meusProdutos = [
         secao: "arabe",
         estoque: 1,
         disponivel: true,
-        opcoes: [{ texto: "100ML - R$ 439,00", valor: "100ml|439.00" }]
+        opcoes: [{ texto: "100ML", valor: "100ml|439.00", promoPix: false }]
     },
     {
         id: "asad-lattafa",
@@ -280,7 +278,7 @@ const meusProdutos = [
         secao: "arabe",
         estoque: 3,
         disponivel: true,
-        opcoes: [{ texto: "100ML - R$ 369,00", valor: "100ml|369.00" }]
+        opcoes: [{ texto: "100ML", valor: "100ml|369.00", promoPix: false }]
     },
     {
         id: "kitamarillo",
@@ -291,7 +289,7 @@ const meusProdutos = [
         secao: "kits",
         estoque: 6,
         disponivel: true,
-        opcoes: [{ texto: "80ML+10ML - R$ 259,00", valor: "80ml+10ml|259.00" }]
+        opcoes: [{ texto: "80ML+10ML", valor: "80ml+10ml|259.00", promoPix: false }]
     },
     {
         id: "coffretfucsia",
@@ -302,7 +300,7 @@ const meusProdutos = [
         secao: "kits",
         estoque: 1,
         disponivel: true,
-        opcoes: [{ texto: "80ML + CREME - R$ 259,00", valor: "80ml+Creme|259.00" }]
+        opcoes: [{ texto: "80ML+CREME", valor: "80ml+Creme|259.00", promoPix: false }]
     },
     {
         id: "kitblue",
@@ -313,6 +311,6 @@ const meusProdutos = [
         secao: "kits",
         estoque: 1,
         disponivel: true,
-        opcoes: [{ texto: "80ML + DESOD. - R$ 259,00", valor: "80ml+DES|259.00" }]
+        opcoes: [{ texto: "80ML+DESOD.", valor: "80ml+DES|259.00", promoPix: false }]
     }
 ];
