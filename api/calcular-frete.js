@@ -5,7 +5,8 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { cep_destino, valor_total } = req.body;
+  // ADICIONADO: tem_promo vindo do corpo da requisição
+  const { cep_destino, valor_total, tem_promo } = req.body;
   const token = process.env.MELHOR_ENVIO_TOKEN;
   
   const cepLimpo = cep_destino ? cep_destino.replace(/\D/g, '') : "";
@@ -14,7 +15,7 @@ export default async function handler(req, res) {
   try {
     let opcoesFinais = [];
 
-    // 1. REGRA ARAGUAÍNA
+    // 1. REGRA ARAGUAÍNA (Mantida igual)
     if (cepLimpo.startsWith("778")) {
       return res.status(200).json([
         { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "1" },
@@ -45,7 +46,6 @@ export default async function handler(req, res) {
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
-          // Filtra e formata as opções pagas
           opcoesFinais = data
             .filter(op => op.price && !op.error)
             .map(op => ({
@@ -57,12 +57,10 @@ export default async function handler(req, res) {
       }
     }
 
-    // 3. LÓGICA DE EXCLUSIVIDADE DO FRETE GRÁTIS (Sua solicitação)
-    // Se o valor for >= 700, limpamos as opções pagas e deixamos apenas o Grátis com o prazo
-    if (valorNum >= 700) {
-      // Pegamos o maior prazo das transportadoras para exibir no frete grátis
+    // 3. NOVA LÓGICA DE FRETE GRÁTIS VS PROMOÇÃO
+    // Se NÃO tem promoção E o valor é >= 700, limpa tudo e deixa só o GRÁTIS
+    if (!tem_promo && valorNum >= 700) {
       const maiorPrazo = opcoesFinais.length > 0 ? "8 a 17" : "10 a 15"; 
-      
       return res.status(200).json([{ 
         name: "Frete Grátis (Promocional)", 
         price: 0, 
@@ -70,7 +68,7 @@ export default async function handler(req, res) {
       }]);
     }
 
-    // Se não for frete grátis, retorna as opções normais encontradas
+    // Se TIVER promoção ou valor < 700, retorna as opções pagas (PAC/SEDEX) encontradas
     return res.status(200).json(opcoesFinais);
 
   } catch (error) {
