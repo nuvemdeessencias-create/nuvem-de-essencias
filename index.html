@@ -335,31 +335,36 @@ function carregarProdutos() {
         card.setAttribute('data-marca', p.marca.toUpperCase());
         card.setAttribute('data-secao', p.secao);
 
-        // Preço da primeira opção (80ml ou similar)
-        const precoOriginal = parseFloat(p.opcoes[0].valor.split('|')[1]);
+        // Dentro do loop meusProdutos.forEach(p => { ... })
+
+const precoOriginal = parseFloat(p.opcoes[0].valor.split('|')[1]);
+const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
+
+// Calculamos a porcentagem real (ex: 0.07 -> 7 | 0.10 -> 10)
+const porcentagemExibicao = Math.round(promo.descontoPercentual * 100);
+
+card.innerHTML = `
+    ${promo.emPromocao ? `<div class="selo-promo">${porcentagemExibicao}% OFF NO PIX</div>` : ''}
+    <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
+    
+    <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
+        <span class="marca-tag">${p.marca}</span>
+        <div class="nome-perfume">${p.nome}</div>
         
-        // Verifica promoção usando a função do arquivo promocoes.js
-        const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
-
-        const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
-
-        card.innerHTML = `
-            ${promo.emPromocao ? `<div class="selo-promo">7% OFF NO PIX</div>` : ''}
-            <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
-            <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
-                <span class="marca-tag">${p.marca}</span>
-                <div class="nome-perfume">${p.nome}</div>
-                
-            <div style="margin-bottom: 10px;">
-    ${promo.emPromocao ? `
-        <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${precoOriginal.toFixed(2)}</span>
-        <div style="color:#28a745; font-weight:bold; font-size:18px;">R$ ${promo.precoFinal.toFixed(2)} <span style="font-size:12px;">no PIX</span></div>
-        <div style="font-size:10px; color:#666;">(Valor original no cartão)</div>
-    ` : `
-        <div style="color:#d9534f; font-weight:bold; font-size:18px;">R$ ${promo.precoFinal.toFixed(2)}</div>
-    `}
-</div>
-
+        <div style="margin-bottom: 10px;">
+            ${promo.emPromocao ? `
+                <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${precoOriginal.toFixed(2)}</span>
+                <div style="color:#28a745; font-weight:bold; font-size:18px;">
+                    R$ ${promo.precoFinal.toFixed(2)} 
+                    <span style="font-size:12px; display:block;">no PIX (${porcentagemExibicao}% OFF)</span>
+                </div>
+                <div style="font-size:10px; color:#666; margin-top:4px;">No cartão: R$ ${precoOriginal.toFixed(2)}</div>
+            ` : `
+                <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${precoOriginal.toFixed(2)}</div>
+                <div style="font-size:10px; color:#666;">Preço único</div>
+            `}
+        </div>
+        `;
                 <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
                 
                 <div class="qtd-container">
@@ -417,10 +422,14 @@ function atualizarSacola() {
     } else {
         itensCont.innerHTML = sacola.map((item, index) => `
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
-                <div style="text-align:left;">
-                    <b style="font-size:13px;">${item.nome}</b><br>
-                    <small>${item.ml} | Qtd: ${item.qtd} ${item.emPromocao ? '<span style="color:red;">(Promo)</span>' : ''}</small>
-                </div>
+<div style="text-align:left;">
+    <b style="font-size:13px;">${item.nome}</b><br>
+    <small>${item.ml} | Qtd: ${item.qtd}</small><br>
+    ${item.emPromocao ? 
+        `<small style="color:#28a745; font-weight:bold;">Desconto PIX aplicado</small>` : 
+        `<small style="color:#666;">Valor padrão</small>`
+    }
+</div>
                 <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px; cursor:pointer;">&times;</button>
             </div>`).join('');
     }
@@ -519,18 +528,25 @@ function fecharDetalhes() { document.getElementById('modal-detalhes').style.disp
 function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
     
-    let texto = "*Pedido Nuvem de Essências:*\n\n";
+    let texto = "*PEDIDO NUVEM DE ESSÊNCIAS*\n\n";
+    let possuiPromocao = false;
+
     sacola.forEach(i => {
-        texto += `• ${i.nome} (${i.ml}) x${i.qtd} - R$ ${(i.preco * i.qtd).toFixed(2)}\n`;
+        const subtotalItem = i.preco * i.qtd;
+        texto += `• ${i.nome} (${i.ml})\n`;
+        texto += `  Qtd: ${i.qtd} - R$ ${subtotalItem.toFixed(2)}${i.emPromocao ? ' (C/ desc. PIX)' : ''}\n`;
+        if (i.emPromocao) possuiPromocao = true;
     });
     
     texto += `\n*Frete:* ${nomeFreteGlobal} (R$ ${valorFreteGlobal.toFixed(2)})\n`;
-    texto += `*Total no PIX:* R$ ${document.getElementById('cart-total').innerText}\n\n`;
-    texto += `_Obs: O desconto de 7% é exclusivo para pagamento via PIX. No cartão de crédito, prevalece o valor sem desconto._`;
+    texto += `*TOTAL FINAL:* R$ ${document.getElementById('cart-total').innerText}\n\n`;
+    
+    if (possuiPromocao) {
+        texto += `⚠️ *Aviso:* O total acima considera o desconto para PIX nos produtos sinalizados. Para pagamento via Cartão, os itens em promoção voltam ao valor original.`;
+    }
 
     window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
-}
-</script>
+}</script>
 
 <div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
     <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; position:relative; color:#333; text-align:center;">
@@ -552,6 +568,7 @@ function finalizarWhatsApp() {
 
 </body>
 </html>
+
 
 
 
