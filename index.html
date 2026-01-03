@@ -324,14 +324,14 @@ window.onload = function() {
     if(anoReal) anoReal.textContent = new Date().getFullYear();
 };
 
+// FORMATADOR DE MOEDA (Substitui ponto por vírgula)
+function formatarMoeda(valor) {
+    return valor.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
-    if (!container) return;
-    
-    if (typeof meusProdutos === 'undefined') {
-        console.error("A variável 'meusProdutos' não foi definida!");
-        return;
-    }
+    if (!container || typeof meusProdutos === 'undefined') return;
 
     container.innerHTML = ""; 
 
@@ -339,93 +339,146 @@ function carregarProdutos() {
         try {
             const card = document.createElement('div');
             card.className = 'card';
-            card.setAttribute('data-marca', p.marca.toUpperCase());
-            card.setAttribute('data-secao', p.secao);
+            card.setAttribute('data-marca', (p.marca || "").toUpperCase());
+            card.setAttribute('data-secao', p.secao || "");
 
+            // Preço inicial (primeira opção)
             const precoOriginal = parseFloat(p.opcoes[0].valor.split('|')[1]);
             const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
-
-            // Correção para exibir sempre o valor correto (ex: 7 em vez de 700 ou 0.07)
-            let porc = promo.descontoPercentual;
-            if (porc < 1 && porc > 0) porc = Math.round(porc * 100);
-            const porcentagemExibicao = porc || 7;
-
             const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
             card.innerHTML = `
-                ${promo.emPromocao ? `<div class="selo-promo">${porcentagemExibicao}% OFF NO PIX</div>` : ''}
+                ${promo.emPromocao ? `<div class="selo-promo">${promo.descontoPercentual}% OFF NO PIX</div>` : ''}
                 <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
                 
                 <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
                     <span class="marca-tag">${p.marca}</span>
                     <div class="nome-perfume">${p.nome}</div>
                     
-                    <div style="margin-bottom: 10px;">
+                    <div id="preco-container-${p.id}" style="margin-bottom: 10px;">
                         ${promo.emPromocao ? `
-                            <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${precoOriginal.toFixed(2)}</span>
+                            <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${formatarMoeda(precoOriginal)}</span>
                             <div style="color:#28a745; font-weight:bold; font-size:18px;">
-                                R$ ${promo.precoFinal.toFixed(2)} 
-                                <span style="font-size:12px; display:block;">no PIX (${porcentagemExibicao}% OFF)</span>
+                                R$ ${formatarMoeda(promo.precoFinal)} 
+                                <span style="font-size:12px; display:block;">no PIX (${promo.descontoPercentual}% OFF)</span>
                             </div>
-                            <div style="font-size:10px; color:#666; margin-top:4px;">No cartão: R$ ${precoOriginal.toFixed(2)}</div>
                         ` : `
-                            <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${precoOriginal.toFixed(2)}</div>
+                            <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${formatarMoeda(precoOriginal)}</div>
                             <div style="font-size:10px; color:#666;">Preço único</div>
                         `}
                     </div>
 
                     <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
                     
-                    <div class="qtd-container" style="display:flex; justify-content:center; align-items:center; gap:5px; margin:10px 0;">
+                    <div class="qtd-container">
                         <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                        <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd" style="width:30px; text-align:center;">
+                        <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
                         <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
                     </div>
 
-                    <select class="seletor-ml" id="ml-${p.id}" style="width:100%; margin-bottom:10px;">
+                    <select class="seletor-ml" id="ml-${p.id}" onchange="atualizarPrecoCard('${p.id}', this.value, '${p.marca}')">
                         ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
                     </select>
                     
-                    <div style="display: flex; flex-direction: column; gap: 8px;">
-                        <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="background:#c29958; color:white; padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">VER DETALHES</button>
-                        ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="background:black; color:white; padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">+ ADICIONAR À SACOLA</button>` : ''}
+                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                        <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})">VER DETALHES</button>
+                        ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')">+ ADICIONAR À SACOLA</button>` : ''}
                     </div>
                 </div>`; 
             container.appendChild(card);
-        } catch (e) { console.error("Erro no produto:", e); }
+        } catch (err) { console.error(err); }
     });
+}
+
+// FUNÇÃO PARA MUDAR O PREÇO QUANDO MUDA O ML
+function atualizarPrecoCard(id, valorSelt, marca) {
+    const precoBase = parseFloat(valorSelt.split('|')[1]);
+    const container = document.getElementById(`preco-container-${id}`);
+    const promo = processarPrecoProduto({ id: id, marca: marca, preco: precoBase });
+
+    if (promo.emPromocao) {
+        container.innerHTML = `
+            <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${formatarMoeda(precoBase)}</span>
+            <div style="color:#28a745; font-weight:bold; font-size:18px;">
+                R$ ${formatarMoeda(promo.precoFinal)} 
+                <span style="font-size:12px; display:block;">no PIX (${promo.descontoPercentual}% OFF)</span>
+            </div>`;
+    } else {
+        container.innerHTML = `<div style="color:#333; font-weight:bold; font-size:18px;">R$ ${formatarMoeda(precoBase)}</div>
+                               <div style="font-size:10px; color:#666;">Preço único</div>`;
+    }
+}
+
+// FRETE CORRIGIDO
+async function calcularFrete() {
+    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+    const resultadoDiv = document.getElementById('opcoes-frete');
+    
+    if (sacola.length === 0) return alert("Adicione produtos primeiro.");
+    if (cep.length !== 8) return alert("CEP inválido.");
+
+    resultadoDiv.innerHTML = "<p style='color:#666'>Calculando...</p>";
+    
+    const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
+
+    try {
+        const response = await fetch('/api/calcular-frete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cep_destino: cep, valor_total: subtotal })
+        });
+        const data = await response.json();
+        
+        if(!data || data.length === 0) {
+            resultadoDiv.innerHTML = "<p style='color:orange'>Nenhuma transportadora atende este CEP.</p>";
+            return;
+        }
+
+        resultadoDiv.innerHTML = data.map((op, index) => `
+            <div class="opcao-frete-card" onclick="selecionarFrete('${op.name}', ${op.price}, this)" 
+                 style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
+                <div style="text-align:left;">
+                    <strong style="font-size:12px;">${op.name}</strong><br>
+                    <small>Prazo: ${op.delivery_time} dias</small>
+                </div>
+                <strong style="color:#b89356;">${op.price == 0 ? 'GRÁTIS' : 'R$ ' + formatarMoeda(op.price)}</strong>
+            </div>`).join('');
+    } catch (e) {
+        resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao calcular. Tente pelo WhatsApp.</p>";
+    }
+}
+
+function selecionarFrete(nome, valor, elemento) {
+    valorFreteGlobal = valor;
+    nomeFreteGlobal = nome;
+    document.querySelectorAll('.opcao-frete-card').forEach(c => c.style.borderColor = '#eee');
+    elemento.style.borderColor = '#b89356';
+    atualizarSacola();
 }
 
 function adicionarComPromocao(id, nome, mlId, qtdId) {
     const selectMl = document.getElementById(mlId);
-    if(!selectMl) return;
     const [ml, precoBruto] = selectMl.value.split('|');
     const precoBase = parseFloat(precoBruto);
-    const qtdInput = document.getElementById(qtdId);
-    const qtd = qtdInput ? parseInt(qtdInput.value) : 1;
-    
+    const qtd = parseInt(document.getElementById(qtdId).value);
     const pOriginal = meusProdutos.find(item => item.id === id);
     const promo = processarPrecoProduto({ id: id, marca: pOriginal.marca, preco: precoBase });
 
     sacola.push({ 
-        id: id,
-        nome: nome, 
-        ml: ml, 
-        preco: parseFloat(promo.precoFinal.toFixed(2)), 
-        qtd: qtd, 
-        emPromocao: promo.emPromocao 
+        id: id, nome: nome, ml: ml, 
+        preco: promo.precoFinal, 
+        qtd: qtd, emPromocao: promo.emPromocao 
     });
 
     atualizarSacola();
-    if (!document.getElementById('cart-modal').classList.contains('active')) toggleCart();
+    toggleCart();
 }
 
 function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
     const countCont = document.getElementById('cart-count');
-    if(!itensCont || !totalCont) return;
-
+    
     let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
 
     if (sacola.length === 0) {
@@ -435,73 +488,47 @@ function atualizarSacola() {
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
                 <div style="text-align:left;">
                     <b style="font-size:13px;">${item.nome}</b><br>
-                    <small>${item.ml} | Qtd: ${item.qtd}</small><br>
-                    ${item.emPromocao ? `<small style="color:#28a745; font-weight:bold;">Desconto PIX aplicado</small>` : `<small style="color:#666;">Valor padrão</small>`}
+                    <small>${item.ml} | Qtd: ${item.qtd}</small>
                 </div>
-                <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px; cursor:pointer;">&times;</button>
+                <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px;">&times;</button>
             </div>`).join('');
     }
 
-    const totalGeral = subtotal + (window.valorFreteGlobal || 0);
-    totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
-    if(countCont) countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
+    const totalGeral = subtotal + valorFreteGlobal;
+    totalCont.innerText = formatarMoeda(totalGeral);
+    countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
 }
 
 function alterarQtd(id, delta, max) {
     const input = document.getElementById(id);
-    if(!input) return;
     let novo = parseInt(input.value) + delta;
     if (novo >= 1 && novo <= max) input.value = novo;
 }
 
-function toggleCart() { 
-    const modal = document.getElementById('cart-modal');
-    if(modal) modal.classList.toggle('active'); 
-}
-
-function removerItem(index) { 
-    sacola.splice(index, 1); 
-    atualizarSacola(); 
-}
+function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
+function removerItem(index) { sacola.splice(index, 1); atualizarSacola(); }
 
 function abrirDetalhes(p) {
-    const modal = document.getElementById('modal-detalhes');
-    if(!modal) return;
     document.getElementById('detalhe-img').src = p.imagem;
     document.getElementById('detalhe-nome').innerText = p.nome;
     document.getElementById('detalhe-marca').innerText = p.marca;
     document.getElementById('detalhe-descricao').innerText = p.descricao || "Fragrância exclusiva.";
-    modal.style.display = 'flex';
+    document.getElementById('modal-detalhes').style.display = 'flex';
 }
 
-function fecharDetalhes() { 
-    const modal = document.getElementById('modal-detalhes');
-    if(modal) modal.style.display = 'none'; 
-}
+function fecharDetalhes() { document.getElementById('modal-detalhes').style.display = 'none'; }
 
 function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
     let texto = "*PEDIDO NUVEM DE ESSÊNCIAS*\n\n";
-    let possuiPromocao = false;
-
     sacola.forEach(i => {
-        const subtotalItem = i.preco * i.qtd;
-        texto += `• ${i.nome} (${i.ml})\n`;
-        texto += `  Qtd: ${i.qtd} - R$ ${subtotalItem.toFixed(2)}${i.emPromocao ? ' (C/ desc. PIX)' : ''}\n`;
-        if (i.emPromocao) possuiPromocao = true;
+        texto += `• ${i.nome} (${i.ml}) - Qtd: ${i.qtd} - R$ ${formatarMoeda(i.preco * i.qtd)}\n`;
     });
-    
-    texto += `\n*Frete:* ${window.nomeFreteGlobal || 'A combinar'} (R$ ${(window.valorFreteGlobal || 0).toFixed(2)})\n`;
-    texto += `*TOTAL FINAL:* R$ ${document.getElementById('cart-total').innerText}\n\n`;
-    
-    if (possuiPromocao) {
-        texto += `⚠️ *Aviso:* O total acima considera o desconto para PIX nos produtos sinalizados. No Cartão, o valor volta ao original.`;
-    }
-
+    texto += `\n*Frete:* ${nomeFreteGlobal || 'A combinar'} (R$ ${formatarMoeda(valorFreteGlobal)})\n`;
+    texto += `*TOTAL:* R$ ${document.getElementById('cart-total').innerText}`;
     window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
 }
 </script>
-
 <div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
     <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; position:relative; color:#333; text-align:center;">
         <span onclick="fecharDetalhes()" style="position:absolute; top:10px; right:15px; font-size:25px; cursor:pointer;">&times;</span>
@@ -519,4 +546,5 @@ function finalizarWhatsApp() {
         <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
     </div>
 </footer>
+
 
