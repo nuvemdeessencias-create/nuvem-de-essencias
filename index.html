@@ -350,8 +350,7 @@ function carregarProdutos() {
                 <span class="marca-tag">${p.marca}</span>
                 <div class="nome-perfume">${p.nome}</div>
                 
-               // Localize onde o preço é desenhado no card e substitua por:
-<div style="margin-bottom: 10px;">
+            <div style="margin-bottom: 10px;">
     ${promo.emPromocao ? `
         <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${precoOriginal.toFixed(2)}</span>
         <div style="color:#28a745; font-weight:bold; font-size:18px;">R$ ${promo.precoFinal.toFixed(2)} <span style="font-size:12px;">no PIX</span></div>
@@ -553,6 +552,7 @@ function finalizarWhatsApp() {
 
 </body>
 </html>
+
 
 
 
