@@ -344,16 +344,22 @@ function carregarProdutos() {
         const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
         card.innerHTML = `
-            ${promo.emPromocao ? `<div class="selo-promo">PROMOÇÃO ${Math.round(promo.descontoPercentual * 100)}% OFF</div>` : ''}
+            ${promo.emPromocao ? `<div class="selo-promo">7% OFF NO PIX</div>` : ''}
             <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
             <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
                 <span class="marca-tag">${p.marca}</span>
                 <div class="nome-perfume">${p.nome}</div>
                 
-                <div style="margin-bottom: 10px;">
-                    ${promo.emPromocao ? `<span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${precoOriginal.toFixed(2)}</span>` : ''}
-                    <div style="color:#d9534f; font-weight:bold; font-size:18px;">R$ ${promo.precoFinal.toFixed(2)}</div>
-                </div>
+               // Localize onde o preço é desenhado no card e substitua por:
+<div style="margin-bottom: 10px;">
+    ${promo.emPromocao ? `
+        <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${precoOriginal.toFixed(2)}</span>
+        <div style="color:#28a745; font-weight:bold; font-size:18px;">R$ ${promo.precoFinal.toFixed(2)} <span style="font-size:12px;">no PIX</span></div>
+        <div style="font-size:10px; color:#666;">(Valor original no cartão)</div>
+    ` : `
+        <div style="color:#d9534f; font-weight:bold; font-size:18px;">R$ ${promo.precoFinal.toFixed(2)}</div>
+    `}
+</div>
 
                 <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
                 
@@ -513,9 +519,16 @@ function fecharDetalhes() { document.getElementById('modal-detalhes').style.disp
 
 function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
+    
     let texto = "*Pedido Nuvem de Essências:*\n\n";
-    sacola.forEach(i => texto += `• ${i.nome} (${i.ml}) x${i.qtd} - R$ ${(i.preco * i.qtd).toFixed(2)}\n`);
-    texto += `\n*Frete:* ${nomeFreteGlobal} (R$ ${valorFreteGlobal.toFixed(2)})\n*Total:* R$ ${document.getElementById('cart-total').innerText}`;
+    sacola.forEach(i => {
+        texto += `• ${i.nome} (${i.ml}) x${i.qtd} - R$ ${(i.preco * i.qtd).toFixed(2)}\n`;
+    });
+    
+    texto += `\n*Frete:* ${nomeFreteGlobal} (R$ ${valorFreteGlobal.toFixed(2)})\n`;
+    texto += `*Total no PIX:* R$ ${document.getElementById('cart-total').innerText}\n\n`;
+    texto += `_Obs: O desconto de 7% é exclusivo para pagamento via PIX. No cartão de crédito, prevalece o valor sem desconto._`;
+
     window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
 }
 </script>
@@ -540,6 +553,7 @@ function finalizarWhatsApp() {
 
 </body>
 </html>
+
 
 
 
