@@ -5,78 +5,160 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuvem De Essências | Catálogo Oficial</title>
     <style>
-        /* 1. CONFIGURAÇÕES GERAIS E CORES */
-        :root {
-            --azul-fundo: #020b1f; 
-            --azul-card: #ffffff; 
-            --dourado: #b89356;
-            --texto-escuro: #333333;
-            --verde-whats: #25d366;
-            --cinza-botao: #000000;
-        }
+/* 1. CONFIGURAÇÕES GERAIS E CORES */
+:root {
+    --azul-fundo: #020b1f; 
+    --azul-card: #ffffff; 
+    --dourado: #b89356;
+    --texto-escuro: #333333;
+    --verde-whats: #25d366;
+    --cinza-botao: #000000; /* ALTERADO: De #333333 para #000000 (Preto) */
+}
 
-        body { 
-            font-family: 'Segoe UI', sans-serif; 
-            margin: 0; 
-            background-color: var(--azul-fundo); 
-            color: white; 
-            overflow-x: hidden; 
-        }
+/* Certifique-se que o botão está usando essa variável */
+.btn-add-sacola {
+    background-color: var(--cinza-botao) !important;
+    color: #ffffff !important; /* Garante que o nome fique branco */
+    cursor: pointer;
+}
 
-        header { 
-            background: var(--azul-fundo); 
-            padding: 15px 5%; 
-            display: flex;
-            align-items: center;
-            justify-content: space-between; 
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            border-bottom: 1px solid rgba(184, 147, 86, 0.3);
-        }
+body { 
+    font-family: 'Segoe UI', sans-serif; 
+    margin: 0; 
+    background-color: var(--azul-fundo); 
+    color: white; 
+    overflow-x: hidden; 
+}
 
-        .logo-img { width: 180px; height: auto; }
+/* 2. CABEÇALHO DO SITE */
+header { 
+    background: var(--azul-fundo); 
+    padding: 15px 5%; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between; 
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(184, 147, 86, 0.3);
+}
 
-        .cart-icon-container {
-            background: var(--dourado);
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-weight: bold;
-            color: white;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        }
+.logo-img { width: 180px; height: auto; }
 
-        /* ESTILO DO MODAL SACOLA */
-        .cart-modal {
-            position: fixed;
-            top: 0;
-            right: -100%;
-            width: 100%;
-            max-width: 380px;
-            height: 100vh;
-            background: white;
-            z-index: 2000;
-            transition: 0.4s;
-            display: flex;
-            flex-direction: column;
-            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
-        }
-        .logo-text {
-    font-family: 'Playfair Display', serif;
-    color: #87CEEB; /* Azul Nuvem Celeste */
-    font-size: 1.25rem;
+.cart-icon-container {
+    background: var(--dourado);
+    padding: 8px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 2px;
+    color: white;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-.rodape-premium strong {
-    color: #87CEEB; /* Araguaína - Tocantins em destaque */
+#cart-count { background: white; color: var(--azul-fundo); padding: 2px 6px; border-radius: 50%; font-size: 11px; }
+
+/* 3. ESTRUTURA DA SACOLA (MODAL) */
+.cart-modal {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 100%;
+    max-width: 380px;
+    height: 100vh;
+    background: white;
+    z-index: 2000;
+    transition: 0.4s;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: -5px 0 20px rgba(0,0,0,0.5);
 }
+
+.cart-modal.active { right: 0; }
+
+#cart-scroll-area {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px;
+    -webkit-overflow-scrolling: touch;
+}
+
+#cart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-bottom: 20px;
+}
+
+#opcoes-frete {
+    margin-top: 15px;
+    padding-bottom: 80px; /* Garante que o último frete não suma atrás do botão */
+}
+
+.cart-footer {
+    padding: 20px;
+    border-top: 1px solid #eee;
+    background: white;
+    flex-shrink: 0;
+    z-index: 10;
+}
+
+
+/* 4. RODAPÉ PREMIUM (FONTES E ESTILO) */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap');
+
+.rodape-premium {
+    background-color: #0a0c1a;
+    color: #ffffff;
+    padding: 50px 0 30px 0;
+    font-family: 'Poppins', sans-serif;
+    text-align: center;
+}
+
+.logo-text {
+    font-family: 'Playfair Display', serif;
+    color: #87CEEB; 
+    font-size: 1.20rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.slogan {
+    font-family: 'Playfair Display', serif;
+    font-style: italic;
+    color: #c5a059;
+    font-size: 1.0rem;
+    margin-bottom: 5px;
+}
+
+/* 5. INPUTS E BOTÕES */
+#cep-cliente {
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 12px;
+    font-size: 16px;
+    outline: none;
+    background: white;
+    color: #333;
+}
+
+.btn-whats {
+    background: var(--verde-whats);
+    color: white;
+    border: none;
+    padding: 15px;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 16px;
+}
+
         .cart-modal.active { right: 0; }
         #cart-scroll-area { flex: 1; overflow-y: auto; padding: 20px; color: #333; }
         .cart-footer { padding: 20px; border-top: 1px solid #eee; background: white; flex-shrink: 0; }
@@ -490,6 +572,7 @@ function filtrarCategoria(cat, el) {
 </script>
 </body>
 </html>
+
 
 
 
