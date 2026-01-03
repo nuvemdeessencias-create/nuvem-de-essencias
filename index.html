@@ -335,25 +335,23 @@ function carregarProdutos() {
         card.setAttribute('data-marca', p.marca.toUpperCase());
         card.setAttribute('data-secao', p.secao);
 
-        // Pega o preço base da primeira opção
-        const precoBase = parseFloat(p.opcoes[0].valor.split('|')[1]);
+        // Preço da primeira opção (80ml ou similar)
+        const precoOriginal = parseFloat(p.opcoes[0].valor.split('|')[1]);
         
-        // Processa promoção via promocoes.js
-        const promo = typeof processarPrecoProduto === 'function' 
-            ? processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoBase }) 
-            : { precoFinal: precoBase, emPromocao: false, descontoPercentual: 0 };
+        // Verifica promoção usando a função do arquivo promocoes.js
+        const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
 
         const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
         card.innerHTML = `
             ${promo.emPromocao ? `<div class="selo-promo">PROMOÇÃO ${Math.round(promo.descontoPercentual * 100)}% OFF</div>` : ''}
-            <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick='abrirDetalhes(${pJson})'>
+            <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
             <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
                 <span class="marca-tag">${p.marca}</span>
                 <div class="nome-perfume">${p.nome}</div>
                 
                 <div style="margin-bottom: 10px;">
-                    ${promo.emPromocao ? `<span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${precoBase.toFixed(2)}</span>` : ''}
+                    ${promo.emPromocao ? `<span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${precoOriginal.toFixed(2)}</span>` : ''}
                     <div style="color:#d9534f; font-weight:bold; font-size:18px;">R$ ${promo.precoFinal.toFixed(2)}</div>
                 </div>
 
@@ -365,41 +363,38 @@ function carregarProdutos() {
                     <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
                 </div>
 
-                <select class="seletor-ml" id="ml-${p.id}" onchange="atualizarPrecoCard('${p.id}', this.value, '${p.marca}')">
+                <select class="seletor-ml" id="ml-${p.id}">
                     ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
                 </select>
                 
                 <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <button class="btn-add-cart" onclick='abrirDetalhes(${pJson})'>VER DETALHES</button>
-                    ${p.disponivel ? `<button class="btn-add-sacola" onclick="addSacolaPromo('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')">+ Adicionar à Sacola</button>` : ''}
+                    <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">VER DETALHES</button>
+                    ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">+ Adicionar à Sacola</button>` : ''}
                 </div>
             </div>`; 
         container.appendChild(card);
     });
 }
 
-// Função para adicionar com desconto aplicado
-function addSacolaPromo(id, nome, mlId, qtdId) {
+// FUNÇÃO PARA ADICIONAR AO CARRINHO COM O PREÇO CORRETO DA PROMOÇÃO
+function adicionarComPromocao(id, nome, mlId, qtdId) {
     const selectMl = document.getElementById(mlId);
     const [ml, precoBruto] = selectMl.value.split('|');
-    const precoNum = parseFloat(precoBruto);
+    const precoBase = parseFloat(precoBruto);
     const qtd = parseInt(document.getElementById(qtdId).value);
 
-    // Busca a marca para o cálculo do desconto
-    const produtoOriginal = meusProdutos.find(x => x.id === id);
-    
-    const promo = typeof processarPrecoProduto === 'function' 
-        ? processarPrecoProduto({ id: id, marca: produtoOriginal.marca, preco: precoNum }) 
-        : { precoFinal: precoNum, emPromocao: false };
+    // Re-calcula promoção para garantir o preço atualizado
+    const pOriginal = meusProdutos.find(item => item.id === id);
+    const promo = processarPrecoProduto({ id: id, marca: pOriginal.marca, preco: precoBase });
 
     sacola.push({ 
-        nome, 
-        ml, 
+        nome: nome, 
+        ml: ml, 
         preco: promo.precoFinal, 
-        qtd, 
+        qtd: qtd, 
         emPromocao: promo.emPromocao 
     });
-    
+
     atualizarSacola();
     if (!document.getElementById('cart-modal').classList.contains('active')) toggleCart();
 }
@@ -429,6 +424,7 @@ function atualizarSacola() {
     countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
 }
 
+// CÁLCULO DE FRETE COM REGRA DE PROMOÇÃO E API
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
     const resultadoDiv = document.getElementById('opcoes-frete');
@@ -440,8 +436,6 @@ async function calcularFrete() {
 
     const ehAraguaina = cep.startsWith('778');
     const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
-    
-    // REGRA SOLICITADA: Se houver promoção, não tem frete grátis nacional
     const temPromocaoNoCarrinho = sacola.some(item => item.emPromocao === true);
 
     try {
@@ -452,10 +446,12 @@ async function calcularFrete() {
                 { name: "Retirada no Local", price: 0, delivery_time: "0" }
             ];
         } else {
-            // Frete grátis nacional apenas se NÃO houver itens em promoção e for > 700
+            // Regra: Se tem promoção, NUNCA é grátis para fora de Araguaína.
+            // Se não tem promoção e é acima de 700, pode ser grátis.
             if (subtotal >= 700 && !temPromocaoNoCarrinho) {
-                validas = [{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "8 a 12" }];
+                validas = [{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "8 a 14" }];
             } else {
+                // CHAMA A SUA PASTA API
                 const response = await fetch('/api/calcular-frete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -468,17 +464,15 @@ async function calcularFrete() {
         resultadoDiv.innerHTML = validas.map((op, index) => `
             <div id="f-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${op.price}, 'f-op-${index}')" 
                  style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                    <div class="radio-inner" style="width:12px; height:12px; border:2px solid #b89356; border-radius:50%;"></div>
-                    <div style="text-align:left;">
-                        <strong style="font-size:12px;">${op.name}</strong><br>
-                        <small>Prazo: ${op.delivery_time} dias</small>
-                    </div>
+                <div style="text-align:left;">
+                    <strong style="font-size:12px;">${op.name}</strong><br>
+                    <small>Prazo: ${op.delivery_time} dias</small>
                 </div>
                 <strong style="color:#b89356;">${op.price == 0 ? 'GRÁTIS' : 'R$ '+op.price.toFixed(2)}</strong>
             </div>`).join('');
+
     } catch (e) {
-        resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao calcular frete.</p>";
+        resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao conectar com a API de frete.</p>";
     }
 }
 
@@ -520,24 +514,6 @@ function finalizarWhatsApp() {
     texto += `\n*Frete:* ${nomeFreteGlobal} (R$ ${valorFreteGlobal.toFixed(2)})\n*Total:* R$ ${document.getElementById('cart-total').innerText}`;
     window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
 }
-
-function filtrar() {
-    const marca = document.getElementById('filtroMarca').value.toUpperCase();
-    const busca = document.getElementById('buscaInput').value.toUpperCase();
-    document.querySelectorAll('.card').forEach(card => {
-        const mCard = card.getAttribute('data-marca');
-        const nCard = card.querySelector('.nome-perfume').innerText.toUpperCase();
-        card.style.display = (marca === 'TODOS' || mCard === marca) && nCard.includes(busca) ? "block" : "none";
-    });
-}
-
-function filtrarCategoria(cat, el) {
-    document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
-    el.classList.add('active');
-    document.querySelectorAll('.card').forEach(card => {
-        card.style.display = (cat === 'todos' || card.getAttribute('data-secao') === cat) ? "block" : "none";
-    });
-}
 </script>
 
 <div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
@@ -552,9 +528,7 @@ function filtrarCategoria(cat, el) {
 
 <footer class="rodape-premium">
     <div class="container">
-        <p class="slogan">"Sinta o aroma dos sonhos e realce sua beleza!"</p>
         <h1 class="logo-text">NUVEM DE ESSÊNCIAS PERFUMARIA</h1>
-        <hr style="opacity: 0.1; margin: 20px 0;">
         <p>Araguaína - TO | WhatsApp: (63) 99257-6211</p>
         <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
     </div>
@@ -562,4 +536,5 @@ function filtrarCategoria(cat, el) {
 
 </body>
 </html>
+
 
