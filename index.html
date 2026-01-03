@@ -324,6 +324,8 @@ window.onload = function() {
     if(anoReal) anoReal.textContent = new Date().getFullYear();
 };
 
+// --- FUNÇÕES DE CARREGAMENTO E LÓGICA ---
+
 function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
     if (!container) return;
@@ -335,14 +337,9 @@ function carregarProdutos() {
         card.setAttribute('data-marca', p.marca.toUpperCase());
         card.setAttribute('data-secao', p.secao);
 
-        // Preço da primeira opção para o card inicial
         const precoOriginal = parseFloat(p.opcoes[0].valor.split('|')[1]);
         const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
-
-        // Cálculo da porcentagem de exibição (ex: 0.07 -> 7)
         const porcentagemExibicao = Math.round(promo.descontoPercentual * 100);
-
-        // CORREÇÃO: Definindo o pJson corretamente para não travar o código
         const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
         card.innerHTML = `
@@ -379,28 +376,7 @@ function carregarProdutos() {
                     ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
                 </select>
                 
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">VER DETALHES</button>
-                    ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">+ Adicionar à Sacola</button>` : ''}
-                </div>
-            </div>`; 
-        container.appendChild(card);
-    });
-}               
-    
-    <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
-                
-                <div class="qtd-container">
-                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
-                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
-                </div>
-
-                <select class="seletor-ml" id="ml-${p.id}">
-                    ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
-                </select>
-                
-                <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top:10px;">
                     <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">VER DETALHES</button>
                     ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">+ Adicionar à Sacola</button>` : ''}
                 </div>
@@ -414,12 +390,9 @@ function adicionarComPromocao(id, nome, mlId, qtdId) {
     const [ml, precoBruto] = selectMl.value.split('|');
     const precoBase = parseFloat(precoBruto);
     const qtd = parseInt(document.getElementById(qtdId).value);
-
-    // Busca o produto original para validar a marca/id na promoção
     const pOriginal = meusProdutos.find(item => item.id === id);
     const promo = processarPrecoProduto({ id: id, marca: pOriginal.marca, preco: precoBase });
 
-    // O segredo está aqui: garantir que o preço vá como número para a API de frete
     sacola.push({ 
         id: id,
         nome: nome, 
@@ -437,7 +410,6 @@ function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
     const countCont = document.getElementById('cart-count');
-    
     let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
 
     if (sacola.length === 0) {
@@ -445,19 +417,16 @@ function atualizarSacola() {
     } else {
         itensCont.innerHTML = sacola.map((item, index) => `
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
-<div style="text-align:left;">
-    <b style="font-size:13px;">${item.nome}</b><br>
-    <small>${item.ml} | Qtd: ${item.qtd}</small><br>
-    ${item.emPromocao ? 
-        `<small style="color:#28a745; font-weight:bold;">Desconto PIX aplicado</small>` : 
-        `<small style="color:#666;">Valor padrão</small>`
-    }
-</div>
+                <div style="text-align:left;">
+                    <b style="font-size:13px;">${item.nome}</b><br>
+                    <small>${item.ml} | Qtd: ${item.qtd}</small><br>
+                    ${item.emPromocao ? `<small style="color:#28a745; font-weight:bold;">Desconto PIX aplicado</small>` : `<small style="color:#666;">Valor padrão</small>`}
+                </div>
                 <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px; cursor:pointer;">&times;</button>
             </div>`).join('');
     }
 
-    const totalGeral = subtotal + valorFreteGlobal;
+    const totalGeral = subtotal + (typeof valorFreteGlobal !== 'undefined' ? valorFreteGlobal : 0);
     totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
     countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
 }
@@ -465,44 +434,25 @@ function atualizarSacola() {
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
     const resultadoDiv = document.getElementById('opcoes-frete');
-    
     if (sacola.length === 0) return alert("Adicione produtos primeiro.");
     if (cep.length !== 8) return alert("CEP inválido.");
 
     resultadoDiv.innerHTML = "<p>Calculando...</p>";
-
-    const ehAraguaina = cep.startsWith('778');
-    // Calcula o subtotal ignorando centavos extras que travam APIs
     const subtotal = parseFloat(sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0).toFixed(2));
 
-    if (ehAraguaina) {
-        renderizarOpcoesFrete([
-            { name: "Entrega Local", price: 10.00, delivery_time: "1" },
-            { name: "Retirada", price: 0, delivery_time: "0" }
-        ]);
-    } else {
-        try {
-            // Se antes funcionava, o problema é este fetch. 
-            // Adicionei um "timeout" para não travar o seu site se a API demorar.
-            const response = await fetch('/api/calcular-frete', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    cep_destino: cep, 
-                    valor_total: subtotal 
-                })
-            });
-
-            const validas = await response.json();
-            renderizarOpcoesFrete(validas);
-        } catch (e) {
-            console.error("Erro na API:", e);
-            resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao calcular. Tente novamente ou finalize pelo WhatsApp.</p>";
-        }
+    try {
+        const response = await fetch('/api/calcular-frete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ cep_destino: cep, valor_total: subtotal })
+        });
+        const validas = await response.json();
+        renderizarOpcoesFrete(validas);
+    } catch (e) {
+        resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao calcular. Tente pelo WhatsApp.</p>";
     }
-}           
+}
 
-// Função auxiliar para mostrar as opções na tela
 function renderizarOpcoesFrete(opcoes) {
     const resultadoDiv = document.getElementById('opcoes-frete');
     resultadoDiv.innerHTML = opcoes.map((op, index) => `
@@ -515,13 +465,13 @@ function renderizarOpcoesFrete(opcoes) {
             <strong style="color:#b89356;">${op.price == 0 ? 'GRÁTIS' : 'R$ '+op.price.toFixed(2)}</strong>
         </div>`).join('');
 }
-    
 
 function selecionarFreteVisual(nome, valor, id) {
     valorFreteGlobal = valor;
     nomeFreteGlobal = nome;
     document.querySelectorAll('.opcao-frete-card').forEach(c => c.style.borderColor = '#eee');
-    document.getElementById(id).style.borderColor = '#b89356';
+    const el = document.getElementById(id);
+    if(el) el.style.borderColor = '#b89356';
     atualizarSacola();
 }
 
@@ -532,11 +482,7 @@ function alterarQtd(id, delta, max) {
 }
 
 function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
-
-function removerItem(index) {
-    sacola.splice(index, 1);
-    atualizarSacola();
-}
+function removerItem(index) { sacola.splice(index, 1); atualizarSacola(); }
 
 function abrirDetalhes(p) {
     document.getElementById('detalhe-img').src = p.imagem;
@@ -550,7 +496,6 @@ function fecharDetalhes() { document.getElementById('modal-detalhes').style.disp
 
 function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
-    
     let texto = "*PEDIDO NUVEM DE ESSÊNCIAS*\n\n";
     let possuiPromocao = false;
 
@@ -561,15 +506,16 @@ function finalizarWhatsApp() {
         if (i.emPromocao) possuiPromocao = true;
     });
     
-    texto += `\n*Frete:* ${nomeFreteGlobal} (R$ ${valorFreteGlobal.toFixed(2)})\n`;
+    texto += `\n*Frete:* ${nomeFreteGlobal || 'A combinar'} (R$ ${(valorFreteGlobal || 0).toFixed(2)})\n`;
     texto += `*TOTAL FINAL:* R$ ${document.getElementById('cart-total').innerText}\n\n`;
     
     if (possuiPromocao) {
-        texto += `⚠️ *Aviso:* O total acima considera o desconto para PIX nos produtos sinalizados. Para pagamento via Cartão, os itens em promoção voltam ao valor original.`;
+        texto += `⚠️ *Aviso:* O total acima considera o desconto para PIX nos produtos sinalizados. No Cartão, prevalece o valor sem desconto.`;
     }
 
     window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
-}</script>
+}
+</script>
 
 <div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
     <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; position:relative; color:#333; text-align:center;">
@@ -585,7 +531,7 @@ function finalizarWhatsApp() {
     <div class="container">
         <h1 class="logo-text">NUVEM DE ESSÊNCIAS PERFUMARIA</h1>
         <p>Araguaína - TO | WhatsApp: (63) 99257-6211</p>
-        <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
+        <p>© 2024 Nuvem de Essências - Todos os direitos reservados.</p>
     </div>
 </footer>
 
