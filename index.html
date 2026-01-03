@@ -414,6 +414,21 @@ function carregarProdutos() {
             const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
             const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
+            // GERAÇÃO DOS BOTÕES QUADRADOS (Substituindo o Select)
+            const botoesML = p.opcoes.map((opt, index) => {
+                const ativo = index === 0 ? 'active' : '';
+                const soML = opt.valor.split('|')[0].toUpperCase(); 
+                
+                // Nota: Usamos atualizarPrecoCard para manter sua lógica de promoção existente
+                return `
+                    <button class="btn-ml-nuvem ${ativo}" 
+                            onclick="selecionarVariacaoManual('${p.id}', '${opt.valor}', '${p.marca}', this)">
+                        <span>${soML}</span>
+                        ${opt.promoPix ? `<span class="tag-pix-btn">PIX OFF</span>` : ''}
+                    </button>
+                `;
+            }).join('');
+
             card.innerHTML = `
                 ${promo.emPromocao ? `<div class="selo-promo">${promo.descontoPercentual}% OFF NO PIX</div>` : ''}
                 <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
@@ -422,7 +437,7 @@ function carregarProdutos() {
                     <span class="marca-tag">${p.marca}</span>
                     <div class="nome-perfume">${p.nome}</div>
                     
-                    <div id="preco-container-${p.id}" style="margin-bottom: 10px;">
+                    <div id="preco-container-${p.id}" style="margin-bottom: 10px; min-height: 50px;">
                         ${promo.emPromocao ? `
                             <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${formatarMoeda(precoOriginal)}</span>
                             <div style="color:#28a745; font-weight:bold; font-size:18px;">
@@ -437,15 +452,17 @@ function carregarProdutos() {
 
                     <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
                     
+                    <div class="variacao-container">
+                        ${botoesML}
+                    </div>
+
                     <div class="qtd-container">
                         <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
                         <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
                         <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
                     </div>
 
-                    <select class="seletor-ml" id="ml-${p.id}" onchange="atualizarPrecoCard('${p.id}', this.value, '${p.marca}')">
-                        ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
-                    </select>
+                    <input type="hidden" id="ml-${p.id}" value="${p.opcoes[0].valor}">
                     
                     <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                         <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})">VER DETALHES</button>
@@ -457,20 +474,18 @@ function carregarProdutos() {
     });
 }
 
-    function renderizarBotoesML(p) {
-    return p.opcoes.map((opt, index) => {
-        const ativo = index === 0 ? 'active' : '';
-        // Pegamos apenas o ML (ex: "80ml") antes do pipe "|"
-        const soML = opt.valor.split('|')[0].toUpperCase(); 
-        
-        return `
-            <button class="btn-ml-nuvem ${ativo}" 
-                    onclick="selecionarVariacaoML('${p.id}', '${opt.valor}', ${opt.promoPix}, this)">
-                <span>${soML}</span>
-                ${opt.promoPix ? `<span class="tag-pix-btn">PIX OFF</span>` : ''}
-            </button>
-        `;
-    }).join('');
+function selecionarVariacaoManual(id, valorSelt, marca, elemento) {
+    // 1. Muda a borda azul (Visual)
+    const container = elemento.parentElement;
+    container.querySelectorAll('.btn-ml-nuvem').forEach(b => b.classList.remove('active'));
+    elemento.classList.add('active');
+
+    // 2. Avisa o carrinho qual ML foi escolhido
+    const inputOculto = document.getElementById(`ml-${id}`);
+    if(inputOculto) inputOculto.value = valorSelt;
+
+    // 3. Chama a função que VOCÊ mandou para atualizar o preço na tela
+    atualizarPrecoCard(id, valorSelt, marca);
 }
     
 // FUNÇÃO PARA MUDAR O PREÇO QUANDO MUDA O ML
@@ -657,6 +672,7 @@ function finalizarWhatsApp() {
         <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
     </div>
 </footer>
+
 
 
 
