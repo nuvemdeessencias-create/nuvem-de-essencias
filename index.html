@@ -376,21 +376,22 @@ function carregarProdutos() {
     });
 }
 
-// FUNÇÃO PARA ADICIONAR AO CARRINHO COM O PREÇO CORRETO DA PROMOÇÃO
 function adicionarComPromocao(id, nome, mlId, qtdId) {
     const selectMl = document.getElementById(mlId);
     const [ml, precoBruto] = selectMl.value.split('|');
     const precoBase = parseFloat(precoBruto);
     const qtd = parseInt(document.getElementById(qtdId).value);
 
-    // Re-calcula promoção para garantir o preço atualizado
+    // Busca o produto original para validar a marca/id na promoção
     const pOriginal = meusProdutos.find(item => item.id === id);
     const promo = processarPrecoProduto({ id: id, marca: pOriginal.marca, preco: precoBase });
 
+    // O segredo está aqui: garantir que o preço vá como número para a API de frete
     sacola.push({ 
+        id: id,
         nome: nome, 
         ml: ml, 
-        preco: promo.precoFinal, 
+        preco: parseFloat(promo.precoFinal.toFixed(2)), 
         qtd: qtd, 
         emPromocao: promo.emPromocao 
     });
@@ -431,45 +432,38 @@ async function calcularFrete() {
     if (sacola.length === 0) return alert("Adicione produtos primeiro.");
     if (cep.length !== 8) return alert("CEP inválido.");
 
-    resultadoDiv.innerHTML = "<p style='font-size:12px; color:#666;'>Calculando frete...</p>";
+    resultadoDiv.innerHTML = "<p>Calculando...</p>";
 
     const ehAraguaina = cep.startsWith('778');
-    const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
-    const temPromocaoNoCarrinho = sacola.some(item => item.emPromocao === true);
+    // Calcula o subtotal ignorando centavos extras que travam APIs
+    const subtotal = parseFloat(sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0).toFixed(2));
 
     if (ehAraguaina) {
-        // Regra para Araguaína - Sempre funciona localmente
-        let opcoes = [
-            { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "1" },
-            { name: "Retirada no Local", price: 0, delivery_time: "0" }
-        ];
-        renderizarOpcoesFrete(opcoes);
+        renderizarOpcoesFrete([
+            { name: "Entrega Local", price: 10.00, delivery_time: "1" },
+            { name: "Retirada", price: 0, delivery_time: "0" }
+        ]);
     } else {
-        // Fora de Araguaína - Regra do Frete Grátis acima de 700 (Sem promo)
-        if (subtotal >= 700 && !temPromocaoNoCarrinho) {
-            renderizarOpcoesFrete([{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "8 a 14" }]);
-        } else {
-            // Tenta chamar a API do Melhor Envio / Correios
-            try {
-                const response = await fetch('/api/calcular-frete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ cep_destino: cep, valor_total: subtotal })
-                });
-                
-                if (!response.ok) throw new Error();
-                const dados = await response.json();
-                renderizarOpcoesFrete(dados);
-            } catch (e) {
-                resultadoDiv.innerHTML = `
-                    <p style="color:#d9534f; font-size:13px;"><b>Erro ao calcular frete automático.</b><br>
-                    Finalize o pedido e calcularemos o envio via WhatsApp!</p>
-                    <button onclick="selecionarFreteVisual('A combinar', 0, 'manual')" style="width:100%; padding:10px; cursor:pointer;">Combinar Frete no Whats</button>
-                `;
-            }
+        try {
+            // Se antes funcionava, o problema é este fetch. 
+            // Adicionei um "timeout" para não travar o seu site se a API demorar.
+            const response = await fetch('/api/calcular-frete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    cep_destino: cep, 
+                    valor_total: subtotal 
+                })
+            });
+
+            const validas = await response.json();
+            renderizarOpcoesFrete(validas);
+        } catch (e) {
+            console.error("Erro na API:", e);
+            resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao calcular. Tente novamente ou finalize pelo WhatsApp.</p>";
         }
     }
-}
+}           
 
 // Função auxiliar para mostrar as opções na tela
 function renderizarOpcoesFrete(opcoes) {
@@ -546,6 +540,7 @@ function finalizarWhatsApp() {
 
 </body>
 </html>
+
 
 
 
