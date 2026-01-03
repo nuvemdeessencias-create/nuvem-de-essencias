@@ -107,7 +107,10 @@
 
 <div class="filtros-container">
     <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%;">
-          <option value="todos">TODAS AS MARCAS</option>
+        
+        <select id="filtroMarca" onchange="filtrar()">
+            <option value="todos">TODAS AS MARCAS</option>
+            
             <optgroup label="ALTA PERFUMARIA">
                 <option value="PACO RABANNE">PACO RABANNE</option>
                 <option value="CHLOE">CHLOE</option>
@@ -124,7 +127,7 @@
                 <option value="ANTONIO BANDEIRAS">ANTONIO BANDEIRAS</option>
                 <option value="AZZARO">AZZARO</option>
                 <option value="BVLGARI">BVLGARI</option>
-                <option value="JACQUES BOGART ">JACQUES BOGART </option>
+                <option value="JACQUES BOGART">JACQUES BOGART</option>
                 <option value="CACHAREL">CACHAREL</option>
                 <option value="CALVIN KLEIN">CALVIN KLEIN</option>
                 <option value="DAVIDOFF">DAVIDOFF</option>
@@ -137,6 +140,7 @@
                 <option value="RALPH LAUREN">RALPH LAUREN</option>
                 <option value="SHAKIRA">SHAKIRA</option>
             </optgroup>
+
             <optgroup label="PERFUMARIA ÁRABE">
                 <option value="LATTAFA">LATTAFA</option>
                 <option value="AL WATANIAH">AL WATANIAH</option>
@@ -144,29 +148,29 @@
                 <option value="MAISON ALHAMBRA">MAISON ALHAMBRA</option>
                 <option value="AFNAN">AFNAN</option>
                 <option value="ORIENTICA">ORIENTICA</option>
-                
             </optgroup>
+
             <optgroup label="KITS">
                 <option value="KITS">KITS</option> 
             </optgroup>
+
             <optgroup label="CASA">
                 <option value="VELAS AROMATICAS">VELAS AROMÁTICAS</option>
             </optgroup>
-             <optgroup label="MAQUIAGEM">
+
+            <optgroup label="MAQUIAGEM">
                 <option value="BATONS">BATONS</option>
             </optgroup>
-        </select>
-        <input type="text" id="buscaInput" onkeyup="filtrar()" placeholder="PESQUISAR...">
+        </select> <input type="text" id="buscaInput" onkeyup="filtrar()" placeholder="PESQUISAR...">
     </div>
 
-    <div class="categorias-nav" style="display:flex; gap:10px; margin-top:10px;">
-       <button class="btn-categoria active" onclick="filtrarCategoria('todos', this)">TODOS</button>
+    <div class="categorias-nav" style="display:flex; gap:10px; flex-wrap: wrap; justify-content: center; margin-top:10px;">
+        <button class="btn-categoria active" onclick="filtrarCategoria('todos', this)">TODOS</button>
         <button class="btn-categoria" onclick="filtrarCategoria('alta', this)">ALTA PERFUMARIA</button>
         <button class="btn-categoria" onclick="filtrarCategoria('arabe', this)">PERFUMES ÁRABES</button>
         <button class="btn-categoria" onclick="filtrarCategoria('casa', this)">CASA & VELAS</button>
         <button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
-         <button class="btn-categoria" onclick="filtrarCategoria('maquiagem', this)">MAQUIAGEM</button>
-
+        <button class="btn-categoria" onclick="filtrarCategoria('maquiagem', this)">MAQUIAGEM</button>
     </div>
 </div>
 
@@ -422,4 +426,5 @@ function filtrarCategoria(cat, el) {
 </script>
 </body>
 </html>
+
 
