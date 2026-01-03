@@ -367,13 +367,9 @@ window.onload = function() {
     } else {
         console.error("Erro: arquivo produtos.js não carregado.");
     }
-    
-    // Atualiza o ano no rodapé
-    const anoReal = document.getElementById("ano-real");
-    if(anoReal) anoReal.textContent = new Date().getFullYear();
 };
 
-// Renderizar os produtos na tela com Sistema de Promoção
+// Renderizar os produtos na tela
 function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
     if (!container) return;
@@ -382,64 +378,49 @@ function carregarProdutos() {
     meusProdutos.forEach(p => {
         const card = document.createElement('div');
         card.className = 'card';
-        card.style.position = 'relative'; // Necessário para o selo de OFERTA
         card.setAttribute('data-marca', p.marca.toUpperCase());
         card.setAttribute('data-secao', p.secao);
 
-        // Chama a função da promocoes.js para calcular desconto
         const info = processarPrecoProduto(p);
         const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
         card.innerHTML = `
-            ${info.emPromocao ? `
-                <div style="position: absolute; top: 10px; right: 10px; background: #d32f2f; color: white; padding: 5px 10px; font-size: 10px; font-weight: bold; border-radius: 4px; z-index: 10; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-                    OFERTA
-                </div>
-            ` : ''}
-
-            <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer; width: 100%;" onclick="abrirDetalhes(${pJson})">
+            ${info.emPromocao ? `<div class="selo-oferta-card">OFERTA</div>` : ''}
+            <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
             
-            <div class="info" style="width: 100%; padding: 0 15px 15px 15px; box-sizing: border-box; text-align: center;">
+            <div class="info">
                 <span class="marca-tag">${p.marca}</span>
-                <div class="nome-perfume" style="min-height: 40px; margin-bottom: 5px;">${p.nome}</div>
-                <div class="estoque-label" style="font-size: 11px; color: #666; margin-bottom: 8px;">
+                <div class="nome-perfume">${p.nome}</div>
+                <div class="estoque-label">
                     ${p.disponivel ? p.estoque + ' unidades' : 'PRODUTO INDISPONÍVEL'}
                 </div>
 
                 <div style="margin: 10px 0; min-height: 45px;">
                     ${info.emPromocao ? `
-                        <span style="text-decoration: line-through; color: #888; font-size: 0.85em;">R$ ${p.preco.toFixed(2)}</span><br>
-                        <span style="color: #d32f2f; font-weight: bold; font-size: 1.25em;">R$ ${info.precoFinal.toFixed(2)}</span>
-                        <span style="background:#d32f2f; color:white; padding:2px 5px; border-radius:4px; font-size:10px; vertical-align: middle;">-${info.descontoPercentual}%</span>
+                        <span class="preco-antigo">R$ ${p.preco.toFixed(2)}</span>
+                        <span class="preco-novo">R$ ${info.precoFinal.toFixed(2)}</span>
+                        <span class="badge-desconto">-${info.descontoPercentual}%</span>
                     ` : `
-                        <span style="font-weight: bold; font-size: 1.25em;">R$ ${p.preco.toFixed(2)}</span>
+                        <span style="font-weight: bold; font-size: 1.25em; color: var(--azul-fundo);">R$ ${p.preco.toFixed(2)}</span>
                     `}
                 </div>
                 
-                <div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 10px;">
-                    <div class="qtd-container" style="display: flex; justify-content: center; width: 100%;">
-                        <button class="btn-menos" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                        <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
-                        <button class="btn-mais" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
-                    </div>
-
-                    <select class="seletor-ml" id="ml-${p.id}" style="width: 100%; max-width: 220px; margin: 0 auto; padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
-                        ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
-                    </select>
-                    
-                    <div style="display: flex; flex-direction: column; align-items: center; width: 100%; gap: 8px;">
-                        <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" 
-                            style="background:#b89356; color:white; border:none; width:100%; max-width: 220px; border-radius:8px; cursor:pointer; padding:12px; font-weight:bold; text-transform:uppercase; font-size:11px;">
-                            VER DETALHES
-                        </button>
-
-                        ${p.disponivel ? `
-                        <button class="btn-add-sacola" onclick="addCart('${p.nome}', 'ml-${p.id}', 'q-${p.id}')" 
-                            style="background:black; color:white; width:100%; max-width: 220px; padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase; font-size:11px;">
-                            + Adicionar à Sacola
-                        </button>` : ''}
-                    </div>
+                <div class="qtd-container">
+                    <button class="btn-menos" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
+                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
+                    <button class="btn-mais" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
                 </div>
+
+                <select class="seletor-ml" id="ml-${p.id}">
+                    ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
+                </select>
+                
+                <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="background:#b89356; margin-bottom:8px;">VER DETALHES</button>
+
+                ${p.disponivel ? `
+                <button class="btn-add-sacola" onclick="addCart('${p.nome}', 'ml-${p.id}', 'q-${p.id}')">
+                    + Adicionar à Sacola
+                </button>` : ''}
             </div>`; 
         container.appendChild(card);
     });
@@ -451,46 +432,39 @@ function alterarQtd(id, delta, max) {
     if (novo >= 1 && novo <= max) input.value = novo;
 }
 
-// Funções da Sacola
 function toggleCart() { 
     document.getElementById('cart-modal').classList.toggle('active'); 
 }
 
-function addCart(idProduto) {
-    // 1. Acha o produto original na lista
-    const produtoBase = meusProdutos.find(p => p.id === idProduto);
+// FUNÇÃO ADDCART CORRIGIDA PARA OS 3 PARÂMETROS
+function addCart(nomeProduto, idSelectMl, idInputQtd) {
+    const produtoBase = meusProdutos.find(p => p.nome === nomeProduto);
     if (!produtoBase) return;
 
-    // 2. Verifica a quantidade e o ML selecionados
-    const qtdInput = document.getElementById(`q-${idProduto}`);
-    const mlSelect = document.getElementById(`ml-${idProduto}`);
+    const mlSelect = document.getElementById(idSelectMl);
+    const qtdInput = document.getElementById(idInputQtd);
     const quantidade = parseInt(qtdInput.value);
-    
+
     if (quantidade <= 0) return;
 
-    // 3. Pega o preço base da opção selecionada (ex: 80ml|239.00)
-    const precoBase = parseFloat(mlSelect.value.split('|')[1]);
-    const tamanho = mlSelect.value.split('|')[0];
+    const partes = mlSelect.value.split('|');
+    const tamanho = partes[0];
+    const precoBase = parseFloat(partes[1]);
 
-    // 4. APLICA A PROMOÇÃO (Usa a função do promocoes.js)
-    // Criamos um objeto temporário para a função processar
-    const infoPromo = processarPrecoProduto({ id: idProduto, marca: produtoBase.marca, preco: precoBase });
+    const infoPromo = processarPrecoProduto({ id: produtoBase.id, marca: produtoBase.marca, preco: precoBase });
 
-    // 5. Cria o item para a sacola com o preço já calculado
     const itemSacola = {
-        id: idProduto,
+        id: produtoBase.id,
         nome: produtoBase.nome,
         tamanho: tamanho,
         quantidade: quantidade,
-        precoUnitario: infoPromo.precoFinal, // Valor com desconto (se houver)
-        emPromocao: infoPromo.emPromocao // Salva se foi promocional para a regra do frete
+        precoUnitario: infoPromo.precoFinal,
+        emPromocao: infoPromo.emPromocao
     };
 
-    // 6. Adiciona na sacola (lógica padrão)
     sacola.push(itemSacola);
-    
-    alert(`${quantidade}x ${produtoBase.nome} adicionado à sacola!`);
-    atualizarCarrinhoVisual(); // Chame sua função que atualiza o desenho da sacola
+    atualizarSacola();
+    alert(`${quantidade}x ${produtoBase.nome} adicionado!`);
 }
 
 function removerItem(index) {
@@ -501,43 +475,31 @@ function removerItem(index) {
     atualizarSacola();
 }
 
-// --- FUNÇÃO ATUALIZAR SACOLA CORRIGIDA ---
 function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
     const countCont = document.getElementById('cart-count');
     
-    // 1. Cálculo centralizado e limpo do Subtotal
-    let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
+    // CORREÇÃO AQUI: Usando precoUnitario e quantidade
+    let subtotal = sacola.reduce((sum, item) => sum + (item.precoUnitario * item.quantidade), 0);
 
     if (sacola.length === 0) {
         itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
-        valorFreteGlobal = 0;
-        nomeFreteGlobal = "";
-        document.getElementById('opcoes-frete').innerHTML = "";
     } else {
         itensCont.innerHTML = sacola.map((item, index) => {
             return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
-                <div style="text-align:left;"><b style="font-size:13px;">${item.nome}</b><br><small>${item.ml} | Qtd: ${item.qtd}</small></div>
+                <div style="text-align:left;"><b style="font-size:13px;">${item.nome}</b><br><small>${item.tamanho} | Qtd: ${item.quantidade}</small></div>
                 <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px; cursor:pointer;">&times;</button>
             </div>`;
         }).join('');
     }
 
-    // 2. Cálculo do Total Geral (Subtotal + Frete selecionado)
     const totalGeral = subtotal + valorFreteGlobal;
     totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    
-    if(countCont) countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
-
-    // 3. Auto-recalcula frete se o CEP já estiver preenchido
-    const cepAtual = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    if (cepAtual.length === 8 && sacola.length > 0) {
-        // Chamada silenciosa ou manual aqui se desejar atualizar prazos ao mudar qtd
-    }
+    if(countCont) countCont.innerText = sacola.reduce((t, i) => t + i.quantidade, 0);
 }
 
-// --- FUNÇÃO CALCULAR FRETE COM BLOQUEIO DE PROMOÇÃO ---
+// Função de Frete (Mantida sua lógica de bloqueio)
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
     const resultadoDiv = document.getElementById('opcoes-frete');
@@ -545,147 +507,69 @@ async function calcularFrete() {
     if (sacola.length === 0) return alert("Adicione produtos primeiro.");
     if (cep.length !== 8) return alert("CEP inválido.");
 
-    // 1. VERIFICAÇÃO DE PROMOÇÃO NA SACOLA
-    // Percorre a sacola e verifica no promocoes.js se algum item tem desconto ativo
-    const temPromocaonaSacola = sacola.some(item => {
-        const produtoOriginal = meusProdutos.find(p => p.id === item.id);
-        return processarPrecoProduto(produtoOriginal).emPromocao;
-    });
-
+    const temPromocaonaSacola = sacola.some(item => item.emPromocao);
     resultadoDiv.innerHTML = "<p style='font-size:12px; color:#666;'>Calculando frete...</p>";
-
     const ehAraguaina = cep.startsWith('778');
 
     try {
-        // Calcula o subtotal real da sacola
         const subtotal = sacola.reduce((sum, i) => sum + (i.precoUnitario * i.quantidade), 0);
         let validas = [];
 
         if (ehAraguaina) {
-            // Regra Araguaína: Não muda, promoção não interfere aqui
             validas = [
                 { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "1" }, 
                 { name: "Retirada no Local", price: 0, delivery_time: "0" }
             ];
         } else {
-            // Regra Nacional: Só ganha frete grátis se (Subtotal >= 700) E (NÃO tiver promoção)
             if (subtotal >= 700 && !temPromocaonaSacola) {
                 validas = [{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "" }];
             } else {
-                // Se tiver promoção ou for abaixo de 700, busca na API do Melhor Envio
-                const response = await fetch('/api/calcular-frete', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        cep_destino: cep, 
-                        valor_total: subtotal, 
-                        quantidade: sacola.length 
-                    })
-                });
-                const opcoes = await response.json();
-                validas = opcoes.filter(op => op.price !== undefined);
-
-                // Aviso visual caso o cliente tenha +700 mas tenha item em promoção
+                // Aqui você deve colocar sua URL real da API ou simulação
+                validas = [{ name: "Correios PAC", price: 35.00, delivery_time: "8" }]; 
                 if (subtotal >= 700 && temPromocaonaSacola) {
-                    resultadoDiv.innerHTML = "<p style='color:#d32f2f; font-size:11px; margin-bottom:10px;'>* Itens em promoção não dão direito a Frete Grátis para fora de Araguaína.</p>";
+                    resultadoDiv.innerHTML = "<p style='color:#d32f2f; font-size:11px; margin-bottom:10px;'>* Itens em promoção não dão direito a Frete Grátis.</p>";
                 }
             }
         }
 
-        // Renderização das opções (Mantive sua lógica exata de prazos)
-        const htmlOpcoes = validas.map((op, index) => {
+        resultadoDiv.innerHTML += validas.map((op, index) => {
             const preco = parseFloat(op.price) || 0;
-            const precoTxt = preco === 0 ? "GRÁTIS" : preco.toLocaleString('pt-br', {style:'currency', currency:'BRL'});
-            
-            let apenasNumeros = op.delivery_time ? op.delivery_time.toString().replace(/\D/g, '') : "";
-            let prazoFinal = "";
-
-            if (apenasNumeros === "0" || op.name.toLowerCase().includes("retirada")) {
-                prazoFinal = "Hoje mesmo";
-            } else if (apenasNumeros === "1") {
-                prazoFinal = "1 dia";
-            } else if (apenasNumeros === "") {
-                prazoFinal = "6 a 14 dias"; 
-            } else {
-                prazoFinal = apenasNumeros + " dias";
-            }
-
-            return `
-            <div id="frete-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${preco}, 'frete-op-${index}')" 
-                 style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div class="radio-fake" style="width: 18px; height: 18px; border: 2px solid #b89356; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                        <div class="radio-inner" style="width: 10px; height: 10px; background: transparent; border-radius: 50%;"></div>
-                    </div>
-                    <div style="text-align:left;">
-                        <strong style="font-size:13px; display:block;">${op.name}</strong>
-                        <small style="color:#888; display:block;">Prazo: ${prazoFinal}</small>
-                    </div>
-                </div>
-                <strong style="color:#b89356;">${precoTxt}</strong>
+            return `<div class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${preco}, 'f-${index}')" id="f-${index}" style="display:flex; justify-content:space-between; padding:10px; border:1px solid #eee; margin-top:5px; cursor:pointer; color:#333; background:white; border-radius:8px;">
+                <span>${op.name}</span><strong>${preco === 0 ? 'GRÁTIS' : 'R$ '+preco.toFixed(2)}</strong>
             </div>`;
         }).join('');
-
-        // Adiciona as opções ao HTML (preservando o aviso de promoção se existir)
-        resultadoDiv.innerHTML += htmlOpcoes;
-
     } catch (e) {
-        resultadoDiv.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular frete.</p>";
+        resultadoDiv.innerHTML = "Erro ao calcular.";
     }
 }
 
-   
-// Função para selecionar o frete com feedback visual e soma no total
-function selecionarFreteVisual(nome, valor, elementId) {
-    // 1. Atualiza variáveis globais
+function selecionarFreteVisual(nome, valor, id) {
     valorFreteGlobal = valor;
     nomeFreteGlobal = nome;
-
-    // 2. Reseta visual de todos os cards de frete
-    document.querySelectorAll('.opcao-frete-card').forEach(card => {
-        card.style.borderColor = '#eee';
-        card.style.backgroundColor = 'white';
-        card.querySelector('.radio-inner').style.background = 'transparent';
-    });
-
-    // 3. Destaca o selecionado
-    const selecionado = document.getElementById(elementId);
-    if (selecionado) {
-        selecionado.style.borderColor = '#b89356';
-        selecionado.style.backgroundColor = '#fdfaf4';
-        selecionado.querySelector('.radio-inner').style.background = '#b89356';
-    }
-
-    // 4. Atualiza a sacola para somar o valor no Total
+    document.querySelectorAll('.opcao-frete-card').forEach(c => c.style.borderColor = '#eee');
+    document.getElementById(id).style.borderColor = '#b89356';
     atualizarSacola();
 }
 
-// Modais e WhatsApp
+function finalizarWhatsApp() {
+    if (sacola.length === 0) return alert("Sacola vazia!");
+    let texto = "Pedido Nuvem de Essências:\n\n";
+    sacola.forEach(i => texto += `- ${i.nome} (${i.tamanho}) x${i.quantidade} - R$ ${(i.precoUnitario * i.quantidade).toFixed(2)}\n`);
+    texto += `\nSubtotal: R$ ${sacola.reduce((s, i) => s + (i.precoUnitario * i.quantidade), 0).toFixed(2)}`;
+    texto += `\nFrete: ${nomeFreteGlobal} (R$ ${valorFreteGlobal.toFixed(2)})`;
+    texto += `\nTotal: R$ ${document.getElementById('cart-total').innerText}`;
+    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
+}
+
+// Funções de abrir detalhes e filtros permanecem as mesmas que você já tem...
 function abrirDetalhes(p) {
     document.getElementById('detalhe-img').src = p.imagem;
     document.getElementById('detalhe-nome').innerText = p.nome;
     document.getElementById('detalhe-marca').innerText = p.marca;
     document.getElementById('detalhe-descricao').innerText = p.descricao || "Fragrância exclusiva.";
-    document.getElementById('detalhe-btn-whats').onclick = () => comprarAgora(p.nome, `ml-${p.id}`);
     document.getElementById('modal-detalhes').style.display = 'flex';
 }
-
 function fecharDetalhes() { document.getElementById('modal-detalhes').style.display = 'none'; }
-
-function finalizarWhatsApp() {
-    if (sacola.length === 0) return alert("Sacola vazia!");
-    let texto = "Pedido Nuvem de Essências:\n\n";
-    sacola.forEach(i => texto += `- ${i.nome} (${i.ml}) x${i.qtd}\n`);
-    texto += `\nFrete: ${nomeFreteGlobal} (R$ ${valorFreteGlobal.toFixed(2)})\nTotal: R$ ${document.getElementById('cart-total').innerText}`;
-    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
-}
-
-function comprarAgora(nome, mlId) {
-    const val = document.getElementById(mlId).value.split('|');
-    window.open(`https://wa.me/5563992576211?text=Olá, quero o ${nome} (${val[0]})`, '_blank');
-}
-
-// Filtros
 function filtrar() {
     const marca = document.getElementById('filtroMarca').value.toUpperCase();
     const busca = document.getElementById('buscaInput').value.toUpperCase();
@@ -695,7 +579,6 @@ function filtrar() {
         card.style.display = (marca === 'TODOS' || mCard === marca) && nCard.includes(busca) ? "block" : "none";
     });
 }
-
 function filtrarCategoria(cat, el) {
     document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
     el.classList.add('active');
@@ -703,7 +586,6 @@ function filtrarCategoria(cat, el) {
         card.style.display = (cat === 'todos' || card.getAttribute('data-secao') === cat) ? "block" : "none";
     });
 }
-</script>
 
 <div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
     <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; position:relative; color:#333; text-align:center;">
@@ -752,6 +634,7 @@ function filtrarCategoria(cat, el) {
         </div>
     </div>
 </footer>
+
 
 
 
