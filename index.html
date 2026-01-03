@@ -235,6 +235,27 @@ select, .busca-input { padding: 12px; border: 1px solid var(--dourado); border-r
 .btn-add-sacola { background: black !important; color: white !important; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; }
 
 footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid rgba(184, 147, 86, 0.2); }
+
+/* Esconde o select antigo se ele ainda estiver no código */
+.seletor-ml {
+    display: none !important;
+}
+
+/* Garante que o container de botões não herde larguras erradas */
+.variacao-container {
+    display: flex !important;
+    gap: 8px !important;
+    justify-content: center !important;
+    margin: 10px 0 !important;
+    flex-wrap: wrap !important;
+    width: 100%;
+}
+
+/* Ajuste fino nos botões para garantir o formato quadrado */
+.btn-ml-nuvem {
+    box-sizing: border-box !important;
+}
+        
     </style>
 </head>
 <body>
@@ -636,6 +657,7 @@ function finalizarWhatsApp() {
         <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
     </div>
 </footer>
+
 
 
 
