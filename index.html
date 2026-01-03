@@ -328,9 +328,8 @@ function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
     if (!container) return;
     
-    // Verifica se a lista de produtos existe para não travar o site
-    if (typeof meusProdutos === 'undefined' || !meusProdutos) {
-        console.error("Erro: A variável 'meusProdutos' não foi encontrada.");
+    if (typeof meusProdutos === 'undefined') {
+        console.error("A variável 'meusProdutos' não foi definida!");
         return;
     }
 
@@ -340,19 +339,17 @@ function carregarProdutos() {
         try {
             const card = document.createElement('div');
             card.className = 'card';
-            card.setAttribute('data-marca', (p.marca || "").toUpperCase());
-            card.setAttribute('data-secao', p.secao || "");
+            card.setAttribute('data-marca', p.marca.toUpperCase());
+            card.setAttribute('data-secao', p.secao);
 
-            // Preço da primeira opção
             const precoOriginal = parseFloat(p.opcoes[0].valor.split('|')[1]);
-            
-            // Chama a função de promoção
             const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
 
-            // CORREÇÃO FINAL 700%: Usando o valor direto sem multiplicar
-            const porcentagemExibicao = promo.descontoPercentual;
+            // Correção para exibir sempre o valor correto (ex: 7 em vez de 700 ou 0.07)
+            let porc = promo.descontoPercentual;
+            if (porc < 1 && porc > 0) porc = Math.round(porc * 100);
+            const porcentagemExibicao = porc || 7;
 
-            // Prepara o JSON para o clique na imagem de forma segura
             const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
             card.innerHTML = `
@@ -379,96 +376,34 @@ function carregarProdutos() {
 
                     <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
                     
-                    <div class="qtd-container" style="display: flex; justify-content: center; align-items: center; gap: 5px; margin-bottom: 10px;">
+                    <div class="qtd-container" style="display:flex; justify-content:center; align-items:center; gap:5px; margin:10px 0;">
                         <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                        <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd" style="width: 30px; text-align: center;">
+                        <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd" style="width:30px; text-align:center;">
                         <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
                     </div>
 
-                    <select class="seletor-ml" id="ml-${p.id}" style="width: 100%; margin-bottom: 10px; padding: 5px;">
+                    <select class="seletor-ml" id="ml-${p.id}" style="width:100%; margin-bottom:10px;">
                         ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
                     </select>
                     
-                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
                         <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="background:#c29958; color:white; padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">VER DETALHES</button>
                         ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="background:black; color:white; padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold;">+ ADICIONAR À SACOLA</button>` : ''}
                     </div>
                 </div>`; 
             container.appendChild(card);
-        } catch (err) {
-            console.error("Erro ao renderizar produto:", err);
-        }
-    });
-}
-
-                <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
-                
-                <div class="qtd-container">
-                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
-                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
-                </div>
-
-                <select class="seletor-ml" id="ml-${p.id}">
-                    ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
-                </select>
-                
-                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-                    <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">VER DETALHES</button>
-                    ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">+ Adicionar à Sacola</button>` : ''}
-                </div>
-            </div>`; 
-        container.appendChild(card);
-    });
-}
-
-                <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
-                
-                <div class="qtd-container">
-                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
-                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
-                </div>
-
-                <select class="seletor-ml" id="ml-${p.id}">
-                    ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
-                </select>
-                
-                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-                    <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">VER DETALHES</button>
-                    ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">+ Adicionar à Sacola</button>` : ''}
-                </div>
-            </div>`; 
-        container.appendChild(card);
-    });
-}
-
-                <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
-                
-                <div class="qtd-container">
-                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
-                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
-                </div>
-
-                <select class="seletor-ml" id="ml-${p.id}">
-                    ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
-                </select>
-                
-                <div style="display: flex; flex-direction: column; gap: 8px; margin-top:10px;">
-                    <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">VER DETALHES</button>
-                    ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">+ Adicionar à Sacola</button>` : ''}
-                </div>
-            </div>`; 
-        container.appendChild(card);
+        } catch (e) { console.error("Erro no produto:", e); }
     });
 }
 
 function adicionarComPromocao(id, nome, mlId, qtdId) {
     const selectMl = document.getElementById(mlId);
+    if(!selectMl) return;
     const [ml, precoBruto] = selectMl.value.split('|');
     const precoBase = parseFloat(precoBruto);
-    const qtd = parseInt(document.getElementById(qtdId).value);
+    const qtdInput = document.getElementById(qtdId);
+    const qtd = qtdInput ? parseInt(qtdInput.value) : 1;
+    
     const pOriginal = meusProdutos.find(item => item.id === id);
     const promo = processarPrecoProduto({ id: id, marca: pOriginal.marca, preco: precoBase });
 
@@ -489,6 +424,8 @@ function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
     const countCont = document.getElementById('cart-count');
+    if(!itensCont || !totalCont) return;
+
     let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
 
     if (sacola.length === 0) {
@@ -505,73 +442,42 @@ function atualizarSacola() {
             </div>`).join('');
     }
 
-    const totalGeral = subtotal + (typeof valorFreteGlobal !== 'undefined' ? valorFreteGlobal : 0);
+    const totalGeral = subtotal + (window.valorFreteGlobal || 0);
     totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
-    countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
-}
-
-async function calcularFrete() {
-    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    const resultadoDiv = document.getElementById('opcoes-frete');
-    if (sacola.length === 0) return alert("Adicione produtos primeiro.");
-    if (cep.length !== 8) return alert("CEP inválido.");
-
-    resultadoDiv.innerHTML = "<p>Calculando...</p>";
-    const subtotal = parseFloat(sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0).toFixed(2));
-
-    try {
-        const response = await fetch('/api/calcular-frete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ cep_destino: cep, valor_total: subtotal })
-        });
-        const validas = await response.json();
-        renderizarOpcoesFrete(validas);
-    } catch (e) {
-        resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao calcular. Tente pelo WhatsApp.</p>";
-    }
-}
-
-function renderizarOpcoesFrete(opcoes) {
-    const resultadoDiv = document.getElementById('opcoes-frete');
-    resultadoDiv.innerHTML = opcoes.map((op, index) => `
-        <div id="f-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${op.price}, 'f-op-${index}')" 
-             style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
-            <div style="text-align:left;">
-                <strong style="font-size:12px;">${op.name}</strong><br>
-                <small>Prazo: ${op.delivery_time} dias</small>
-            </div>
-            <strong style="color:#b89356;">${op.price == 0 ? 'GRÁTIS' : 'R$ '+op.price.toFixed(2)}</strong>
-        </div>`).join('');
-}
-
-function selecionarFreteVisual(nome, valor, id) {
-    valorFreteGlobal = valor;
-    nomeFreteGlobal = nome;
-    document.querySelectorAll('.opcao-frete-card').forEach(c => c.style.borderColor = '#eee');
-    const el = document.getElementById(id);
-    if(el) el.style.borderColor = '#b89356';
-    atualizarSacola();
+    if(countCont) countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
 }
 
 function alterarQtd(id, delta, max) {
     const input = document.getElementById(id);
+    if(!input) return;
     let novo = parseInt(input.value) + delta;
     if (novo >= 1 && novo <= max) input.value = novo;
 }
 
-function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
-function removerItem(index) { sacola.splice(index, 1); atualizarSacola(); }
+function toggleCart() { 
+    const modal = document.getElementById('cart-modal');
+    if(modal) modal.classList.toggle('active'); 
+}
+
+function removerItem(index) { 
+    sacola.splice(index, 1); 
+    atualizarSacola(); 
+}
 
 function abrirDetalhes(p) {
+    const modal = document.getElementById('modal-detalhes');
+    if(!modal) return;
     document.getElementById('detalhe-img').src = p.imagem;
     document.getElementById('detalhe-nome').innerText = p.nome;
     document.getElementById('detalhe-marca').innerText = p.marca;
     document.getElementById('detalhe-descricao').innerText = p.descricao || "Fragrância exclusiva.";
-    document.getElementById('modal-detalhes').style.display = 'flex';
+    modal.style.display = 'flex';
 }
 
-function fecharDetalhes() { document.getElementById('modal-detalhes').style.display = 'none'; }
+function fecharDetalhes() { 
+    const modal = document.getElementById('modal-detalhes');
+    if(modal) modal.style.display = 'none'; 
+}
 
 function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
@@ -585,11 +491,11 @@ function finalizarWhatsApp() {
         if (i.emPromocao) possuiPromocao = true;
     });
     
-    texto += `\n*Frete:* ${nomeFreteGlobal || 'A combinar'} (R$ ${(valorFreteGlobal || 0).toFixed(2)})\n`;
+    texto += `\n*Frete:* ${window.nomeFreteGlobal || 'A combinar'} (R$ ${(window.valorFreteGlobal || 0).toFixed(2)})\n`;
     texto += `*TOTAL FINAL:* R$ ${document.getElementById('cart-total').innerText}\n\n`;
     
     if (possuiPromocao) {
-        texto += `⚠️ *Aviso:* O total acima considera o desconto para PIX nos produtos sinalizados. No Cartão, prevalece o valor sem desconto.`;
+        texto += `⚠️ *Aviso:* O total acima considera o desconto para PIX nos produtos sinalizados. No Cartão, o valor volta ao original.`;
     }
 
     window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
@@ -610,19 +516,7 @@ function finalizarWhatsApp() {
     <div class="container">
         <h1 class="logo-text">NUVEM DE ESSÊNCIAS PERFUMARIA</h1>
         <p>Araguaína - TO | WhatsApp: (63) 99257-6211</p>
-        <p>© 2024 Nuvem de Essências - Todos os direitos reservados.</p>
+        <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
     </div>
 </footer>
-
-</body>
-</html>
-
-
-
-
-
-
-
-
-
 
