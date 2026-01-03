@@ -324,7 +324,6 @@ window.onload = function() {
     if(anoReal) anoReal.textContent = new Date().getFullYear();
 };
 
-// --- FUNÇÕES DE CARREGAMENTO E LÓGICA ---
 function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
     if (!container) return;
@@ -336,11 +335,10 @@ function carregarProdutos() {
         card.setAttribute('data-marca', p.marca.toUpperCase());
         card.setAttribute('data-secao', p.secao);
 
-        // Preço da primeira opção para o card inicial
         const precoOriginal = parseFloat(p.opcoes[0].valor.split('|')[1]);
         const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
 
-        // CORREÇÃO 700%: promo.descontoPercentual já vem como "7" do arquivo promocoes.js
+        // Se o desconto for 0.07, o processarPrecoProduto retorna 7.
         const porcentagemExibicao = promo.descontoPercentual;
 
         const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
@@ -366,6 +364,27 @@ function carregarProdutos() {
                         <div style="font-size:10px; color:#666;">Preço único</div>
                     `}
                 </div>
+
+                <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
+                
+                <div class="qtd-container">
+                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
+                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
+                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
+                </div>
+
+                <select class="seletor-ml" id="ml-${p.id}">
+                    ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
+                </select>
+                
+                <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
+                    <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">VER DETALHES</button>
+                    ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">+ Adicionar à Sacola</button>` : ''}
+                </div>
+            </div>`; 
+        container.appendChild(card);
+    });
+}
 
                 <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
                 
