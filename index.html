@@ -5,216 +5,89 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuvem De Essências | Catálogo Oficial</title>
     <style>
-/* 1. CONFIGURAÇÕES GERAIS E CORES */
-:root {
-    --azul-fundo: #020b1f; 
-    --azul-card: #ffffff; 
-    --dourado: #b89356;
-    --texto-escuro: #333333;
-    --verde-whats: #25d366;
-    --cinza-botao: #000000;
-}
+        /* 1. CONFIGURAÇÕES GERAIS E CORES */
+        :root {
+            --azul-fundo: #020b1f; 
+            --azul-card: #ffffff; 
+            --dourado: #b89356;
+            --texto-escuro: #333333;
+            --verde-whats: #25d366;
+            --cinza-botao: #000000;
+        }
 
-.btn-add-sacola {
-    background-color: var(--cinza-botao) !important;
-    color: #ffffff !important;
-    cursor: pointer;
-}
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            margin: 0; 
+            background-color: var(--azul-fundo); 
+            color: white; 
+            overflow-x: hidden; 
+        }
 
-body { 
-    font-family: 'Segoe UI', sans-serif; 
-    margin: 0; 
-    background-color: var(--azul-fundo); 
-    color: white; 
-    overflow-x: hidden; 
-}
+        header { 
+            background: var(--azul-fundo); 
+            padding: 15px 5%; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between; 
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(184, 147, 86, 0.3);
+        }
 
-/* 2. CABEÇALHO DO SITE */
-header { 
-    background: var(--azul-fundo); 
-    padding: 15px 5%; 
-    display: flex;
-    align-items: center;
-    justify-content: space-between; 
-    position: sticky;
-    top: 0;
-    z-index: 1000;
-    border-bottom: 1px solid rgba(184, 147, 86, 0.3);
-}
+        .logo-img { width: 180px; height: auto; }
 
-.logo-img { width: 180px; height: auto; }
+        .cart-icon-container {
+            background: var(--dourado);
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
 
-.cart-icon-container {
-    background: var(--dourado);
-    padding: 8px 15px;
-    border-radius: 20px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-weight: bold;
-    color: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-}
+        /* ESTILO DO MODAL SACOLA */
+        .cart-modal {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            max-width: 380px;
+            height: 100vh;
+            background: white;
+            z-index: 2000;
+            transition: 0.4s;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -5px 0 20px rgba(0,0,0,0.5);
+        }
+        .cart-modal.active { right: 0; }
+        #cart-scroll-area { flex: 1; overflow-y: auto; padding: 20px; color: #333; }
+        .cart-footer { padding: 20px; border-top: 1px solid #eee; background: white; flex-shrink: 0; }
 
-#cart-count { background: white; color: var(--azul-fundo); padding: 2px 6px; border-radius: 50%; font-size: 11px; }
+        /* ESTILO DOS CARDS DE PRODUTO */
+        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .card { background: var(--azul-card); color: var(--texto-escuro); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
+        .card img { width: 100%; height: 200px; object-fit: contain; background: white; padding: 10px 0; }
+        .nome-perfume { font-size: 15px; font-weight: bold; color: var(--azul-fundo); margin: 5px 0; min-height: 40px; text-align: center; }
+        
+        /* PREÇOS E PROMOÇÕES */
+        .preco-de { text-decoration: line-through; color: #999; font-size: 12px; }
+        .preco-por { color: #d9534f; font-weight: bold; font-size: 18px; }
+        .tag-desconto { background: #d9534f; color: white; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 5px; }
 
-/* 3. ESTRUTURA DA SACOLA (MODAL) */
-.cart-modal {
-    position: fixed;
-    top: 0;
-    right: -100%;
-    width: 100%;
-    max-width: 380px;
-    height: 100vh;
-    background: white;
-    z-index: 2000;
-    transition: 0.4s;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    overflow: hidden;
-    box-shadow: -5px 0 20px rgba(0,0,0,0.5);
-}
+        /* FILTROS */
+        .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .busca-input, select { padding: 12px; border: 1px solid var(--dourado); border-radius: 8px; width: 100%; max-width: 300px; background: white; }
+        .btn-categoria { background: transparent; border: 1px solid var(--dourado); color: white; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 11px; }
+        .btn-categoria.active { background: var(--dourado); }
 
-.cart-modal.active { right: 0; }
-
-#cart-scroll-area {
-    flex: 1;
-    overflow-y: auto;
-    padding: 20px;
-    -webkit-overflow-scrolling: touch;
-}
-
-#cart-items {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    padding-bottom: 20px;
-}
-
-.cart-footer {
-    padding: 20px;
-    border-top: 1px solid #eee;
-    background: white;
-    flex-shrink: 0;
-    z-index: 10;
-}
-
-/* 4. RODAPÉ PREMIUM */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap');
-
-.rodape-premium {
-    background-color: #0a0c1a;
-    color: #ffffff;
-    padding: 50px 0 30px 0;
-    font-family: 'Poppins', sans-serif;
-    text-align: center;
-}
-
-.logo-text {
-    font-family: 'Playfair Display', serif;
-    color: #87CEEB; 
-    font-size: 1.20rem;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-
-.slogan {
-    font-family: 'Playfair Display', serif;
-    font-style: italic;
-    color: #c5a059;
-    font-size: 1.0rem;
-    margin-bottom: 5px;
-}
-
-/* 5. INPUTS E BOTÕES */
-#cep-cliente {
-    flex: 1;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    padding: 12px;
-    font-size: 16px;
-    outline: none;
-    background: white;
-    color: #333;
-}
-
-.btn-whats {
-    background: var(--verde-whats);
-    color: white;
-    border: none;
-    padding: 15px;
-    width: 100%;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 16px;
-}
-
-/* FILTROS */
-.filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.busca-grupo { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
-select, .busca-input { padding: 12px; border: 1px solid var(--dourado); border-radius: 8px; width: 100%; max-width: 300px; }
-
-.categorias-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
-.btn-categoria { background: transparent; border: 1px solid var(--dourado); color: white; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; }
-.btn-categoria.active { background: var(--dourado); }
-
-/* GRID E CARDS */
-.container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
-
-.card { 
-    position: relative; 
-    background: var(--azul-card); 
-    color: var(--texto-escuro); 
-    border-radius: 12px; 
-    overflow: hidden; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    padding-bottom: 20px; 
-    box-shadow: 0 8px 15px rgba(0,0,0,0.2); 
-}
-
-.card img { width: 100%; height: 180px; object-fit: contain; background: white; padding: 10px 0; }
-.info { width: 90%; text-align: center; }
-.marca-tag { color: var(--dourado); font-weight: bold; font-size: 11px; text-transform: uppercase; }
-
-.nome-perfume { 
-    font-size: 15px; 
-    font-weight: bold; 
-    color: var(--azul-fundo); 
-    margin: 5px 0; 
-    min-height: 40px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    line-height: 1.2; 
-}
-
-.estoque-label { font-size: 11px; color: #d9534f; font-weight: bold; margin-bottom: 8px; }
-
-/* ESTILOS DE PROMOÇÃO */
-.preco-antigo { text-decoration: line-through; color: #888; font-size: 0.85em; display: block; }
-.preco-novo { color: #d32f2f; font-weight: bold; font-size: 1.25em; }
-.badge-desconto { background: #d32f2f; color: white; padding: 2px 5px; border-radius: 4px; font-size: 10px; margin-left: 5px; vertical-align: middle; }
-.selo-oferta-card { position: absolute; top: 10px; right: 10px; background: #d32f2f; color: white; padding: 5px 10px; font-size: 10px; font-weight: bold; border-radius: 4px; z-index: 5; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-
-/* SELETOR QTD HORIZONTAL */
-.qtd-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
-.btn-menos, .btn-mais { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ccc; background: #f8f8f8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-.input-qtd { width: 45px; height: 30px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
-
-/* SELECT ML */
-.seletor-ml { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 13px; }
-
-.btn-add-cart { background: var(--dourado); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; margin-bottom: 8px;}
-
-@media (max-width: 480px) {
-    .container { grid-template-columns: 1fr; padding: 15px; }
-    .logo-img { width: 130px; }
-}
+        /* RODAPÉ */
+        .rodape-premium { background-color: #0a0c1a; color: #ffffff; padding: 50px 0 30px 0; text-align: center; border-top: 2px solid var(--dourado); }
     </style>
 </head>
 <body>
@@ -226,28 +99,47 @@ select, .busca-input { padding: 12px; border: 1px solid var(--dourado); border-r
     </div>
 </header>
 
+<div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
+    <p style="color: #ffffff; font-size: 14px; margin: 0; font-weight: bold;">
+        ✨ Parcele suas fragrâncias favoritas em até 10x sem juros! ✨
+    </p>
+</div>
+
+<div class="filtros-container">
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%;">
+        <select id="filtroMarca" onchange="filtrar()">
+            <option value="todos">TODAS AS MARCAS</option>
+            <option value="SHAKIRA">SHAKIRA</option>
+            <option value="PACO RABANNE">PACO RABANNE</option>
+            <option value="LATTAFA">LATTAFA</option>
+            </select>
+        <input type="text" id="buscaInput" onkeyup="filtrar()" placeholder="PESQUISAR...">
+    </div>
+    <div class="categorias-nav" style="display:flex; gap:10px; margin-top:10px;">
+        <button class="btn-categoria active" onclick="filtrarCategoria('todos', this)">TODOS</button>
+        <button class="btn-categoria" onclick="filtrarCategoria('alta', this)">ALTA PERFUMARIA</button>
+        <button class="btn-categoria" onclick="filtrarCategoria('arabe', this)">ÁRABES</button>
+    </div>
+</div>
+
+<div class="container" id="listaProdutos"></div>
+
 <div id="cart-modal" class="cart-modal">
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee; flex-shrink: 0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee;">
         <h3 style="margin:0; color: #333;">Sua Sacola</h3>
         <span style="cursor:pointer; font-size: 28px; color: #333;" onclick="toggleCart()">×</span>
     </div>
 
     <div id="cart-scroll-area">
-        <div id="cart-items">
-            <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
-        </div>
-
-        <div style="font-family: 'Inter', sans-serif; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-            <h3 style="font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: #1a1a1a;">ENTREGA</h3>
-            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
-            
-            <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
-                <input type="text" id="cep-cliente" placeholder="Digite o CEP">
-                <button onclick="calcularFrete()" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase;">
-                    CALCULAR
-                </button>
+        <div id="cart-items"></div>
+        
+        <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
+            <h4 style="font-size: 14px; margin-bottom: 10px;">CÁLCULO DE FRETE</h4>
+            <div style="display: flex; gap: 5px;">
+                <input type="text" id="cep-cliente" placeholder="00000-000" style="flex:1; padding: 10px; border: 1px solid #ccc; border-radius: 4px;">
+                <button onclick="calcularFrete()" style="background: #1a1a1a; color: white; border: none; padding: 0 15px; border-radius: 4px; cursor: pointer;">CALCULAR</button>
             </div>
-            <div id="opcoes-frete"></div>
+            <div id="opcoes-frete" style="margin-top: 15px;"></div>
         </div>
     </div>
 
@@ -256,222 +148,143 @@ select, .busca-input { padding: 12px; border: 1px solid var(--dourado); border-r
             <span>Total:</span>
             <span>R$ <span id="cart-total">0,00</span></span>
         </div>
-        <button class="btn-whats" onclick="finalizarWhatsApp()">
-            ENVIAR PEDIDO
+        <button onclick="finalizarWhatsApp()" style="background: var(--verde-whats); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer;">
+            ENVIAR PEDIDO VIA WHATSAPP
         </button>
     </div>
 </div>
 
-<div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; margin-bottom: 20px; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
-    <p style="color: #ffffff; font-size: 14px; margin: 0; font-weight: bold; letter-spacing: 0.5px;">
-        ✨ Parcele suas fragrâncias favoritas em até 10x sem juros no cartão! ✨
-    </p>
-</div>
-
-<div class="filtros-container">
-    <div class="busca-grupo">
-        <select id="filtroMarca" onchange="filtrar()">
-            <option value="todos">TODAS AS MARCAS</option>
-            <optgroup label="ALTA PERFUMARIA">
-                <option value="PACO RABANNE">PACO RABANNE</option>
-                <option value="CHLOE">CHLOE</option>
-                <option value="CAROLINA HERRERA">CAROLINA HERRERA</option>
-                <option value="DIOR">DIOR</option>
-                <option value="JEAN PAUL GAULTIER">JEAN PAUL GAULTIER</option>
-                <option value="ARMANI">ARMANI</option>
-                <option value="DOLCE & GABBANA">DOLCE & GABBANA</option>
-                <option value="YVES SAINT LAURENT">YVES SAINT LAURENT</option>
-                <option value="HUGO BOSS">HUGO BOSS</option>
-                <option value="ADOLFO DOMINGUEZ">ADOLFO DOMINGUEZ</option>
-                <option value="GABRIELA SABATINI">GABRIELA SABATINI</option>
-                <option value="ANIMALE">ANIMALE</option>
-                <option value="ANTONIO BANDEIRAS">ANTONIO BANDEIRAS</option>
-                <option value="AZZARO">AZZARO</option>
-                <option value="BVLGARI">BVLGARI</option>
-                <option value="JACQUES BOGART ">JACQUES BOGART </option>
-                <option value="CACHAREL">CACHAREL</option>
-                <option value="CALVIN KLEIN">CALVIN KLEIN</option>
-                <option value="DAVIDOFF">DAVIDOFF</option>
-                <option value="GIVENCHY">GIVENCHY</option>
-                <option value="JOOP">JOOP</option>
-                <option value="KENZO">KENZO</option>
-                <option value="NAUTICA">NAUTICA</option>
-                <option value="MARINA DE BOURBON">MARINA DE BOURBON</option>
-                <option value="MERCEDES BENZ">MERCEDES BENZ</option>
-                <option value="RALPH LAUREN">RALPH LAUREN</option>
-                <option value="SHAKIRA">SHAKIRA</option>
-            </optgroup>
-            <optgroup label="PERFUMARIA ÁRABE">
-                <option value="LATTAFA">LATTAFA</option>
-                <option value="AL WATANIAH">AL WATANIAH</option>
-                <option value="ARMAF">ARMAF</option>
-                <option value="MAISON ALHAMBRA">MAISON ALHAMBRA</option>
-                <option value="AFNAN">AFNAN</option>
-                <option value="ORIENTICA">ORIENTICA</option>
-            </optgroup>
-            <optgroup label="KITS">
-                <option value="KITS">KITS</option> 
-            </optgroup>
-            <optgroup label="CASA">
-                <option value="VELAS AROMATICAS">VELAS AROMÁTICAS</option>
-            </optgroup>
-             <optgroup label="MAQUIAGEM">
-                <option value="BATONS">BATONS</option>
-            </optgroup>
-        </select>
-        <input type="text" id="buscaInput" onkeyup="filtrar()" placeholder="PESQUISAR...">
-    </div>
-
-    <div class="categorias-nav">
-        <button class="btn-categoria active" onclick="filtrarCategoria('todos', this)">TODOS</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('alta', this)">ALTA PERFUMARIA</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('arabe', this)">PERFUMES ÁRABES</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('casa', this)">CASA & VELAS</button>
-        <button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
-         <button class="btn-categoria" onclick="filtrarCategoria('maquiagem', this)">MAQUIAGEM</button>
+<div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; position:relative; color:#333; text-align:center;">
+        <span onclick="fecharDetalhes()" style="position:absolute; top:10px; right:15px; font-size:25px; cursor:pointer;">&times;</span>
+        <img id="detalhe-img" src="" style="width:100%; height:200px; object-fit:contain; margin-bottom:15px;">
+        <h2 id="detalhe-nome" style="margin:5px 0; color:#020b1f; font-size:18px;"></h2>
+        <p id="detalhe-marca" style="color:#b89356; font-weight:bold; text-transform:uppercase; font-size:12px;"></p>
+        <p id="detalhe-descricao" style="font-size:14px; color:#666; text-align:left; margin-top:15px;"></p>
+        <button id="detalhe-btn-whats" style="background:#25d366; color:white; border:none; padding:12px; width:100%; border-radius:8px; font-weight:bold; cursor:pointer; margin-top:15px;">COMPRAR AGORA</button>
     </div>
 </div>
 
+<footer class="rodape-premium">
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
+        <p style="font-style: italic; color: #c5a059;">"Sinta o aroma dos sonhos e realce sua beleza!"</p>
+        <h2 style="letter-spacing: 2px;">NUVEM DE ESSÊNCIAS PERFUMARIA</h2>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 30px; text-align: left;">
+            <div>
+                <h4>ATENDIMENTO</h4>
+                <p>Rua dos Motoristas, nº 341 - Jardim Paulista</p>
+                <p>(63) 99257-6211</p>
+            </div>
+            <div>
+                <h4>PAGAMENTO</h4>
+                <div style="display:flex; gap:10px;">
+                    <img src="https://img.icons8.com/color/38/mastercard.png" alt="Master">
+                    <img src="https://img.icons8.com/color/38/visa.png" alt="Visa">
+                    <img src="https://img.icons8.com/color/38/pix.png" alt="Pix">
+                </div>
+            </div>
+        </div>
+        <p style="margin-top: 40px; opacity: 0.6; font-size: 12px;">© <span id="ano-real"></span> Nuvem de Essências - CNPJ: 58.620.682/0001-15</p>
+    </div>
+</footer>
 
-<div class="container" id="listaProdutos"></div>
 
 <script src="promocoes.js"></script>
 <script src="produtos.js"></script>
 
 <script>
-let sacola = []; 
+let sacola = [];
 let valorFreteGlobal = 0;
+let nomeFreteGlobal = "";
 
 window.onload = function() {
     if (typeof meusProdutos !== 'undefined') carregarProdutos();
-    const anoReal = document.getElementById("ano-real");
-    if(anoReal) anoReal.textContent = new Date().getFullYear();
+    document.getElementById("ano-real").textContent = new Date().getFullYear();
 };
 
 function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
-    if (!container) return;
     container.innerHTML = ""; 
 
     meusProdutos.forEach(p => {
-        // SEGURANÇA: Se o preço não for número, assume 0 para não quebrar o toFixed
-        const precoBase = (p.preco && typeof p.preco === 'number') ? p.preco : 0;
+        // INTEGRAÇÃO COM promocoes.js
+        // Pegamos o preço da primeira opção para exibir no card
+        const opcaoPadrao = p.opcoes[0];
+        const valorOriginal = parseFloat(opcaoPadrao.valor.split('|')[1]);
         
-        // PROCESSA PROMOÇÃO (Usa a função do seu arquivo promocoes.js)
-        const info = (typeof processarPrecoProduto === 'function') ? 
-                      processarPrecoProduto(p) : { emPromocao: false, precoFinal: precoBase };
+        // Chamada da função do promocoes.js
+        const promo = (typeof processarPrecoProduto === 'function') 
+            ? processarPrecoProduto({id: p.id, marca: p.marca, preco: valorOriginal}) 
+            : {precoFinal: valorOriginal, emPromocao: false};
 
-        const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
-        
         const card = document.createElement('div');
         card.className = 'card';
+        card.setAttribute('data-marca', p.marca.toUpperCase());
+        card.setAttribute('data-secao', p.secao);
+
+        const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
+
         card.innerHTML = `
-            ${info.emPromocao ? `<div class="selo-oferta-card">OFERTA</div>` : ''}
-            <img src="${p.imagem}" alt="${p.nome}" onclick="abrirDetalhes(${pJson})" style="cursor:pointer;">
-            <div class="info">
-                <span class="marca-tag">${p.marca}</span>
+            <img src="${p.imagem}" alt="${p.nome}" onclick='abrirDetalhes(${pJson})' style="cursor:pointer">
+            <div class="info" style="width: 90%; text-align:center;">
+                <span style="color:var(--dourado); font-size:10px; font-weight:bold;">${p.marca}</span>
                 <div class="nome-perfume">${p.nome}</div>
-                <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
-                <div style="margin: 10px 0; min-height: 45px;">
-                    ${info.emPromocao ? 
-                        `<span class="preco-antigo">R$ ${precoBase.toFixed(2)}</span><br>
-                         <span class="preco-novo">R$ ${info.precoFinal.toFixed(2)}</span>
-                         <span class="badge-desconto">-${info.descontoPercentual}%</span>` : 
-                        `<span style="font-weight:bold; font-size:1.25em; color: #020b1f;">R$ ${precoBase.toFixed(2)}</span>`}
+                
+                <div style="margin-bottom:10px;">
+                    ${promo.emPromocao ? `<span class="preco-de">R$ ${valorOriginal.toFixed(2)}</span>` : ''}
+                    <div class="preco-por">
+                        R$ ${promo.precoFinal.toFixed(2)}
+                        ${promo.emPromocao ? `<span class="tag-desconto">-${(promo.descontoPercentual * 100).toFixed(0)}%</span>` : ''}
+                    </div>
                 </div>
-                <div class="qtd-container">
-                    <button class="btn-menos" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
-                    <button class="btn-mais" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
-                </div>
-                <select class="seletor-ml" id="ml-${p.id}">
+
+                <select class="seletor-ml" id="ml-${p.id}" style="width:100%; padding:8px; border-radius:5px; margin-bottom:10px;">
                     ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
                 </select>
-                <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})">VER DETALHES</button>
-                ${p.disponivel ? `<button class="btn-add-sacola" onclick="addCart('${p.nome}', 'ml-${p.id}', 'q-${p.id}')">+ Adicionar à Sacola</button>` : ''}
-            </div>`;
+
+                <button onclick="addCart('${p.nome}', 'ml-${p.id}', '${p.id}')" style="background:black; color:white; border:none; width:100%; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold;">
+                    + ADICIONAR À SACOLA
+                </button>
+            </div>
+        `;
         container.appendChild(card);
     });
 }
 
-function addCart(nomeProduto, idSelectMl, idInputQtd) {
-    const produtoBase = meusProdutos.find(p => p.nome === nomeProduto);
-    const mlSelect = document.getElementById(idSelectMl);
-    const qtdInput = document.getElementById(idInputQtd);
+function addCart(nome, mlId, prodId) {
+    const selectMl = document.getElementById(mlId);
+    const [ml, preco] = selectMl.value.split('|');
+    const precoNum = parseFloat(preco);
     
-    if (!produtoBase) return;
+    // Aplicar promoção também na hora de adicionar à sacola
+    const produtoEncontrado = meusProdutos.find(x => x.id === prodId);
+    const promo = processarPrecoProduto({id: prodId, marca: produtoEncontrado.marca, preco: precoNum});
 
-    const partes = mlSelect.value.split('|');
-    const precoBase = parseFloat(partes[1]);
-    const quantidade = parseInt(qtdInput.value);
-
-    // Verifica promoção para o item específico adicionado
-    const infoPromo = processarPrecoProduto({ id: produtoBase.id, marca: produtoBase.marca, preco: precoBase });
-
-    const novoItem = {
-        id: produtoBase.id,
-        nome: produtoBase.nome,
-        tamanho: partes[0],
-        quantidade: quantidade,
-        precoUnitario: infoPromo.precoFinal,
-        emPromocao: infoPromo.emPromocao
-    };
-
-    sacola.push(novoItem);
+    sacola.push({ nome, ml, preco: promo.precoFinal, qtd: 1 });
     atualizarSacola();
-    alert("Produto adicionado à sacola!");
+    document.getElementById('cart-modal').classList.add('active');
 }
 
 function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
-    const countCont = document.getElementById('cart-count');
-
-    let subtotal = sacola.reduce((sum, item) => sum + (item.precoUnitario * item.quantidade), 0);
-
-    itensCont.innerHTML = sacola.length === 0 ? '<p style="text-align:center; color:#999;">Sacola vazia</p>' : 
-        sacola.map((item, index) => `
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
-                <div style="text-align:left;"><b style="font-size:13px;">${item.nome}</b><br><small>${item.tamanho} | Qtd: ${item.quantidade}</small></div>
-                <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px; cursor:pointer;">&times;</button>
-            </div>`).join('');
-
-    // --- REGRA DE FRETE ---
-    const temPromocao = sacola.some(item => item.emPromocao === true);
-    if (temPromocao) {
-        valorFreteGlobal = 0; // Reseta frete grátis se houver promoção
-        document.getElementById('opcoes-frete').innerHTML = `<p style="color:red; font-size:12px;">⚠️ Produtos em promoção não possuem Frete Grátis. Insira o CEP para calcular.</p>`;
+    
+    let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
+    
+    if (sacola.length === 0) {
+        itensCont.innerHTML = '<p style="text-align:center; color:#999;">Sacola vazia</p>';
+    } else {
+        itensCont.innerHTML = sacola.map((item, index) => `
+            <div style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eee; font-size:13px;">
+                <div><b>${item.nome}</b><br><small>${item.ml}</small></div>
+                <div>R$ ${item.preco.toFixed(2)} <button onclick="removerItem(${index})" style="color:red; background:none; border:none; cursor:pointer; margin-left:10px;">×</button></div>
+            </div>
+        `).join('');
     }
 
     const totalGeral = subtotal + valorFreteGlobal;
     totalCont.innerText = totalGeral.toLocaleString('pt-br', { minimumFractionDigits: 2 });
-    if(countCont) countCont.innerText = sacola.reduce((t, i) => t + i.quantidade, 0);
-}
-
-function calcularFrete() {
-    const temPromocao = sacola.some(item => item.emPromocao === true);
-    const areaFrete = document.getElementById('opcoes-frete');
-    
-    // Simulação de cálculo
-    if (temPromocao) {
-        valorFreteGlobal = 25.00; // Valor fixo simulado quando tem promo
-        areaFrete.innerHTML = `<p style="color:#333;">Entrega Normal: <b>R$ 25,00</b></p>`;
-    } else {
-        valorFreteGlobal = 0;
-        areaFrete.innerHTML = `<p style="color:green;"><b>Frete Grátis Liberado!</b></p>`;
-    }
-    atualizarSacola();
-}
-
-function filtrar() {
-    // Aqui você pode manter sua lógica de filtro original
-    carregarProdutos();
-}
-
-function alterarQtd(id, delta, max) {
-    const input = document.getElementById(id);
-    let novo = parseInt(input.value) + delta;
-    if (novo >= 1 && novo <= max) input.value = novo;
+    document.getElementById('cart-count').innerText = sacola.length;
 }
 
 function removerItem(index) {
@@ -479,69 +292,85 @@ function removerItem(index) {
     atualizarSacola();
 }
 
+async function calcularFrete() {
+    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+    const resultadoDiv = document.getElementById('opcoes-frete');
+    
+    if (sacola.length === 0) return alert("Adicione produtos primeiro.");
+    if (cep.length !== 8) return alert("CEP inválido.");
+
+    resultadoDiv.innerHTML = "Calculando...";
+
+    // Regra Araguaína (Inicia com 778)
+    if (cep.startsWith('778')) {
+        const opcoes = [
+            { name: "Entrega Local", price: 10.00, time: "1 dia" },
+            { name: "Retirada no Local", price: 0, time: "Hoje" }
+        ];
+        renderizarFrete(opcoes);
+    } else {
+        // Aqui você chamaria sua API real ou simularia frete nacional
+        resultadoDiv.innerHTML = "<p style='font-size:12px;'>Para fora de Araguaína, finalize o pedido para combinarmos o envio via Correios/Transportadora.</p>";
+    }
+}
+
+function renderizarFrete(opcoes) {
+    const div = document.getElementById('opcoes-frete');
+    div.innerHTML = opcoes.map((op, i) => `
+        <div onclick="selecionarFrete('${op.name}', ${op.price}, 'f-${i}')" id="f-${i}" class="f-card" style="border:1px solid #eee; padding:10px; margin-bottom:5px; border-radius:5px; cursor:pointer; display:flex; justify-content:space-between;">
+            <span>${op.name} (${op.time})</span>
+            <b>${op.price === 0 ? 'GRÁTIS' : 'R$ '+op.price.toFixed(2)}</b>
+        </div>
+    `).join('');
+}
+
+function selecionarFrete(nome, valor, id) {
+    valorFreteGlobal = valor;
+    nomeFreteGlobal = nome;
+    document.querySelectorAll('.f-card').forEach(c => c.style.borderColor = '#eee');
+    document.getElementById(id).style.borderColor = 'var(--dourado)';
+    atualizarSacola();
+}
+
 function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
+
+function fecharDetalhes() { document.getElementById('modal-detalhes').style.display = 'none'; }
 
 function abrirDetalhes(p) {
     document.getElementById('detalhe-img').src = p.imagem;
     document.getElementById('detalhe-nome').innerText = p.nome;
     document.getElementById('detalhe-marca').innerText = p.marca;
-    document.getElementById('detalhe-descricao').innerText = p.descricao || "Fragrância exclusiva Nuvem de Essências.";
+    document.getElementById('detalhe-descricao').innerText = p.descricao || "Fragrância selecionada com exclusividade.";
     document.getElementById('modal-detalhes').style.display = 'flex';
 }
 
-function fecharDetalhes() { document.getElementById('modal-detalhes').style.display = 'none'; }
-
 function finalizarWhatsApp() {
-    let msg = "Olá Nuvem de Essências! Gostaria de encomendar:\n\n";
-    sacola.forEach(i => msg += `• ${i.quantidade}x ${i.nome} (${i.tamanho})\n`);
-    msg += `\nTotal: R$ ${document.getElementById('cart-total').innerText}`;
-    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
+    if (sacola.length === 0) return alert("Sua sacola está vazia!");
+    let texto = "Olá! Gostaria de fazer um pedido:\n\n";
+    sacola.forEach(i => texto += `• ${i.nome} (${i.ml}) - R$ ${i.preco.toFixed(2)}\n`);
+    texto += `\nSubtotal: R$ ${sacola.reduce((s, i) => s + i.preco, 0).toFixed(2)}`;
+    texto += `\nFrete: ${nomeFreteGlobal} (R$ ${valorFreteGlobal.toFixed(2)})`;
+    texto += `\n*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
+    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
-       <div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
-    <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; position:relative; color:#333; text-align:center;">
-        <span onclick="fecharDetalhes()" style="position:absolute; top:10px; right:15px; font-size:25px; cursor:pointer;">&times;</span>
-        <img id="detalhe-img" src="" style="width:100%; height:200px; object-fit:contain; margin-bottom:15px;">
-        <h2 id="detalhe-nome" style="margin:5px 0; color:#020b1f; font-size:18px;"></h2>
-        <p id="detalhe-marca" style="color:#b89356; font-weight:bold; text-transform:uppercase; font-size:12px; margin-bottom:10px;"></p>
-        <p id="detalhe-descricao" style="font-size:14px; line-height:1.5; color:#666; text-align:left; max-height:150px; overflow-y:auto;"></p>
-        <button class="btn-whats" onclick="finalizarWhatsApp()">COMPRAR PELO WHATSAPP</button>
-    </div>
-</div>
-</script>
-<footer class="rodape-premium">
-    <div class="container">
-        <div class="secao-marca">
-            <p class="slogan no-break">"Sinta o aroma dos sonhos e realce sua beleza!"</p>
-            <h1 class="logo-text no-break">NUVEM DE ESSÊNCIAS PERFUMARIA</h1>
-        </div>
-        <hr class="divisor">
-        <div class="grid-conteudo" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; text-align: left;">
-            <div class="coluna">
-                <h3>ATENDIMENTO</h3>
-                <p>Rua dos Motoristas, nº 341 - Jardim Paulista</p>
-                <div class="whatsapp-link" style="margin-top:10px;">
-                    <a href="https://wa.me/5563992576211" target="_blank" style="color:#25d366; text-decoration:none; font-weight:bold;">
-                        Fale conosco: (63) 99257-6211
-                    </a>
-                </div>
-            </div>
-            <div class="coluna">
-                <h3>PAGAMENTO</h3>
-                <div class="icones-pagamento" style="display:flex; gap:10px; margin-top:10px;">
-                    <img src="https://img.icons8.com/color/38/mastercard.png" alt="Master">
-                    <img src="https://img.icons8.com/color/38/visa.png" alt="Visa">
-                    <img src="https://img.icons8.com/color/38/pix.png" alt="Pix">
-                </div>
-            </div>
-        </div>
-        <div class="rodape-legal" style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px; font-size:12px; opacity:0.7;">
-            <p>Nuvem de Essências Perfumaria LTDA | CNPJ: 58.620.682/0001-15</p>
-            <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
-        </div>
-    </div>
-</footer>
+function filtrar() {
+    const marca = document.getElementById('filtroMarca').value.toUpperCase();
+    const busca = document.getElementById('buscaInput').value.toUpperCase();
+    document.querySelectorAll('.card').forEach(card => {
+        const mCard = card.getAttribute('data-marca');
+        const nCard = card.querySelector('.nome-perfume').innerText.toUpperCase();
+        card.style.display = (marca === 'TODOS' || mCard === marca) && nCard.includes(busca) ? "flex" : "none";
+    });
+}
 
+function filtrarCategoria(cat, el) {
+    document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.card').forEach(card => {
+        card.style.display = (cat === 'todos' || card.getAttribute('data-secao') === cat) ? "flex" : "none";
+    });
+}
+</script>
 </body>
 </html>
-
