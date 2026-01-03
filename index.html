@@ -65,6 +65,18 @@
             flex-direction: column;
             box-shadow: -5px 0 20px rgba(0,0,0,0.5);
         }
+        .logo-text {
+    font-family: 'Playfair Display', serif;
+    color: #87CEEB; /* Azul Nuvem Celeste */
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.rodape-premium strong {
+    color: #87CEEB; /* Araguaína - Tocantins em destaque */
+}
         .cart-modal.active { right: 0; }
         #cart-scroll-area { flex: 1; overflow-y: auto; padding: 20px; color: #333; }
         .cart-footer { padding: 20px; border-top: 1px solid #eee; background: white; flex-shrink: 0; }
@@ -218,29 +230,40 @@
 </div>
 
 <footer class="rodape-premium">
-    <div style="max-width: 1200px; margin: 0 auto; padding: 0 20px;">
-        <p style="font-style: italic; color: #c5a059;">"Sinta o aroma dos sonhos e realce sua beleza!"</p>
-        <h2 style="letter-spacing: 2px;">NUVEM DE ESSÊNCIAS PERFUMARIA</h2>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px; margin-top: 30px; text-align: left;">
-            <div>
-                <h4>ATENDIMENTO</h4>
+    <div class="container">
+        <div class="secao-marca">
+            <p class="slogan no-break">"Sinta o aroma dos sonhos e realce sua beleza!"</p>
+            <h1 class="logo-text no-break">NUVEM DE ESSÊNCIAS PERFUMARIA</h1>
+        </div>
+        <hr class="divisor">
+        <div class="grid-conteudo" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; text-align: left;">
+            <div class="coluna">
+                <h3>ATENDIMENTO</h3>
                 <p>Rua dos Motoristas, nº 341 - Jardim Paulista</p>
-                <p>(63) 99257-6211</p>
+		<p>Araguaína - TO</p>
+
+                <div class="whatsapp-link" style="margin-top:10px;">
+                    <a href="https://wa.me/5563992576211" target="_blank" style="color:#25d366; text-decoration:none; font-weight:bold;">
+                        Fale conosco: (63) 99257-6211
+                    </a>
+                </div>
             </div>
-            <div>
-                <h4>PAGAMENTO</h4>
-                <div style="display:flex; gap:10px;">
+            <div class="coluna">
+                <h3>PAGAMENTO</h3>
+                <div class="icones-pagamento" style="display:flex; gap:10px; margin-top:10px;">
                     <img src="https://img.icons8.com/color/38/mastercard.png" alt="Master">
                     <img src="https://img.icons8.com/color/38/visa.png" alt="Visa">
                     <img src="https://img.icons8.com/color/38/pix.png" alt="Pix">
                 </div>
             </div>
         </div>
-        <p style="margin-top: 40px; opacity: 0.6; font-size: 12px;">© <span id="ano-real"></span> Nuvem de Essências - CNPJ: 58.620.682/0001-15</p>
+        <div class="rodape-legal" style="margin-top:30px; border-top:1px solid rgba(255,255,255,0.1); padding-top:20px; font-size:12px; opacity:0.7;">
+            <p>Nuvem de Essências Perfumaria LTDA | CNPJ: 58.620.682/0001-15</p>
+            <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
+        </div>
     </div>
 </footer>
-
-
+    
 <script src="promocoes.js"></script>
 <script src="produtos.js"></script>
 
@@ -256,49 +279,63 @@ window.onload = function() {
 
 function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
+    if (!container) return;
     container.innerHTML = ""; 
 
     meusProdutos.forEach(p => {
-        // INTEGRAÇÃO COM promocoes.js
-        // Pegamos o preço da primeira opção para exibir no card
-        const opcaoPadrao = p.opcoes[0];
-        const valorOriginal = parseFloat(opcaoPadrao.valor.split('|')[1]);
-        
-        // Chamada da função do promocoes.js
-        const promo = (typeof processarPrecoProduto === 'function') 
-            ? processarPrecoProduto({id: p.id, marca: p.marca, preco: valorOriginal}) 
-            : {precoFinal: valorOriginal, emPromocao: false};
-
         const card = document.createElement('div');
         card.className = 'card';
         card.setAttribute('data-marca', p.marca.toUpperCase());
         card.setAttribute('data-secao', p.secao);
 
+        // Preço base do primeiro item (ex: 80ml)
+        const precoBase = parseFloat(p.opcoes[0].valor.split('|')[1]);
+        
+        // Processa desconto via ID ou Marca
+        const promo = processarPrecoProduto({
+            id: p.id,
+            marca: p.marca,
+            preco: precoBase
+        });
+
         const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
         card.innerHTML = `
-            <img src="${p.imagem}" alt="${p.nome}" onclick='abrirDetalhes(${pJson})' style="cursor:pointer">
-            <div class="info" style="width: 90%; text-align:center;">
-                <span style="color:var(--dourado); font-size:10px; font-weight:bold;">${p.marca}</span>
+            <div style="position: relative; width: 100%;">
+                ${promo.emPromocao ? `<div style="position: absolute; top: 10px; left: 10px; background: #d9534f; color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; z-index: 5;">${promo.descontoPercentual}% OFF</div>` : ''}
+                <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer; width: 100%; height: 180px; object-fit: contain;" onclick="abrirDetalhes(${pJson})">
+            </div>
+            
+            <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
+                <span class="marca-tag">${p.marca}</span>
                 <div class="nome-perfume">${p.nome}</div>
                 
-                <div style="margin-bottom:10px;">
-                    ${promo.emPromocao ? `<span class="preco-de">R$ ${valorOriginal.toFixed(2)}</span>` : ''}
-                    <div class="preco-por">
-                        R$ ${promo.precoFinal.toFixed(2)}
-                        ${promo.emPromocao ? `<span class="tag-desconto">-${(promo.descontoPercentual * 100).toFixed(0)}%</span>` : ''}
-                    </div>
+                <div style="margin-bottom: 10px;">
+                    ${promo.emPromocao ? `<span style="text-decoration: line-through; color: #999; font-size: 12px;">R$ ${precoBase.toFixed(2)}</span>` : ''}
+                    <div style="color: #d9534f; font-size: 20px; font-weight: bold;">R$ ${promo.precoFinal.toFixed(2)}</div>
                 </div>
 
-                <select class="seletor-ml" id="ml-${p.id}" style="width:100%; padding:8px; border-radius:5px; margin-bottom:10px;">
+                <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'PRODUTO INDISPONÍVEL'}</div>
+                
+                <div class="qtd-container">
+                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
+                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
+                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
+                </div>
+
+                <select class="seletor-ml" id="ml-${p.id}">
                     ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
                 </select>
-
-                <button onclick="addCart('${p.nome}', 'ml-${p.id}', '${p.id}')" style="background:black; color:white; border:none; width:100%; padding:10px; border-radius:8px; cursor:pointer; font-weight:bold;">
-                    + ADICIONAR À SACOLA
+                
+                <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="background:#b89356; color:white; margin-bottom: 8px;">
+                    VER DETALHES
                 </button>
-            </div>
-        `;
+
+                ${p.disponivel ? `
+                <button class="btn-add-sacola" onclick="addCartPromocional('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="background:black; color:white;">
+                    + Adicionar à Sacola
+                </button>` : ''}
+            </div>`; 
         container.appendChild(card);
     });
 }
@@ -351,18 +388,45 @@ async function calcularFrete() {
     if (sacola.length === 0) return alert("Adicione produtos primeiro.");
     if (cep.length !== 8) return alert("CEP inválido.");
 
-    resultadoDiv.innerHTML = "Calculando...";
+    resultadoDiv.innerHTML = "<p style='font-size:12px; color:#666;'>Calculando frete...</p>";
 
-    // Regra Araguaína (Inicia com 778)
-    if (cep.startsWith('778')) {
-        const opcoes = [
-            { name: "Entrega Local", price: 10.00, time: "1 dia" },
-            { name: "Retirada no Local", price: 0, time: "Hoje" }
-        ];
-        renderizarFrete(opcoes);
-    } else {
-        // Aqui você chamaria sua API real ou simularia frete nacional
-        resultadoDiv.innerHTML = "<p style='font-size:12px;'>Para fora de Araguaína, finalize o pedido para combinarmos o envio via Correios/Transportadora.</p>";
+    // Regra específica para Araguaína-TO (Inicia com 778)
+    const ehAraguaina = cep.startsWith('778');
+
+    try {
+        const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
+        let validas = [];
+
+        if (ehAraguaina) {
+            validas = [
+                { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "Hoje" }, 
+                { name: "Retirada na Loja", price: 0, delivery_time: "Imediato" }
+            ];
+        } else {
+            // Chamada para sua pasta /api/
+            const response = await fetch('/api/calcular-frete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ cep_destino: cep, valor_total: subtotal })
+            });
+            validas = await response.json();
+        }
+
+        resultadoDiv.innerHTML = validas.map((op, index) => `
+            <div id="f-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${op.price}, 'f-op-${index}')" 
+                 style="display:flex; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; border-radius:8px;">
+                <div class="radio-fake" style="width:18px; height:18px; border:2px solid #b89356; border-radius:50%; margin-right:10px; display:flex; align-items:center; justify-content:center;">
+                    <div class="radio-inner" style="width:10px; height:10px; border-radius:50%;"></div>
+                </div>
+                <div style="flex:1; text-align:left;">
+                    <strong style="font-size:13px;">${op.name}</strong><br>
+                    <small style="color:#888;">Prazo: ${op.delivery_time}</small>
+                </div>
+                <strong style="color:#b89356;">${op.price === 0 ? 'GRÁTIS' : 'R$ ' + op.price.toFixed(2)}</strong>
+            </div>
+        `).join('');
+    } catch (e) {
+        resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao conectar com o serviço de frete.</p>";
     }
 }
 
@@ -426,5 +490,6 @@ function filtrarCategoria(cat, el) {
 </script>
 </body>
 </html>
+
 
 
