@@ -106,17 +106,96 @@ header {
     z-index: 10;
 }
 
-/* 4. RODAPÉ PREMIUM */
+/* 4. RODAPÉ PROFISSIONAL NUVEM */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap');
 
-.rodape-premium {
-    background-color: #0a0c1a;
+.rodape-container {
+    background-color: #020b1f; /* Mantendo seu azul escuro */
     color: #ffffff;
-    padding: 50px 0 30px 0;
+    padding: 40px 5% 20px;
+    border-top: 1px solid rgba(184, 147, 86, 0.3);
     font-family: 'Poppins', sans-serif;
-    text-align: center;
 }
 
+.rodape-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 30px;
+}
+
+.rodape-col {
+    flex: 1;
+    min-width: 250px;
+}
+
+.rodape-frase-dourada {
+    font-family: 'Playfair Display', serif;
+    color: #b89356;
+    font-style: italic;
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+}
+
+.link-whats {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #fff;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 10px 0;
+    transition: 0.3s;
+}
+
+.link-whats:hover { color: #25d366; }
+
+.img-whats-icon { width: 22px; height: 22px; }
+
+/* Selos de Pagamento */
+.pagamento-titulo {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    color: #b89356;
+}
+
+.pagamento-icones {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.pagamento-icones img {
+    height: 22px;
+    filter: brightness(0) invert(1); /* Deixa os logos brancos para combinar com seu site */
+    opacity: 0.8;
+}
+
+.rodape-alert {
+    font-size: 11px;
+    color: #888;
+    line-height: 1.6;
+    margin-top: 20px;
+}
+
+.rodape-bottom {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    text-align: center;
+    font-size: 11px;
+    color: #666;
+}
+
+.simbolo-perfume-footer {
+    width: 35px;
+    margin-bottom: 10px;
+}
 .logo-text {
     font-family: 'Playfair Display', serif;
     color: #87CEEB; 
@@ -667,13 +746,45 @@ function finalizarWhatsApp() {
     </div>
 </div>
 
-<footer class="rodape-premium">
-    <div class="container">
-        <h1 class="logo-text">NUVEM DE ESSÊNCIAS PERFUMARIA</h1>
-        <p>Araguaína - TO | WhatsApp: (63) 99257-6211</p>
-        <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
+<footer class="rodape-container">
+    <div class="rodape-content">
+        
+        <div class="rodape-col">
+            <div class="rodape-frase-dourada">"Sinta o aroma dos sonhos e realce sua beleza!"</div>
+            
+            <a href="https://wa.me/5563992576211" target="_blank" class="link-whats">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="img-whats-icon" alt="WhatsApp">
+                (63) 99257-6211
+            </a>
+
+            <div class="rodape-alert">
+                O único site oficial da Nuvem de Essências é o <strong>www.nuvemdeessencias.com.br</strong>. 
+                Não forneça dados pessoais para links ou páginas não oficiais.
+            </div>
+        </div>
+
+        <div class="rodape-col" style="text-align: center;">
+            <div class="pagamento-titulo">Formas de Pagamento</div>
+            <div class="pagamento-icones" style="justify-content: center;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94Elo.svg" alt="Elo">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Logo_Pix.svg" alt="Pix" style="filter: none; opacity: 1;">
+            </div>
+        </div>
+
+        <div class="rodape-col" style="text-align: right;">
+            <img src="img/simboloperfume.png" class="simbolo-perfume-footer" alt="Ícone">
+            <div style="font-size: 13px; font-weight: bold; color: #87CEEB; letter-spacing: 1px;">NUVEM DE ESSÊNCIAS PERFUMARIA</div>
+            <div style="font-size: 11px; color: #bbb;">Araguaína - TO</div>
+        </div>
+    </div>
+
+    <div class="rodape-bottom">
+        CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
