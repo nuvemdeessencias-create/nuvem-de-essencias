@@ -335,37 +335,60 @@ function carregarProdutos() {
         card.setAttribute('data-marca', p.marca.toUpperCase());
         card.setAttribute('data-secao', p.secao);
 
-        // Dentro do loop meusProdutos.forEach(p => { ... })
+        // Preço da primeira opção para o card inicial
+        const precoOriginal = parseFloat(p.opcoes[0].valor.split('|')[1]);
+        const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
 
-const precoOriginal = parseFloat(p.opcoes[0].valor.split('|')[1]);
-const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
+        // Cálculo da porcentagem de exibição (ex: 0.07 -> 7)
+        const porcentagemExibicao = Math.round(promo.descontoPercentual * 100);
 
-// Calculamos a porcentagem real (ex: 0.07 -> 7 | 0.10 -> 10)
-const porcentagemExibicao = Math.round(promo.descontoPercentual * 100);
+        // CORREÇÃO: Definindo o pJson corretamente para não travar o código
+        const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
-card.innerHTML = `
-    ${promo.emPromocao ? `<div class="selo-promo">${porcentagemExibicao}% OFF NO PIX</div>` : ''}
-    <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
-    
-    <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
-        <span class="marca-tag">${p.marca}</span>
-        <div class="nome-perfume">${p.nome}</div>
-        
-        <div style="margin-bottom: 10px;">
-            ${promo.emPromocao ? `
-                <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${precoOriginal.toFixed(2)}</span>
-                <div style="color:#28a745; font-weight:bold; font-size:18px;">
-                    R$ ${promo.precoFinal.toFixed(2)} 
-                    <span style="font-size:12px; display:block;">no PIX (${porcentagemExibicao}% OFF)</span>
+        card.innerHTML = `
+            ${promo.emPromocao ? `<div class="selo-promo">${porcentagemExibicao}% OFF NO PIX</div>` : ''}
+            <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
+            
+            <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
+                <span class="marca-tag">${p.marca}</span>
+                <div class="nome-perfume">${p.nome}</div>
+                
+                <div style="margin-bottom: 10px;">
+                    ${promo.emPromocao ? `
+                        <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${precoOriginal.toFixed(2)}</span>
+                        <div style="color:#28a745; font-weight:bold; font-size:18px;">
+                            R$ ${promo.precoFinal.toFixed(2)} 
+                            <span style="font-size:12px; display:block;">no PIX (${porcentagemExibicao}% OFF)</span>
+                        </div>
+                        <div style="font-size:10px; color:#666; margin-top:4px;">No cartão: R$ ${precoOriginal.toFixed(2)}</div>
+                    ` : `
+                        <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${precoOriginal.toFixed(2)}</div>
+                        <div style="font-size:10px; color:#666;">Preço único</div>
+                    `}
                 </div>
-                <div style="font-size:10px; color:#666; margin-top:4px;">No cartão: R$ ${precoOriginal.toFixed(2)}</div>
-            ` : `
-                <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${precoOriginal.toFixed(2)}</div>
-                <div style="font-size:10px; color:#666;">Preço único</div>
-            `}
-        </div>
-        `;
+
                 <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
+                
+                <div class="qtd-container">
+                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
+                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
+                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
+                </div>
+
+                <select class="seletor-ml" id="ml-${p.id}">
+                    ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
+                </select>
+                
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="padding:10px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">VER DETALHES</button>
+                    ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="padding:12px; border-radius:8px; border:none; cursor:pointer; font-weight:bold; text-transform:uppercase;">+ Adicionar à Sacola</button>` : ''}
+                </div>
+            </div>`; 
+        container.appendChild(card);
+    });
+}               
+    
+    <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
                 
                 <div class="qtd-container">
                     <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
@@ -568,6 +591,7 @@ function finalizarWhatsApp() {
 
 </body>
 </html>
+
 
 
 
