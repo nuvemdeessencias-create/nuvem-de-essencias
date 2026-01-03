@@ -436,6 +436,22 @@ function carregarProdutos() {
     });
 }
 
+    function renderizarBotoesML(p) {
+    return p.opcoes.map((opt, index) => {
+        const ativo = index === 0 ? 'active' : '';
+        // Pegamos apenas o ML (ex: "80ml") antes do pipe "|"
+        const soML = opt.valor.split('|')[0].toUpperCase(); 
+        
+        return `
+            <button class="btn-ml-nuvem ${ativo}" 
+                    onclick="selecionarVariacaoML('${p.id}', '${opt.valor}', ${opt.promoPix}, this)">
+                <span>${soML}</span>
+                ${opt.promoPix ? `<span class="tag-pix-btn">PIX OFF</span>` : ''}
+            </button>
+        `;
+    }).join('');
+}
+    
 // FUNÇÃO PARA MUDAR O PREÇO QUANDO MUDA O ML
 function atualizarPrecoCard(id, valorSelt, marca) {
     const precoBase = parseFloat(valorSelt.split('|')[1]);
@@ -620,6 +636,7 @@ function finalizarWhatsApp() {
         <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
     </div>
 </footer>
+
 
 
 
