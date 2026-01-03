@@ -61,7 +61,7 @@ export default async function handler(req, res) {
     // Se o valor for >= 700, limpamos as opções pagas e deixamos apenas o Grátis com o prazo
     if (valorNum >= 700) {
       // Pegamos o maior prazo das transportadoras para exibir no frete grátis
-      const maiorPrazo = opcoesFinais.length > 0 ? "8 a 14" : "10 a 15"; 
+      const maiorPrazo = opcoesFinais.length > 0 ? "8 a 17" : "10 a 15"; 
       
       return res.status(200).json([{ 
         name: "Frete Grátis (Promocional)", 
