@@ -424,7 +424,6 @@ function atualizarSacola() {
     countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
 }
 
-// CÁLCULO DE FRETE COM REGRA DE PROMOÇÃO E API
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
     const resultadoDiv = document.getElementById('opcoes-frete');
@@ -438,43 +437,54 @@ async function calcularFrete() {
     const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
     const temPromocaoNoCarrinho = sacola.some(item => item.emPromocao === true);
 
-    try {
-        let validas = [];
-        if (ehAraguaina) {
-            validas = [
-                { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "1" }, 
-                { name: "Retirada no Local", price: 0, delivery_time: "0" }
-            ];
+    if (ehAraguaina) {
+        // Regra para Araguaína - Sempre funciona localmente
+        let opcoes = [
+            { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "1" },
+            { name: "Retirada no Local", price: 0, delivery_time: "0" }
+        ];
+        renderizarOpcoesFrete(opcoes);
+    } else {
+        // Fora de Araguaína - Regra do Frete Grátis acima de 700 (Sem promo)
+        if (subtotal >= 700 && !temPromocaoNoCarrinho) {
+            renderizarOpcoesFrete([{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "8 a 14" }]);
         } else {
-            // Regra: Se tem promoção, NUNCA é grátis para fora de Araguaína.
-            // Se não tem promoção e é acima de 700, pode ser grátis.
-            if (subtotal >= 700 && !temPromocaoNoCarrinho) {
-                validas = [{ name: "Frete Grátis (Promoção)", price: 0, delivery_time: "8 a 14" }];
-            } else {
-                // CHAMA A SUA PASTA API
+            // Tenta chamar a API do Melhor Envio / Correios
+            try {
                 const response = await fetch('/api/calcular-frete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ cep_destino: cep, valor_total: subtotal })
                 });
-                validas = await response.json();
+                
+                if (!response.ok) throw new Error();
+                const dados = await response.json();
+                renderizarOpcoesFrete(dados);
+            } catch (e) {
+                resultadoDiv.innerHTML = `
+                    <p style="color:#d9534f; font-size:13px;"><b>Erro ao calcular frete automático.</b><br>
+                    Finalize o pedido e calcularemos o envio via WhatsApp!</p>
+                    <button onclick="selecionarFreteVisual('A combinar', 0, 'manual')" style="width:100%; padding:10px; cursor:pointer;">Combinar Frete no Whats</button>
+                `;
             }
         }
-
-        resultadoDiv.innerHTML = validas.map((op, index) => `
-            <div id="f-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${op.price}, 'f-op-${index}')" 
-                 style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
-                <div style="text-align:left;">
-                    <strong style="font-size:12px;">${op.name}</strong><br>
-                    <small>Prazo: ${op.delivery_time} dias</small>
-                </div>
-                <strong style="color:#b89356;">${op.price == 0 ? 'GRÁTIS' : 'R$ '+op.price.toFixed(2)}</strong>
-            </div>`).join('');
-
-    } catch (e) {
-        resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao conectar com a API de frete.</p>";
     }
 }
+
+// Função auxiliar para mostrar as opções na tela
+function renderizarOpcoesFrete(opcoes) {
+    const resultadoDiv = document.getElementById('opcoes-frete');
+    resultadoDiv.innerHTML = opcoes.map((op, index) => `
+        <div id="f-op-${index}" class="opcao-frete-card" onclick="selecionarFreteVisual('${op.name}', ${op.price}, 'f-op-${index}')" 
+             style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
+            <div style="text-align:left;">
+                <strong style="font-size:12px;">${op.name}</strong><br>
+                <small>Prazo: ${op.delivery_time} dias</small>
+            </div>
+            <strong style="color:#b89356;">${op.price == 0 ? 'GRÁTIS' : 'R$ '+op.price.toFixed(2)}</strong>
+        </div>`).join('');
+}
+    
 
 function selecionarFreteVisual(nome, valor, id) {
     valorFreteGlobal = valor;
@@ -536,5 +546,6 @@ function finalizarWhatsApp() {
 
 </body>
 </html>
+
 
 
