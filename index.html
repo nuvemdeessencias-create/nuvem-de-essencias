@@ -418,6 +418,8 @@ async function calcularFrete() {
     resultadoDiv.innerHTML = "<p style='color:#666'>Calculando...</p>";
     
     const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
+    
+    // REGRA 1: Verifica se existe QUALQUER item em promoção na sacola
     const temPromo = sacola.some(item => item.emPromocao === true);
 
     try {
@@ -433,24 +435,26 @@ async function calcularFrete() {
             return;
         }
 
-        // REGRAS DE FILTRAGEM CORRIGIDAS:
+        // REGRA 2: Filtrar apenas a OPÇÃO de frete grátis, mantendo as outras
         const fretesFiltrados = data.filter(op => {
-            const nomeMinusculo = op.name.toLowerCase();
-            const ehFreteGratis = op.price == 0 && (nomeMinusculo.includes("grátis") || nomeMinusculo.includes("promocional"));
-            const ehEntregaLocal = nomeMinusculo.includes("local") || nomeMinusculo.includes("araguaína") || nomeMinusculo.includes("retirar");
+            const nomeF = op.name.toLowerCase();
+            const ehGratis = op.price == 0 || nomeF.includes("grátis");
+            const ehLocal = nomeF.includes("local") || nomeF.includes("araguaína");
 
-            // Se for Entrega Local/Retirada, SEMPRE mantém (independente de promo ou valor)
-            if (ehEntregaLocal) return true;
+            // Se for entrega local em Araguaína, SEMPRE mostra
+            if (ehLocal) return true;
 
-            // Se for Frete Grátis (envio), SÓ mantém se NÃO tiver promo E valor >= 700
-            if (ehFreteGratis) {
+            // Se for frete grátis por transportadora:
+            if (ehGratis) {
+                // SÓ aparece se NÃO tiver promo E o total for >= 700
                 return !temPromo && subtotal >= 700;
             }
 
-            // Mantém todas as outras opções pagas (SEDEX, PAC, etc)
+            // Mantém sempre as opções pagas (SEDEX, PAC, etc)
             return true;
         });
 
+        // Exibe o resultado final
         resultadoDiv.innerHTML = fretesFiltrados.map((op, index) => `
             <div class="opcao-frete-card" onclick="selecionarFrete('${op.name}', ${op.price}, this)" 
                  style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
@@ -460,7 +464,7 @@ async function calcularFrete() {
                 </div>
                 <strong style="color:#b89356;">${op.price == 0 ? 'GRÁTIS' : 'R$ ' + formatarMoeda(op.price)}</strong>
             </div>`).join('');
-            
+
     } catch (e) {
         resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao calcular. Tente pelo WhatsApp.</p>";
     }
@@ -565,6 +569,7 @@ function finalizarWhatsApp() {
         <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
     </div>
 </footer>
+
 
 
 
