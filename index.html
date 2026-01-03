@@ -409,7 +409,6 @@ function atualizarPrecoCard(id, valorSelt, marca) {
     }
 }
 
-// FRETE CORRIGIDO
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
     const resultadoDiv = document.getElementById('opcoes-frete');
@@ -420,6 +419,9 @@ async function calcularFrete() {
     resultadoDiv.innerHTML = "<p style='color:#666'>Calculando...</p>";
     
     const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
+    
+    // VERIFICAÇÃO DE PROMOÇÃO: Se um item for promo, temPromo vira true
+    const temPromo = sacola.some(item => item.emPromocao === true);
 
     try {
         const response = await fetch('/api/calcular-frete', {
@@ -434,7 +436,22 @@ async function calcularFrete() {
             return;
         }
 
-        resultadoDiv.innerHTML = data.map((op, index) => `
+        // FILTRAGEM: Remove frete grátis se tiver PROMO ou se for menor que R$ 700
+        const fretesFiltrados = data.filter(op => {
+            const ehFreteGratis = op.price == 0 || op.name.toLowerCase().includes("grátis");
+            if (ehFreteGratis) {
+                // SÓ mantém o frete grátis se NÃO tiver promo E o valor for >= 700
+                return !temPromo && subtotal >= 700;
+            }
+            return true; // Mantém SEDEX, PAC, etc.
+        });
+
+        if (fretesFiltrados.length === 0) {
+            resultadoDiv.innerHTML = "<p style='color:orange'>Frete grátis indisponível para itens em promoção.</p>";
+            return;
+        }
+
+        resultadoDiv.innerHTML = fretesFiltrados.map((op, index) => `
             <div class="opcao-frete-card" onclick="selecionarFrete('${op.name}', ${op.price}, this)" 
                  style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
                 <div style="text-align:left;">
@@ -489,6 +506,7 @@ function atualizarSacola() {
                 <div style="text-align:left;">
                     <b style="font-size:13px;">${item.nome}</b><br>
                     <small>${item.ml} | Qtd: ${item.qtd}</small>
+                    ${item.emPromocao ? `<br><small style="color:#28a745; font-weight:bold;">Somente no PIX</small>` : ''}
                 </div>
                 <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px;">&times;</button>
             </div>`).join('');
@@ -546,5 +564,6 @@ function finalizarWhatsApp() {
         <p>© <span id="ano-real"></span> Nuvem de Essências - Todos os direitos reservados.</p>
     </div>
 </footer>
+
 
 
