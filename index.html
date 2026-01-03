@@ -365,63 +365,53 @@ function carregarProdutos() {
     container.innerHTML = ""; 
 
     meusProdutos.forEach(p => {
-        const card = document.createElement('div');
-        card.className = 'card';
-        card.setAttribute('data-marca', p.marca.toUpperCase());
-        card.setAttribute('data-secao', p.secao);
-
-        // Preço base do primeiro item (ex: 80ml)
-        const precoBase = parseFloat(p.opcoes[0].valor.split('|')[1]);
+        // Pega o preço bruto do produtos.js
+        const precoOriginal = parseFloat(p.opcoes[0].valor.split('|')[1]);
         
-        // Processa desconto via ID ou Marca
+        // Processa a promoção do promocoes.js (ID ou Marca)
         const promo = processarPrecoProduto({
             id: p.id,
             marca: p.marca,
-            preco: precoBase
+            preco: precoOriginal
         });
 
         const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
+        const card = document.createElement('div');
+        card.className = 'card';
         card.innerHTML = `
-            <div style="position: relative; width: 100%;">
-                ${promo.emPromocao ? `<div style="position: absolute; top: 10px; left: 10px; background: #d9534f; color: white; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; z-index: 5;">${promo.descontoPercentual}% OFF</div>` : ''}
-                <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer; width: 100%; height: 180px; object-fit: contain;" onclick="abrirDetalhes(${pJson})">
+            <div style="position: relative;">
+                ${promo.emPromocao ? `<div class="badge-promo" style="position:absolute; top:10px; left:10px; background:#d9534f; color:white; padding:4px 8px; border-radius:4px; font-weight:bold; font-size:12px; z-index:10;">PROMOÇÃO ${Math.round(promo.descontoPercentual * 100)}% OFF</div>` : ''}
+                <img src="${p.imagem}" alt="${p.nome}" onclick="abrirDetalhes(${pJson})" style="cursor:pointer; width:100%; height:200px; object-fit:contain;">
             </div>
-            
-            <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
-                <span class="marca-tag">${p.marca}</span>
-                <div class="nome-perfume">${p.nome}</div>
+
+            <div class="info" style="text-align:center; padding:10px;">
+                <span class="marca-tag" style="color:#b89356; font-size:11px; font-weight:bold; text-transform:uppercase;">${p.marca}</span>
+                <div class="nome-perfume" style="font-weight:bold; font-size:15px; margin:5px 0; min-height:40px; color:#020b1f;">${p.nome}</div>
                 
-                <div style="margin-bottom: 10px;">
-                    ${promo.emPromocao ? `<span style="text-decoration: line-through; color: #999; font-size: 12px;">R$ ${precoBase.toFixed(2)}</span>` : ''}
-                    <div style="color: #d9534f; font-size: 20px; font-weight: bold;">R$ ${promo.precoFinal.toFixed(2)}</div>
+                <div class="preco-container" style="margin-bottom:10px;">
+                    ${promo.emPromocao ? `<span style="text-decoration:line-through; color:#999; font-size:13px;">R$ ${precoOriginal.toFixed(2)}</span>` : ''}
+                    <div style="color:#d9534f; font-size:22px; font-weight:bold;">R$ ${promo.precoFinal.toFixed(2)}</div>
                 </div>
 
-                <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'PRODUTO INDISPONÍVEL'}</div>
-                
                 <div class="qtd-container">
                     <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                    <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
+                    <input type="text" id="q-${p.id}" value="1" readonly class="input-qtd">
                     <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
                 </div>
 
-                <select class="seletor-ml" id="ml-${p.id}">
+                <select class="seletor-ml" id="ml-${p.id}" style="width:100%; padding:8px; border-radius:5px; margin-bottom:10px;">
                     ${p.opcoes.map(opt => `<option value="${opt.valor}">${opt.texto}</option>`).join('')}
                 </select>
                 
-                <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})" style="background:#b89356; color:white; margin-bottom: 8px;">
-                    VER DETALHES
-                </button>
-
-                ${p.disponivel ? `
-                <button class="btn-add-sacola" onclick="addCartPromocional('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="background:black; color:white;">
-                    + Adicionar à Sacola
-                </button>` : ''}
-            </div>`; 
+                <button onclick="abrirDetalhes(${pJson})" style="width:100%; background:#b89356; color:white; border:none; padding:10px; border-radius:5px; font-weight:bold; cursor:pointer; margin-bottom:8px;">VER DETALHES</button>
+                
+                <button onclick="addSacola('${p.id}', '${p.nome}')" style="width:100%; background:black; color:white; border:none; padding:12px; border-radius:5px; font-weight:bold; cursor:pointer;">+ ADICIONAR À SACOLA</button>
+            </div>
+        `;
         container.appendChild(card);
     });
 }
-
 function addCart(nome, mlId, prodId) {
     const selectMl = document.getElementById(mlId);
     const [ml, preco] = selectMl.value.split('|');
@@ -436,6 +426,56 @@ function addCart(nome, mlId, prodId) {
     document.getElementById('cart-modal').classList.add('active');
 }
 
+function addSacola(id, nome) {
+    const inputQtd = document.getElementById(`q-${id}`);
+    const selectMl = document.getElementById(`ml-${id}`);
+    const [ml, precoOriginalStr] = selectMl.value.split('|');
+    const precoOriginal = parseFloat(precoOriginalStr);
+    const qtd = parseInt(inputQtd.value);
+
+    // Busca o produto no produtos.js para pegar a marca
+    const p = meusProdutos.find(item => item.id === id);
+
+    // Processa o desconto do promocoes.js
+    const promo = processarPrecoProduto({
+        id: id,
+        marca: p.marca,
+        preco: precoOriginal
+    });
+
+    // Adiciona ao array da sacola
+    sacola.push({
+        nome: nome,
+        ml: ml,
+        preco: promo.precoFinal,
+        qtd: qtd
+    });
+
+    // Atualiza o contador e a sacola
+    atualizarSacola();
+    
+    // Abre a sacola automaticamente para o cliente ver
+    if (!document.getElementById('cart-modal').classList.contains('active')) {
+        toggleCart();
+    }
+}
+4. Correção do Frete (Araguaína e Bolinha)
+Para o frete aparecer e somar, use esta lógica:
+
+JavaScrip
+
+function selecionarFrete(nome, valor, elemento) {
+    valorFreteGlobal = valor;
+    nomeFreteGlobal = nome;
+
+    // Remove destaque de todos e adiciona no clicado
+    document.querySelectorAll('.opcao-frete-card').forEach(el => el.classList.remove('selected'));
+    elemento.classList.add('selected');
+
+    // Re-calcula o total da sacola com o frete
+    atualizarSacola();
+}
+	
 function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
@@ -572,6 +612,7 @@ function filtrarCategoria(cat, el) {
 </script>
 </body>
 </html>
+
 
 
 
