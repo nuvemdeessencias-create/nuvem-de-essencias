@@ -1,41 +1,37 @@
 export default async function handler(req, res) {
+  // CORS
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  const { cep_destino, quantidade, valor_total } = req.body;
+  // 1. Captura os dados garantindo que o valor seja número
+  const { cep_destino, valor_total } = req.body;
   const token = process.env.MELHOR_ENVIO_TOKEN;
   
-  // LIMPEZA CRUCIAL: Remove traços e espaços do CEP
   const cepLimpo = cep_destino ? cep_destino.replace(/\D/g, '') : "";
-  const valorNum = parseFloat(valor_total) || 0;
+  // Arredonda para 2 casas decimais para não travar a API
+  const valorNum = parseFloat(parseFloat(valor_total || 0).toFixed(2));
 
   try {
     let opcoesFinais = [];
 
-    // 1. REGRA ARAGUAÍNA (Verifica se começa com 778)
+    // 2. REGRA ARAGUAÍNA (Sempre funciona)
     if (cepLimpo.startsWith("778")) {
       opcoesFinais.push(
-        { name: "Entrega Local (Araguaína)", price: 0, delivery_time: "Até 1 dia útil", custom: true },
-        { name: "Retirada no Local", price: 0, delivery_time: "Imediato", custom: true }
+        { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "1" },
+        { name: "Retirada no Local", price: 0, delivery_time: "0" }
       );
+      // Se for Araguaína, já podemos retornar aqui ou continuar para somar outras opções
+      return res.status(200).json(opcoesFinais);
     }
 
-    // 2. REGRA FRETE GRÁTIS (Se valor >= 700)
-    if (valorNum >= 700) {
-      opcoesFinais.push({ 
-        name: "Frete Grátis (Promoção)", 
-        price: 0, 
-        delivery_time: "6 a 14", 
-        custom: true 
-      });
-    }
-
-    // 3. BUSCA NO MELHOR ENVIO
+    // 3. BUSCA NO MELHOR ENVIO (Fora de Araguaína)
     if (cepLimpo.length === 8) {
-      const pesoTotal = (parseInt(quantidade) || 1) * 0.6;
+      // Calculamos o peso aproximado baseado no valor se a quantidade não vier
+      const pesoTotal = 0.6; 
+
       const payload = {
         "from": { "postal_code": "77809270" },
         "to": { "postal_code": cepLimpo },
@@ -63,16 +59,33 @@ export default async function handler(req, res) {
       if (response.ok) {
         const data = await response.json();
         if (Array.isArray(data)) {
-          // Filtra transportadoras válidas e junta com as personalizadas
-          const transportadoras = data.filter(op => op.price && !op.error);
+          const transportadoras = data
+            .filter(op => op.price && !op.error)
+            .map(op => ({
+              name: op.name,
+              price: parseFloat(op.price),
+              delivery_time: op.delivery_range ? `${op.delivery_range.min}-${op.delivery_range.max}` : op.delivery_time
+            }));
+          
           opcoesFinais = [...opcoesFinais, ...transportadoras];
         }
       }
     }
 
+    // 4. REGRA FRETE GRÁTIS (Adiciona ao final se atingir o valor)
+    // Nota: Verifique se quer oferecer frete grátis mesmo em itens promocionais
+    if (valorNum >= 700) {
+       opcoesFinais.unshift({ 
+         name: "Frete Grátis (Promocional)", 
+         price: 0, 
+         delivery_time: "8 a 14" 
+       });
+    }
+
     return res.status(200).json(opcoesFinais);
 
   } catch (error) {
+    console.error("Erro interno API:", error);
     return res.status(500).json({ error: "Erro ao calcular", details: error.message });
   }
 }
