@@ -1090,62 +1090,63 @@ function atualizarSacola() {
 }
 
 async function calcularFrete() {
-    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    const div = document.getElementById('opcoes-frete');
-    
-    // IMPORTANTE: Pegamos os valores que o arquivo .js na Vercel exige
-    const subtotal = sacola.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
-    const qtdTotal = sacola.reduce((acc, item) => acc + item.qtd, 0);
+    const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+    const div = document.getElementById('opcoes-frete');
+    
+    // IMPORTANTE: Pegamos os valores que o arquivo .js na Vercel exige
+    const subtotal = sacola.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
+    const qtdTotal = sacola.reduce((acc, item) => acc + item.qtd, 0);
 
-    if (cep.length !== 8) {
-        alert("CEP Inválido. Digite os 8 números.");
-        return;
-    }
-    
-    div.innerHTML = "<p style='color: #666; font-size: 13px;'>Calculando opções...</p>";
+    if (cep.length !== 8) {
+        alert("CEP Inválido. Digite os 8 números.");
+        return;
+    }
+    
+    div.innerHTML = "<p style='color: #666; font-size: 13px;'>Calculando opções...</p>";
 
-    try {
-        const response = await fetch('/api/calcular-frete', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                cep_destino: cep,
-                quantidade: qtdTotal, 
-                valor_total: subtotal 
-            })
-        });
+    try {
+        const response = await fetch('/api/calcular-frete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                cep_destino: cep,
+                quantidade: qtdTotal, 
+                valor_total: subtotal 
+            })
+        });
 
-        const data = await response.json();
-        div.innerHTML = "";
+        const data = await response.json();
+        div.innerHTML = "";
 
-        if (!Array.isArray(data) || data.length === 0) {
-            div.innerHTML = "<p style='color:orange; font-size:12px;'>Nenhum frete disponível.</p>";
-            return;
-        }
+        if (!Array.isArray(data) || data.length === 0) {
+            div.innerHTML = "<p style='color:orange; font-size:12px;'>Nenhum frete disponível.</p>";
+            return;
+        }
 
-        data.forEach(op => {
-            if (op.error) return;
+        data.forEach(op => {
+            if (op.error) return;
 
-            const preco = parseFloat(op.price || 0);
-            const nome = op.name;
-            const btnOpcao = document.createElement('div');
-            
-            btnOpcao.style = "background:#fff; padding:12px; margin-top:8px; border:1px solid #ddd; cursor:pointer; border-radius:8px; color:#333; transition: 0.2s;";
-            btnOpcao.innerHTML = `
-                <div style="display:flex; justify-content:space-between;">
-                    <span>${nome}</span>
-                    <b>${preco === 0 ? 'GRÁTIS' : 'R$ ' + preco.toFixed(2).replace('.', ',')}</b>
-                </div>
-                <small style="color: #888;">Prazo: ${op.delivery_time || '6-13'} dias úteis</small>
-            `;
+            const preco = parseFloat(op.price || 0);
+            const nome = op.name;
+            const btnOpcao = document.createElement('div');
+            
+            btnOpcao.style = "background:#fff; padding:12px; margin-top:8px; border:1px solid #ddd; cursor:pointer; border-radius:8px; color:#333; transition: 0.2s;";
+            btnOpcao.innerHTML = `
+                <div style="display:flex; justify-content:space-between;">
+                    <span>${nome}</span>
+                    <b>${preco === 0 ? 'GRÁTIS' : 'R$ ' + preco.toFixed(2).replace('.', ',')}</b>
+                </div>
+                <small style="color: #888;">Prazo: ${op.delivery_time || '6-13'} dias úteis</small>
+            `;
 
-            btnOpcao.addEventListener('click', () => aplicarFrete(preco, nome));
-            div.appendChild(btnOpcao);
-        });
-    } catch (e) { 
-        div.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular. Verifique sua conexão.</p>"; 
-    }
+            btnOpcao.addEventListener('click', () => aplicarFrete(preco, nome));
+            div.appendChild(btnOpcao);
+        });
+    } catch (e) { 
+        div.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular. Verifique sua conexão.</p>"; 
+    }
 }
+
 function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
     let texto = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
@@ -1205,33 +1206,4 @@ function comprarAgora(nome, mlId) {
     </div>
 </footer></body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
