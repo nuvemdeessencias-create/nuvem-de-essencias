@@ -132,6 +132,29 @@ header {
 
 .link-whats:hover { color: var(--verde-whats); }
 
+/* Estilo do botão de WhatsApp dentro do Ver Detalhes */
+.btn-whats-modal {
+    background-color: #25d366; /* Verde oficial do WhatsApp */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px; /* Espaço para não colar na descrição */
+}
+
+.btn-whats-modal:hover {
+    background-color: #128c7e; /* Verde mais escuro ao passar o mouse */
+}
+
 .pagamento-titulo {
     font-size: 14px;
     font-weight: bold;
@@ -867,9 +890,17 @@ function abrirDetalhes(p) {
     document.getElementById('detalhe-nome').innerText = p.nome;
     document.getElementById('detalhe-marca').innerText = p.marca;
     document.getElementById('detalhe-descricao').innerText = p.descricao || "Fragrância exclusiva.";
+    
+    // Criar o link do WhatsApp para este produto específico
+    const mensagemWhats = encodeURIComponent(`Olá! Gostaria de saber mais sobre o perfume: *${p.nome}* (${p.marca})`);
+    const linkWhats = `https://wa.me/5563992576211?text=${mensagemWhats}`;
+    
+    // Atualizar o botão no HTML do modal (vamos adicionar esse ID no passo 2)
+    const btnWhats = document.getElementById('btn-whats-detalhe');
+    if(btnWhats) btnWhats.onclick = () => window.open(linkWhats, '_blank');
+
     document.getElementById('modal-detalhes').style.display = 'flex';
 }
-
 function fecharDetalhes() { document.getElementById('modal-detalhes').style.display = 'none'; }
 
 function finalizarWhatsApp() {
@@ -890,6 +921,10 @@ function finalizarWhatsApp() {
         <h2 id="detalhe-nome" style="margin:5px 0; color:#020b1f; font-size:18px;"></h2>
         <p id="detalhe-marca" style="color:#b89356; font-weight:bold; text-transform:uppercase; font-size:12px;"></p>
         <p id="detalhe-descricao" style="font-size:14px; line-height:1.5; color:#666; text-align:left;"></p>
+        
+        <button id="btn-whats-detalhe" class="btn-whats-modal">
+            COMPRAR PELO WHATSAPP
+        </button>
     </div>
 </div>
 
@@ -932,6 +967,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
