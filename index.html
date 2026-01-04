@@ -794,19 +794,20 @@ try {
         });
 
         // Exibe o resultado final
-       resultadoDiv.innerHTML = fretesFiltrados.map((op, index) => {
-    // 1. Lógica de texto do prazo (Correção gramatical)
+      resultadoDiv.innerHTML = fretesFiltrados.map((op, index) => {
+    // Convertemos para número para garantir a comparação
+    const prazoValue = Number(op.delivery_time);
+
     let prazoTexto = "";
-    
-    if (op.delivery_time === 0) {
-        prazoTexto = "Imediato"; // Para Retirada no Local
-    } else if (op.delivery_time === 1) {
-        prazoTexto = "1 dia";    // Para Entrega Local (Araguaína)
+    if (prazoValue === 0) {
+        prazoTexto = "Imediato";
+    } else if (prazoValue === 1) {
+        prazoTexto = "1 dia";
     } else {
-        prazoTexto = `${op.delivery_time} dias`; // Para PAC/SEDEX/Outros
+        // Se for um range (ex: 8-17), o Number() vira NaN, então usamos o texto original
+        prazoTexto = isNaN(prazoValue) ? `${op.delivery_time} dias` : `${prazoValue} dias`;
     }
 
-    // 2. Retorno do HTML com a variável correta
     return `
         <div class="opcao-frete-card" onclick="selecionarFrete('${op.name}', ${op.price}, this)" 
              style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
@@ -982,6 +983,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
