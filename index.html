@@ -555,6 +555,47 @@ let sacola = [];
 let valorFreteGlobal = 0;
 let nomeFreteGlobal = "";
 
+    // Função para filtrar por Categoria (Botões)
+function filtrarCategoria(categoria, elemento) {
+    // 1. Gerenciar visual dos botões (cor de destaque)
+    document.querySelectorAll('.btn-categoria').forEach(btn => btn.classList.remove('active'));
+    elemento.classList.add('active');
+
+    // 2. Filtrar os cards na tela
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const secaoCard = card.getAttribute('data-secao').toLowerCase();
+        
+        // Lógica: se for 'todos' ou se a seção do card bater com a clicada
+        if (categoria === 'todos' || secaoCard === categoria.toLowerCase()) {
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+// Função para filtrar por Marca (Select) e Busca (Input)
+function filtrar() {
+    const marcaSelecionada = document.getElementById('filtroMarca').value.toUpperCase();
+    const termoBusca = document.getElementById('buscaInput').value.toUpperCase();
+    const cards = document.querySelectorAll('.card');
+
+    cards.forEach(card => {
+        const marcaCard = card.getAttribute('data-marca');
+        const nomeCard = card.querySelector('.nome-perfume').innerText.toUpperCase();
+
+        const bateMarca = (marcaSelecionada === 'TODOS' || marcaCard === marcaSelecionada);
+        const bateBusca = nomeCard.includes(termoBusca);
+
+        if (bateMarca && bateBusca) {
+            card.style.display = "flex";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
 window.onload = function() {
     if (typeof meusProdutos !== 'undefined') {
         carregarProdutos();
@@ -876,6 +917,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
