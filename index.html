@@ -218,17 +218,16 @@ header {
 }
 
 .pagamento-icones {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    align-items: center;
+    display: flex !important;
+    gap: 15px !important;
+    align-items: center !important;
 }
 
 .pagamento-icones img {
-    height: 22px;
-    filter: brightness(0) invert(1); /* Deixa os logos brancos para combinar com seu site */
-    opacity: 0.8;
-}
+    height: 32px !important; /* Tamanho bom para visualização */
+    width: auto !important;
+    filter: none !important; /* ISSO AQUI GARANTE QUE A COR APAREÇA */
+    -webkit-filter: none !important;
 
 .rodape-alert {
     font-size: 11px;
@@ -247,8 +246,11 @@ header {
 }
 
 .simbolo-perfume-footer {
-    width: 35px;
+    width: 120px !important; /* Aumentei para 120px para ficar bem visível */
+    height: auto !important;
     margin-bottom: 10px;
+    display: inline-block;
+    filter: none !important;
 }
 .logo-text {
     font-family: 'Playfair Display', serif;
@@ -807,7 +809,7 @@ function finalizarWhatsApp() {
             <div class="rodape-frase-dourada">"Sinta o aroma dos sonhos e realce sua beleza!"</div>
             
             <a href="https://wa.me/5563992576211" target="_blank" class="link-whats">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="25" height="25" alt="WhatsApp">
+                <img src="https://img.icons8.com/color/48/whatsapp--v1.png" alt="WhatsApp">
                 (63) 99257-6211
             </a>
 
@@ -821,10 +823,10 @@ function finalizarWhatsApp() {
         <div class="rodape-col" style="text-align: center;">
             <div class="pagamento-titulo">Formas de Pagamento</div>
             <div class="pagamento-icones" style="justify-content: center;">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg" alt="Visa">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%E2%80%94Elo.svg" alt="Elo">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/a/aa/Logo_Pix.svg" alt="Pix">
+                <img src="https://img.icons8.com/color/48/visa.png" alt="Visa">
+                <img src="https://img.icons8.com/color/48/mastercard.png" alt="Mastercard">
+                <img src="https://logospng.org/download/elo/logo-elo-256.png" alt="Elo" style="height: 25px;">
+                <img src="https://img.icons8.com/color/48/pix.png" alt="Pix">
             </div>
         </div>
 
