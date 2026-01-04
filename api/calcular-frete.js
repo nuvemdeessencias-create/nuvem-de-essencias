@@ -18,8 +18,8 @@ export default async function handler(req, res) {
     // 1. REGRA ARAGUAÍNA (Mantida igual)
     if (cepLimpo.startsWith("778")) {
       return res.status(200).json([
-        { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: "1" },
-        { name: "Retirada no Local", price: 0, delivery_time: "0" }
+        { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: 1 },
+        { name: "Retirada no Local", price: 0, delivery_time: 0 }
       ]);
     }
 
