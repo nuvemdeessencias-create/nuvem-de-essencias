@@ -796,13 +796,13 @@ try {
         // Exibe o resultado final
         resultadoDiv.innerHTML = fretesFiltrados.map((op, index) => {
             // Criamos a lógica de texto aqui para não bagunçar o restante
-            let prazoTexto = "";
+           let prazoTexto = "";
             if (op.delivery_time === 0) {
-                prazoTexto = "Imediato";
+                prazoTexto = "Imediato"; // Para Retirada no Local
             } else if (op.delivery_time === 1) {
-                prazoTexto = "1 dia";
+                prazoTexto = "1 dia";    // Para Entrega Local
             } else {
-                prazoTexto = `${op.delivery_time} dias`;
+                prazoTexto = `${op.delivery_time} dias`; // Para PAC/SEDEX
             }
 
             return `
@@ -979,6 +979,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
