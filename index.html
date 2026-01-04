@@ -794,15 +794,27 @@ try {
         });
 
         // Exibe o resultado final
-        resultadoDiv.innerHTML = fretesFiltrados.map((op, index) => `
-            <div class="opcao-frete-card" onclick="selecionarFrete('${op.name}', ${op.price}, this)" 
-                 style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
-                <div style="text-align:left;">
-                    <strong style="font-size:12px;">${op.name}</strong><br>
-                    <small>Prazo: ${op.delivery_time} dias</small>
-                </div>
-                <strong style="color:#b89356;">${op.price == 0 ? 'GRÁTIS' : 'R$ ' + formatarMoeda(op.price)}</strong>
-            </div>`).join('');
+        resultadoDiv.innerHTML = fretesFiltrados.map((op, index) => {
+            // Criamos a lógica de texto aqui para não bagunçar o restante
+            let prazoTexto = "";
+            if (op.delivery_time === 0) {
+                prazoTexto = "Imediato";
+            } else if (op.delivery_time === 1) {
+                prazoTexto = "1 dia";
+            } else {
+                prazoTexto = `${op.delivery_time} dias`;
+            }
+
+            return `
+                <div class="opcao-frete-card" onclick="selecionarFrete('${op.name}', ${op.price}, this)" 
+                     style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
+                    <div style="text-align:left;">
+                        <strong style="font-size:12px;">${op.name}</strong><br>
+                        <small>Prazo: ${prazoTexto}</small> 
+                    </div>
+                    <strong style="color:#b89356;">${op.price == 0 ? 'GRÁTIS' : 'R$ ' + formatarMoeda(op.price)}</strong>
+                </div>`;
+        }).join('');
 
     } catch (e) {
         resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao calcular. Tente pelo WhatsApp.</p>";
@@ -967,6 +979,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
