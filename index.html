@@ -149,7 +149,7 @@ header {
 
 /* IMPORTANTE: Removido o filtro que deixava as imagens brancas */
 .pagamento-icones img {
-    height: 32px !important;
+    height: 30px !important;
     width: auto !important;
     filter: none !important;
     -webkit-filter: none !important;
@@ -845,7 +845,22 @@ function alterarQtd(id, delta, max) {
 }
 
 function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
-function removerItem(index) { sacola.splice(index, 1); atualizarSacola(); }
+function removerItem(index) {
+    sacola.splice(index, 1); 
+
+    // SEMPRE que remover algo, limpamos o frete antigo
+    // porque o peso da sacola mudou e o valor anterior não vale mais
+    valorFreteGlobal = 0;
+    nomeFreteGlobal = "";
+
+    const resultadoFrete = document.getElementById('opcoes-frete');
+    if (resultadoFrete) {
+        // Limpa as opções de PAC/SEDEX e pede novo cálculo
+        resultadoFrete.innerHTML = "<p style='color:#b89356; font-size:12px;'>O peso mudou. Calcule o frete novamente.</p>";
+    }
+
+    atualizarSacola(); 
+}
 
 function abrirDetalhes(p) {
     document.getElementById('detalhe-img').src = p.imagem;
@@ -917,6 +932,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
