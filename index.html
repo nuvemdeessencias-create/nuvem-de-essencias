@@ -218,16 +218,17 @@ header {
 }
 
 .pagamento-icones {
-    display: flex !important;
-    gap: 15px !important;
-    align-items: center !important;
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
 }
 
 .pagamento-icones img {
-    height: 32px !important; /* Tamanho bom para visualização */
-    width: auto !important;
-    filter: none !important; /* ISSO AQUI GARANTE QUE A COR APAREÇA */
-    -webkit-filter: none !important;
+    height: 22px;
+    filter: brightness(0) invert(1); /* Deixa os logos brancos para combinar com seu site */
+    opacity: 0.8;
+}
 
 .rodape-alert {
     font-size: 11px;
@@ -246,11 +247,8 @@ header {
 }
 
 .simbolo-perfume-footer {
-    width: 120px !important; /* Aumentei para 120px para ficar bem visível */
-    height: auto !important;
+    width: 35px;
     margin-bottom: 10px;
-    display: inline-block;
-    filter: none !important;
 }
 .logo-text {
     font-family: 'Playfair Display', serif;
@@ -396,6 +394,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     </style>
 </head>
 <body>
+
 
 <header>
     <img src="img/logo.png" alt="NUVEM DE ESSÊNCIAS" class="logo-img">
@@ -841,6 +840,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
