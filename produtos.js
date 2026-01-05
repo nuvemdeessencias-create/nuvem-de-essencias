@@ -36,16 +36,15 @@ const meusProdutos = [
         id: "chloe",
         marca: "CHLOE",
         nome: "CHLOÉ EDP",
-        descricao: "O clássico da sofisticação. Notas de rosa damascena, peônia e lichia. É um perfume floral leve e refrescante, que traduz a elegância natural e o luxo moderno da marca francesa.",
+        descricao: "O clássico da sofisticação. Notas de rosa damascena, peônia e lichia. É um perfume floral leve e refrescante.",
         imagem: "img/chloedp.avif",
         secao: "alta",
-        estoque: 7,
-        disponivel: true,
         opcoes: [
-            { texto: "50ML", valor: "50ml|809.00", promoPix: false },
-            { texto: "75ML", valor: "75ml|939.00", promoPix: false }
+            { texto: "50ML", valor: "50ml|809.00", estoque: 2, disponivel: true, promoPix: false },
+            { texto: "75ML", valor: "75ml|939.00", estoque: 0, disponivel: true, promoPix: false }
         ]
     },
+   
     {
         id: "gabriela",
         marca: "GABRIELA SABATINI",
@@ -204,14 +203,12 @@ const meusProdutos = [
         id: "clubblack",
         marca: "MERCEDES BENZ",
         nome: "MERCEDES BENZ CLUB BLACK EDT",
-        descricao: "Uma joia rara da perfumaria. Baunilha intensa combinada com incenso e notas amadeiradas. Elegante, noturno e com uma fixação extraordinária. Um verdadeiro item de colecionador.",
+        descricao: "Uma joia rara da perfumaria. Baunilha intensa combinada com incenso e notas amadeiradas.",
         imagem: "img/clubblack.avif",
         secao: "alta",
-        estoque: 3,
-        disponivel: true,
         opcoes: [
-            { texto: "100ML", valor: "100ml|578.00", promoPix: true },
-            { texto: "50ML", valor: "50ml|470.00", promoPix: false }
+            { texto: "100ML", valor: "100ml|578.00", estoque: 1, disponivel: true, promoPix: true },
+            { texto: "50ML", valor: "50ml|470.00", estoque: 2, disponivel: true, promoPix: false }
         ]
     },
     {
