@@ -635,27 +635,25 @@ function formatarMoeda(valor) {
 function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
     if (!container || typeof meusProdutos === 'undefined') return;
-
     container.innerHTML = ""; 
 
     meusProdutos.forEach(p => {
         try {
             const card = document.createElement('div');
             card.className = 'card';
+            card.setAttribute('data-id', p.id); // Importante para localizar o card
             card.setAttribute('data-marca', (p.marca || "").toUpperCase());
             card.setAttribute('data-secao', p.secao || "");
 
-            // Preço inicial (primeira opção)
-            const precoOriginal = parseFloat(p.opcoes[0].valor.split('|')[1]);
+            // Pegamos a primeira opção disponível para o preço inicial
+            const primeiraOpcao = p.opcoes[0];
+            const precoOriginal = parseFloat(primeiraOpcao.valor.split('|')[1]);
             const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
             const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
 
-            // GERAÇÃO DOS BOTÕES QUADRADOS (Substituindo o Select)
             const botoesML = p.opcoes.map((opt, index) => {
                 const ativo = index === 0 ? 'active' : '';
                 const soML = opt.valor.split('|')[0].toUpperCase(); 
-                
-                // Nota: Usamos atualizarPrecoCard para manter sua lógica de promoção existente
                 return `
                     <button class="btn-ml-nuvem ${ativo}" 
                             onclick="selecionarVariacaoManual('${p.id}', '${opt.valor}', '${p.marca}', this)">
@@ -667,7 +665,7 @@ function carregarProdutos() {
 
             card.innerHTML = `
                 ${promo.emPromocao ? `<div class="selo-promo">${promo.descontoPercentual}% OFF NO PIX</div>` : ''}
-                <img src="${p.imagem}" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
+                <img src="${p.imagem}" class="img-principal" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
                 
                 <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
                     <span class="marca-tag">${p.marca}</span>
@@ -686,23 +684,27 @@ function carregarProdutos() {
                         `}
                     </div>
 
-                    <div class="estoque-label">${p.disponivel ? p.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
-                    
-                    <div class="variacao-container">
-                        ${botoesML}
+                    <div class="estoque-label" id="estoque-${p.id}">
+                        ${primeiraOpcao.disponivel ? primeiraOpcao.estoque + ' unidades' : 'INDISPONÍVEL'}
                     </div>
+                    
+                    <div class="variacao-container">${botoesML}</div>
 
                     <div class="qtd-container">
-                        <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, ${p.estoque})">-</button>
-                        <input type="text" id="q-${p.id}" value="${p.disponivel ? 1 : 0}" readonly class="input-qtd">
-                        <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, ${p.estoque})">+</button>
+                        <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, '${p.id}')">-</button>
+                        <input type="text" id="q-${p.id}" value="${primeiraOpcao.disponivel ? 1 : 0}" readonly class="input-qtd">
+                        <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, '${p.id}')">+</button>
                     </div>
 
-                    <input type="hidden" id="ml-${p.id}" value="${p.opcoes[0].valor}">
+                    <input type="hidden" id="ml-${p.id}" value="${primeiraOpcao.valor}">
                     
                     <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
                         <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})">VER DETALHES</button>
-                        ${p.disponivel ? `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')">+ ADICIONAR À SACOLA</button>` : ''}
+                        <div id="btn-container-${p.id}">
+                            ${primeiraOpcao.disponivel ? 
+                                `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')">+ ADICIONAR À SACOLA</button>` : 
+                                `<button class="btn-add-sacola" style="background:#666; cursor:not-allowed;" disabled>ESGOTADO</button>`}
+                        </div>
                     </div>
                 </div>`; 
             container.appendChild(card);
@@ -711,17 +713,40 @@ function carregarProdutos() {
 }
 
 function selecionarVariacaoManual(id, valorSelt, marca, elemento) {
-    // 1. Muda a borda azul (Visual)
-    const container = elemento.parentElement;
-    container.querySelectorAll('.btn-ml-nuvem').forEach(b => b.classList.remove('active'));
+    const card = elemento.closest('.card');
+    card.querySelectorAll('.btn-ml-nuvem').forEach(b => b.classList.remove('active'));
     elemento.classList.add('active');
 
-    // 2. Avisa o carrinho qual ML foi escolhido
-    const inputOculto = document.getElementById(`ml-${id}`);
-    if(inputOculto) inputOculto.value = valorSelt;
+    document.getElementById(`ml-${id}`).value = valorSelt;
 
-    // 3. Chama a função que VOCÊ mandou para atualizar o preço na tela
+    // Localizar a opção no array de produtos para ver o estoque
+    const produto = meusProdutos.find(p => p.id === id);
+    const opcao = produto.opcoes.find(o => o.valor === valorSelt);
+
+    // 1. Atualiza Preço
     atualizarPrecoCard(id, valorSelt, marca);
+
+    // 2. Atualiza Imagem (para Batons que têm imagemCor)
+    if (opcao.imagemCor) {
+        card.querySelector('.img-principal').src = opcao.imagemCor;
+    }
+
+    // 3. Atualiza Texto de Estoque e Botão Compra
+    const labelEstoque = document.getElementById(`estoque-${id}`);
+    const containerBotao = document.getElementById(`btn-container-${id}`);
+    const inputQtd = document.getElementById(`q-${id}`);
+
+    if (opcao.estoque > 0 && opcao.disponivel) {
+        labelEstoque.innerText = `${opcao.estoque} unidades`;
+        labelEstoque.style.color = "#666";
+        containerBotao.innerHTML = `<button class="btn-add-sacola" onclick="adicionarComPromocao('${id}', '${produto.nome}', 'ml-${id}', 'q-${id}')">+ ADICIONAR À SACOLA</button>`;
+        inputQtd.value = 1;
+    } else {
+        labelEstoque.innerText = `INDISPONÍVEL`;
+        labelEstoque.style.color = "red";
+        containerBotao.innerHTML = `<button class="btn-add-sacola" style="background:#666; cursor:not-allowed;" disabled>ESGOTADO</button>`;
+        inputQtd.value = 0;
+    }
 }
     
 // FUNÇÃO PARA MUDAR O PREÇO QUANDO MUDA O ML
@@ -877,10 +902,18 @@ function atualizarSacola() {
     countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
 }
 
-function alterarQtd(id, delta, max) {
-    const input = document.getElementById(id);
+function alterarQtd(idInput, delta, produtoId) {
+    const input = document.getElementById(idInput);
+    const valorSelt = document.getElementById(`ml-${produtoId}`).value;
+    const produto = meusProdutos.find(p => p.id === produtoId);
+    const opcao = produto.opcoes.find(o => o.valor === valorSelt);
+    
+    let max = opcao ? opcao.estoque : 0;
     let novo = parseInt(input.value) + delta;
-    if (novo >= 1 && novo <= max) input.value = novo;
+    
+    if (novo >= 1 && novo <= max) {
+        input.value = novo;
+    }
 }
 
 function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
@@ -983,6 +1016,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
