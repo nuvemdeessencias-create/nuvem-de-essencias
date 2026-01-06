@@ -762,40 +762,60 @@ function filtrar() {
         atualizarPrecoCard(p.id, primeiraOpcao.valor, p.marca);
     });
 }
-// --- MANIPULAÇÃO DE VARIAÇÕES E PREÇOS ---
+// --- MANIPULAÇÃO DE VARIAÇÕES (BOTÕES QUADRADOS - PERFUMES) ---
 function selecionarVariacaoManual(id, valorSelt, marca, elemento) {
     const card = elemento.closest('.card');
     card.querySelectorAll('.btn-ml-nuvem').forEach(b => b.classList.remove('active'));
     elemento.classList.add('active');
 
+    // Executa a lógica comum de atualização
+    processarTrocaDeVariacao(id, valorSelt, marca, card);
+}
+
+// --- MANIPULAÇÃO DE VARIAÇÕES (ABA/SELECT - BATONS E VELAS) ---
+function selecionarVariacaoSelect(id, valorSelt, marca) {
+    const containerPreco = document.getElementById(`preco-container-${id}`);
+    const card = containerPreco.closest('.card');
+
+    // Executa a lógica comum de atualização
+    processarTrocaDeVariacao(id, valorSelt, marca, card);
+}
+
+// --- FUNÇÃO MESTRE (PROCESSA TUDO: PREÇO, ESTOQUE E IMAGEM) ---
+function processarTrocaDeVariacao(id, valorSelt, marca, card) {
+    // 1. Atualiza o valor no input oculto para a sacola
     document.getElementById(`ml-${id}`).value = valorSelt;
 
     const produto = meusProdutos.find(p => p.id === id);
     const opcao = produto.opcoes.find(o => o.valor === valorSelt);
 
+    // 2. Atualiza Preço e Parcelamento (em azul)
     atualizarPrecoCard(id, valorSelt, marca);
 
-    if (opcao.imagemCor) {
-        card.querySelector('.img-principal').src = opcao.imagemCor;
+    // 3. Troca a Imagem se houver uma imagem específica para a cor/fragrância
+    // Ela verifica tanto 'imagemCor' quanto 'img' para ser compatível
+    const novaImg = opcao.imagemCor || opcao.img;
+    if (novaImg) {
+        card.querySelector('.img-principal').src = novaImg;
     }
 
+    // 4. Atualiza Estoque e Botão de Compra
     const labelEstoque = document.getElementById(`estoque-${id}`);
     const containerBotao = document.getElementById(`btn-container-${id}`);
     const inputQtd = document.getElementById(`q-${id}`);
 
     if (opcao.estoque > 0 && opcao.disponivel) {
         labelEstoque.innerText = `${opcao.estoque} unidades`;
-        labelEstoque.style.color = "#666";
+        labelEstoque.style.color = "#d32f2f";
         containerBotao.innerHTML = `<button class="btn-add-sacola" onclick="adicionarComPromocao('${id}', '${produto.nome}', 'ml-${id}', 'q-${id}')">+ ADICIONAR À SACOLA</button>`;
         inputQtd.value = 1;
     } else {
         labelEstoque.innerText = `INDISPONÍVEL`;
         labelEstoque.style.color = "red";
-        containerBotao.innerHTML = `<button class="btn-add-sacola" style="background:#666; cursor:not-allowed;" disabled>ESGOTADO</button>`;
+        containerBotao.innerHTML = `<button class="btn-add-sacola" style="background:#000; color:#fff; cursor:not-allowed;" disabled>ESGOTADO</button>`;
         inputQtd.value = 0;
     }
 }
-
 function atualizarPrecoCard(id, valorSelt, marca) {
     const [ml, precoTexto] = valorSelt.split('|');
     const precoBase = parseFloat(precoTexto);
@@ -1110,6 +1130,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
