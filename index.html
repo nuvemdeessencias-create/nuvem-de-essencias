@@ -713,6 +713,29 @@ function coletarDadosCheckout(metodoPagamento) {
     alert("Dados validados! Pronto para conectar com a API do Asaas.");
 }
 
+    function abrirCheckoutAsaas() {
+    if (sacola.length === 0) return alert("Sua sacola está vazia!");
+
+    // 1. Fecha a sacola visualmente
+    toggleCart();
+
+    // 2. Calcula os valores para exibir no resumo do checkout
+    const dados = prepararDadosParaAsaas();
+    
+    // 3. Preenche o "Resumo de Valores" dentro do Modal de Checkout
+    const resumoDiv = document.getElementById('resumoValores');
+    if (resumoDiv) {
+        resumoDiv.innerHTML = `
+            <p><strong>Total PIX:</strong> R$ ${formatarMoeda(dados.valorTotalPix)}</p>
+            <p><strong>Total Cartão:</strong> R$ ${formatarMoeda(dados.valorTotalCartao6x)} (Até 6x c/ desc.)</p>
+            <p style="font-size: 11px; color: #666;">*Opção de 10x sem desconto disponível no próximo passo.</p>
+        `;
+    }
+
+    // 4. Mostra o Modal de Checkout (o que tem o CPF e Endereço)
+    document.getElementById('modalCheckout').style.display = 'flex';
+}
+
 // --- VARIÁVEIS GLOBAIS ---
 let sacola = []; 
 let valorFreteGlobal = 0;
@@ -1260,6 +1283,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
