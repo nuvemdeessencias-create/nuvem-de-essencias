@@ -540,14 +540,19 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     </div>
 
     <div class="cart-footer">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333; font-size: 18px;">
-            <span>Total:</span>
-            <span>R$ <span id="cart-total">0,00</span></span>
-        </div>
-        <button class="btn-whats" onclick="finalizarWhatsApp()">
-            ENVIAR PEDIDO
-        </button>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333; font-size: 18px;">
+        <span>Total:</span>
+        <span>R$ <span id="cart-total">0,00</span></span>
     </div>
+
+    <button class="btn-checkout-asaas" onclick="abrirCheckoutAsaas()" style="width: 100%; background: #2e7d32; color: white; padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 16px;">
+        💳 FINALIZAR PAGAMENTO
+    </button>
+
+    <button class="btn-whats-secundario" onclick="finalizarWhatsApp()" style="width: 100%; background: #25d366; color: white; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" width="16" height="16">
+        Pedir pelo WhatsApp
+    </button>
 </div>
 
     <div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; margin-bottom: 20px; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
@@ -626,6 +631,87 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 <script src="produtos.js"></script>
 
 <script>
+
+function prepararDadosParaAsaas() {
+    if (typeof sacola === 'undefined' || sacola.length === 0) return null;
+    let dados = {
+        valorTotalPix: 0,
+        valorTotalCartao6x: 0,
+        valorTotalOriginal: 0,
+        maxParcelasPromo: 10,
+        temPromo6xAtiva: false,
+        itensDetalhados: []
+    };
+
+    sacola.forEach(item => {
+        const p = meusProdutos.find(prod => prod.id === item.id);
+        const [mlSelt, precoSelt] = item.ml.split('|');
+        const precoOriginal = parseFloat(precoSelt);
+        const infoPromo = processarPrecoProduto({ id: item.id, ml: mlSelt, preco: precoOriginal });
+
+        dados.valorTotalPix += infoPromo.pixValor * item.qtd;
+        dados.valorTotalOriginal += precoOriginal * item.qtd;
+
+        if (infoPromo.tem6x) {
+            dados.maxParcelasPromo = 6;
+            dados.temPromo6xAtiva = true;
+            dados.valorTotalCartao6x += infoPromo.valor6x * item.qtd;
+        } else {
+            dados.valorTotalCartao6x += precoOriginal * item.qtd;
+        }
+        dados.itensDetalhados.push({ nome: p.nome, quantidade: item.qtd, precoUnitario: precoOriginal });
+    });
+    return dados;
+}
+
+function buscarCEP(cep) {
+    const valor = cep.replace(/\D/g, '');
+    if (valor.length !== 8) return;
+    fetch(`https://viacep.com.br/ws/${valor}/json/`)
+        .then(res => res.json())
+        .then(dados => {
+            if (!dados.erro) {
+                document.getElementById('end_rua').value = dados.logradouro;
+                document.getElementById('end_bairro').value = dados.bairro;
+                document.getElementById('end_cidade').value = dados.localidade;
+                document.getElementById('end_estado').value = dados.uf;
+                document.getElementById('end_numero').focus();
+            }
+        });
+}
+
+function coletarDadosCheckout(metodoPagamento) {
+    const dadosCarrinho = prepararDadosParaAsaas();
+    if (!dadosCarrinho) return alert("Seu carrinho está vazio!");
+
+    const checkout = {
+        cliente: {
+            nome: document.getElementById('cliente_nome').value,
+            email: document.getElementById('cliente_email').value,
+            cpfCnpj: document.getElementById('cliente_cpf').value.replace(/\D/g, ''),
+            telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
+        },
+        endereco: {
+            cep: document.getElementById('end_cep').value.replace(/\D/g, ''),
+            rua: document.getElementById('end_rua').value,
+            numero: document.getElementById('end_numero').value,
+            bairro: document.getElementById('end_bairro').value,
+            cidade: document.getElementById('end_cidade').value,
+            estado: document.getElementById('end_estado').value
+        },
+        pagamento: {
+            metodo: metodoPagamento,
+            valor: metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : dadosCarrinho.valorTotalCartao6x
+        }
+    };
+
+    if (!checkout.cliente.nome || !checkout.cliente.cpfCnpj || !checkout.endereco.cep) {
+        return alert("Preencha Nome, CPF e CEP corretamente.");
+    }
+    
+    console.log("Enviando para o Asaas:", checkout);
+    alert("Dados validados! Pronto para conectar com a API do Asaas.");
+}
 
 // --- VARIÁVEIS GLOBAIS ---
 let sacola = []; 
@@ -1083,6 +1169,45 @@ function finalizarWhatsApp() {
     </div>
 </div>
 
+<div id="modalCheckout" class="modal" style="display:none;">
+    <div class="modal-content">
+        <span onclick="document.getElementById('modalCheckout').style.display='none'" style="float:right; cursor:pointer; font-size:24px;">&times;</span>
+        <h2>Finalizar Compra</h2>
+        
+        <h3>1. Dados Pessoais</h3>
+        <div class="form-grupo">
+            <input type="text" id="cliente_nome" placeholder="Nome Completo">
+            <input type="email" id="cliente_email" placeholder="E-mail">
+            <input type="text" id="cliente_cpf" placeholder="CPF (apenas números)">
+            <input type="text" id="cliente_celular" placeholder="WhatsApp">
+        </div>
+
+        <h3>2. Endereço de Entrega</h3>
+        <div class="form-grupo">
+            <input type="text" id="end_cep" placeholder="CEP" onblur="buscarCEP(this.value)">
+            <input type="text" id="end_rua" placeholder="Logradouro / Rua">
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="end_numero" placeholder="Nº" style="width: 30%;">
+                <input type="text" id="end_complemento" placeholder="Complemento" style="width: 70%;">
+            </div>
+            <input type="text" id="end_bairro" placeholder="Bairro">
+            <div style="display: flex; gap: 10px;">
+                <input type="text" id="end_cidade" placeholder="Cidade" style="width: 70%;">
+                <input type="text" id="end_estado" placeholder="UF" style="width: 30%;">
+            </div>
+        </div>
+
+        <hr>
+        
+        <div id="opcoesPagamento">
+            <h3>3. Pagamento</h3>
+            <div id="resumoValores" style="background: #f9f9f9; padding: 10px; border-radius: 8px; margin-bottom: 15px;"></div>
+            <button onclick="coletarDadosCheckout('PIX')" class="btn-pix">Pagar com PIX</button>
+            <button onclick="coletarDadosCheckout('CREDIT_CARD')" class="btn-cartao">Pagar com Cartão</button>
+        </div>
+    </div>
+</div>
+
 <footer class="rodape-container">
     <div class="rodape-content">
         
@@ -1135,6 +1260,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
