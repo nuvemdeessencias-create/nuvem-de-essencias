@@ -379,11 +379,45 @@ header {
     text-align: center;
 }
 
-/* Tag OFF muito pequena */
-.tag-pix-btn {
-    font-size: 8px !important;
-    color: #28a745 !important;
+/* NOVAS ETIQUETAS DE PREÇO NUVEM DE ESSÊNCIAS */
+.tag-promo-pix {
+    background: #e8f5e9 !important; /* Verde Suave */
+    color: #2e7d32 !important;      /* Verde Texto */
+    padding: 4px 12px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;     /* Aumentamos de 8px para 11px */
     font-weight: 800 !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #c8e6c9 !important;
+    margin-top: 5px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.tag-promo-6x {
+    background: #fff3e0 !important; /* Laranja Suave */
+    color: #ef6c00 !important;      /* Laranja Texto */
+    padding: 4px 12px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #ffe0b2 !important;
+    margin-top: 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Garante que o container de preço não fique apertado */
+[id^="preco-container-"] {
+    min-height: 95px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
 }
 /* FILTROS */
 .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -403,18 +437,21 @@ select, .busca-input { padding: 12px; border: 1px solid var(--dourado); border-r
 .nome-perfume { font-size: 15px; font-weight: bold; color: var(--azul-fundo); margin: 5px 0; min-height: 40px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
 .estoque-label { font-size: 11px; color: #d9534f; font-weight: bold; margin-bottom: 8px; }
 
-/* SELO PROMOÇÃO */
+/* Selo de Oferta que fica em cima da imagem */
 .selo-promo {
     position: absolute;
     top: 10px;
     left: 10px;
-    background: #d9534f;
+    background: #d32f2f; /* Vermelho vibrante */
     color: white;
-    padding: 3px 8px;
-    border-radius: 4px;
+    padding: 4px 12px;
+    border-radius: 20px;
     font-size: 10px;
     font-weight: bold;
-    z-index: 5;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 /* SELETOR QTD */
@@ -1071,6 +1108,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
