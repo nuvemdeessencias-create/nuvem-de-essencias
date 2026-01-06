@@ -214,38 +214,14 @@ header {
     margin: 0 auto; 
 }
 
-.card {
-    padding: 10px 15px !important; /* Redução de respiro interno */
-    gap: 4px !important; /* Diminui espaço entre os elementos (foto, nome, preço) */
-}
-
-/* Reduzido de 180px para 140px para encurtar o card verticalmente */
-.card img { 
-    width: 100%; 
-    height: 140px; 
-    object-fit: contain; 
-    background: white; 
-    padding: 10px 0; 
-}
-
-.nome-perfume { 
-    font-size: 15px; 
-    font-weight: bold; 
-    color: var(--azul-fundo); 
-    margin: 5px 0; 
-    min-height: 40px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    line-height: 1.2; 
-}
+/* Redução da altura da imagem para economizar espaço no topo */
 
 /* 6. BOTÕES DE VARIAÇÃO (ML/KIT) */
 .variacao-container {
     display: flex !important;
-    gap: 6px !important;
+    gap: 6px !important;            /* Espaço menor entre botões */
     justify-content: center !important;
-    margin: 8px 0 !important;
+    margin: 4px 0 !important;      /* Reduzido de 10px para 4px para encurtar o card */
     flex-wrap: wrap !important;
     width: 100%;
 }
@@ -329,14 +305,6 @@ header {
     color: #333;
 }
 
-/* Container compacto */
-.variacao-container {
-    display: flex !important;
-    gap: 6px !important;
-    justify-content: center !important;
-    margin: 8px 0 !important;
-    flex-wrap: wrap !important;
-}
 
 /* Botão Base: Quadrado Pequeno */
 .btn-ml-nuvem {
@@ -402,12 +370,24 @@ header {
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-/* Container de preço sem altura mínima excessiva */
+/* Ajuste do container de preço e do parcelamento solicitado */
 [id^="preco-container-"] {
     min-height: auto !important; 
-    margin: 5px 0 !important;
-    padding: 5px 0;
+    margin: 2px 0 !important;
+    padding: 2px 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
+ /* Estilo solicitado: 10x sem juros em Azul Escuro e maior */
+.parcelamento-azul {
+    color: #002d72 !important; /* Azul escuro */
+    font-size: 12px !important; /* Aumentado */
+    font-weight: 700 !important;
+    margin-bottom: 4px;
+}
+        
 /* FILTROS */
 .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 .busca-grupo { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
@@ -419,13 +399,51 @@ select, .busca-input { padding: 12px; border: 1px solid var(--dourado); border-r
 
 /* GRID E CARDS */
 .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
-.card { background: var(--azul-card); color: var(--texto-escuro); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; box-shadow: 0 8px 15px rgba(0,0,0,0.2); position: relative; }
-.card img { width: 100%; height: 180px; object-fit: contain; background: white; padding: 10px 0; }
+
+.card {
+    background: var(--azul-card);
+    color: var(--texto-escuro);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Reduzi drasticamente o padding inferior de 20px para 8px */
+    padding-bottom: 8px !important; 
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    position: relative;
+    /* Adicionado para garantir que o card não estique além do necessário */
+    height: fit-content;
+}
+        
+/* Redução da altura da imagem para economizar espaço no topo */
+.card img { 
+    width: 100%; 
+    height: 130px !important; /* Reduzido de 140/180px para 130px */
+    object-fit: contain; 
+    background: white; 
+    padding: 5px 0 !important; 
+}
 .info { width: 90%; text-align: center; }
 .marca-tag { color: var(--dourado); font-weight: bold; font-size: 11px; text-transform: uppercase; }
-.nome-perfume { font-size: 15px; font-weight: bold; color: var(--azul-fundo); margin: 5px 0; min-height: 40px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
-.estoque-label { font-size: 11px; color: #d9534f; font-weight: bold; margin-bottom: 8px; }
+/* Ajuste do nome para ocupar menos espaço */
+.nome-perfume { 
+    font-size: 14px !important; /* Reduzido de 15px */
+    font-weight: bold; 
+    color: var(--azul-fundo); 
+    margin: 2px 0 !important; /* Margem mínima */
+    min-height: 34px !important; /* Reduzido de 40px */
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    line-height: 1.1; 
+}
 
+/* Redução das margens das etiquetas de estoque e variações */
+.estoque-label { 
+    font-size: 10px !important; 
+    margin-bottom: 4px !important; 
+}
 /* Selo de Oferta que fica em cima da imagem */
 .selo-promo {
     position: absolute;
@@ -459,16 +477,6 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 /* Esconde o select antigo se ele ainda estiver no código */
 .seletor-ml {
     display: none !important;
-}
-
-/* Garante que o container de botões não herde larguras erradas */
-.variacao-container {
-    display: flex !important;
-    gap: 8px !important;
-    justify-content: center !important;
-    margin: 10px 0 !important;
-    flex-wrap: wrap !important;
-    width: 100%;
 }
 
 /* Ajuste fino nos botões para garantir o formato quadrado */
@@ -757,38 +765,38 @@ function atualizarPrecoCard(id, valorSelt, marca) {
     
     if (!container) return;
 
-    // Busca os dados da promoção (PIX e 6x)
+    // Busca os dados da promoção apenas para exibição visual no card
     const promo = processarPrecoProduto({ id: id, marca: marca, preco: precoBase, ml: ml });
 
     let html = `
-        <div style="color:#333; font-weight:bold; font-size:20px; line-height: 1;">R$ ${formatarMoeda(precoBase)}</div>
-        <div style="color:#001f3f; font-size:12px; font-weight:600; margin: 4px 0 8px 0;">
+        <div style="color:#333; font-weight:bold; font-size:18px; line-height: 1;">R$ ${formatarMoeda(precoBase)}</div>
+        <div class="parcelamento-azul">
             até 10x de R$ ${formatarMoeda(precoBase/10)} sem juros
         </div>
     `;
 
     // Container para as tags de desconto (Pix e 6x)
     if (promo.emPromocao) {
-        html += `<div style="display:flex; flex-direction:column; gap:4px; align-items:center; width: 100%;">`;
+        html += `<div style="display:flex; flex-direction:column; gap:3px; align-items:center; width: 100%; margin-top: 2px;">`;
         
-        // Tag PIX
+        // Tag PIX (Estilo Nuvem)
         html += `
-            <span style="background:#e8f5e9; color:#2e7d32; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:bold; display: flex; align-items: center; gap: 4px;">
+            <span class="tag-promo-pix">
                 💰 PIX: R$ ${formatarMoeda(promo.pixValor)}
             </span>`;
 
         // Tag 6x CARTÃO (Se existir na regra)
         if (promo.tem6x) {
             html += `
-                <span style="background:#fff3e0; color:#ef6c00; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:bold; display: flex; align-items: center; gap: 4px;">
+                <span class="tag-promo-6x">
                     💳 6x de R$ ${formatarMoeda(promo.parcela6x)} (-${promo.percentual6x}%)
                 </span>`;
         }
         
         html += `</div>`;
     } else {
-        // Espaçador para manter o alinhamento quando NÃO há promoção
-        html += `<div style="height: 38px;"></div>`;
+        // Espaçador menor (10px) para não empurrar o card para baixo em itens sem promo
+        html += `<div style="height: 10px;"></div>`;
     }
 
     container.innerHTML = html;
@@ -1064,6 +1072,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
