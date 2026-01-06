@@ -714,19 +714,13 @@ function filtrar() {
                 <div class="nome-perfume" style="min-height: 40px; display: flex; align-items: center; justify-content: center; text-align: center;">${p.nome}</div>
                 
                 <div id="preco-container-${p.id}" style="margin: 10px 0; min-height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
-                    </div>
+                </div>
 
                 <div class="estoque-label" id="estoque-${p.id}" style="font-size:12px; font-weight:bold; margin-bottom: 8px; color: ${primeiraOpcao.disponivel ? '#d32f2f' : 'red'}">
                     ${primeiraOpcao.disponivel ? primeiraOpcao.estoque + ' unidades' : 'INDISPONÍVEL'}
                 </div>
                 
-                <div class="variacao-container" style="margin-bottom: 10px;">
-                    ${p.opcoes.map((opt, idx) => `
-                        <button class="btn-ml-nuvem ${idx === 0 ? 'active' : ''}" 
-                                onclick="selecionarVariacaoManual('${p.id}', '${opt.valor}', '${p.marca}', this)">
-                            ${opt.valor.split('|')[0]}
-                        </button>`).join('')}
-                </div>
+                ${seletorHtml}
 
                 <div class="qtd-container" style="margin-bottom: 15px;">
                     <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, '${p.id}')">-</button>
@@ -747,11 +741,9 @@ function filtrar() {
             </div>`; 
         container.appendChild(card);
         
-        // CHAMA A ATUALIZAÇÃO DE PREÇO IMEDIATAMENTE PARA CARREGAR AS TAGS CORRETAS
         atualizarPrecoCard(p.id, primeiraOpcao.valor, p.marca);
     });
-}  
-
+}
 // --- MANIPULAÇÃO DE VARIAÇÕES E PREÇOS ---
 function selecionarVariacaoManual(id, valorSelt, marca, elemento) {
     const card = elemento.closest('.card');
@@ -1100,6 +1092,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
