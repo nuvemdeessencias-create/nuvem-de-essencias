@@ -214,12 +214,9 @@ header {
     margin: 0 auto; 
 }
 
-/* Card mais compacto e com margem interna segura */
 .card {
-    padding: 12px !important; /* Respiro interno para nada tocar na borda */
-    display: flex;
-    flex-direction: column;
-    gap: 8px; /* Espaçamento menor entre elementos */
+    padding: 10px 15px !important; /* Redução de respiro interno */
+    gap: 4px !important; /* Diminui espaço entre os elementos (foto, nome, preço) */
 }
 
 /* Reduzido de 180px para 140px para encurtar o card verticalmente */
@@ -454,8 +451,10 @@ select, .busca-input { padding: 12px; border: 1px solid var(--dourado); border-r
 .seletor-ml { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 13px; }
 
 .btn-whats { background: var(--verde-whats); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
-.btn-add-cart { background: var(--dourado); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; text-transform: uppercase; }
-.btn-add-sacola { background: black !important; color: white !important; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+.btn-add-cart, .btn-add-sacola {
+    padding: 10px 5px !important; /* Botões menos "altos" */
+    font-size: 12px !important;
+}
 
 footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid rgba(184, 147, 86, 0.2); }
 
@@ -1100,6 +1099,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
