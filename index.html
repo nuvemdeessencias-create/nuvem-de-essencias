@@ -673,6 +673,34 @@ function filtrar() {
         const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal, ml: mlInicial });
         const pDados = JSON.stringify(p).replace(/"/g, '&quot;');
 
+        const categoriaLimpa = (p.categoria || "").toUpperCase();
+        const ehPerfume = categoriaLimpa === "ALTA PERFUMARIA" || categoriaLimpa === "PERFUMES ÁRABES";
+
+        let seletorHtml = "";
+
+        if (ehPerfume) {
+            // Mantém os QUADRADOS para perfumes
+            seletorHtml = `
+                <div class="variacao-container" style="margin-bottom: 10px;">
+                    ${p.opcoes.map((opt, idx) => `
+                        <button class="btn-ml-nuvem ${idx === 0 ? 'active' : ''}" 
+                                onclick="selecionarVariacaoManual('${p.id}', '${opt.valor}', '${p.marca}', this)">
+                            ${opt.valor.split('|')[0]}
+                        </button>`).join('')}
+                </div>`;
+        } else {
+            // Cria a ABA (Dropdown) para Batons, Velas, etc.
+            seletorHtml = `
+                <div style="width: 100%; display: flex; justify-content: center; margin-bottom: 10px;">
+                    <select class="seletor-estilo-aba" style="width: 90%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;" 
+                            onchange="selecionarVariacaoSelect('${p.id}', this.value, '${p.marca}')">
+                        ${p.opcoes.map((opt) => `
+                            <option value="${opt.valor}">${opt.valor.split('|')[0]}</option>
+                        `).join('')}
+                    </select>
+                </div>`;
+        }
+
         const card = document.createElement('div');
         card.className = 'card';
         card.innerHTML = `
@@ -1072,6 +1100,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
