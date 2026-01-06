@@ -5,7 +5,6 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // ADICIONADO: qtd_total vindo do corpo da requisição
   const { cep_destino, valor_total, tem_promo, qtd_total } = req.body;
   const token = process.env.MELHOR_ENVIO_TOKEN;
   
@@ -13,9 +12,7 @@ export default async function handler(req, res) {
   const valorNum = parseFloat(parseFloat(valor_total || 0).toFixed(2));
 
   try {
-    let opcoesFinais = [];
-
-    // 1. REGRA ARAGUAÍNA (Mantida 100% igual conforme solicitado)
+    // 1. REGRA ARAGUAÍNA (Exceção: Mantém opções de entrega/retirada)
     if (cepLimpo.startsWith("778")) {
       return res.status(200).json([
         { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: 1 },
@@ -23,7 +20,9 @@ export default async function handler(req, res) {
       ]);
     }
 
-    // 2. BUSCA NO MELHOR ENVIO (PAC/SEDEX)
+    let opcoesFinais = [];
+
+    // 2. BUSCA NO MELHOR ENVIO (Calcula primeiro para saber prazos)
     if (cepLimpo.length === 8) {
       const payload = {
         "from": { "postal_code": "77809270" },
@@ -57,26 +56,26 @@ export default async function handler(req, res) {
       }
     }
 
-    // 3. NOVA LÓGICA DE FRETE GRÁTIS
+    // 3. VALIDAÇÃO DAS REGRAS DE FRETE GRÁTIS
     let ganhaFreteGratis = false;
 
     if (!tem_promo && valorNum >= 700) {
-      // Regra 1: Não promocional >= 700
-      ganhaFreteGratis = true;
+      ganhaFreteGratis = true; // Regra: Não promocional >= 700
     } else if (qtd_total >= 2 && valorNum >= 999) {
-      // Regra 2: Qualquer mistura ou promo >= 999 (com 2+ itens)
-      ganhaFreteGratis = true;
+      ganhaFreteGratis = true; // Regra: Misto/Promo >= 999 com 2+ itens
     }
 
+    // 4. RETORNO FINAL
     if (ganhaFreteGratis) {
-      const maiorPrazo = opcoesFinais.length > 0 ? "8 a 17" : "10 a 15"; 
+      // Se ganhou frete grátis, IGNORA PAC/SEDEX e retorna apenas o Grátis
       return res.status(200).json([{ 
-        name: "Frete Grátis (Promocional)", 
+        name: "Frete Grátis (Envio Nuvem de Essências)", 
         price: 0, 
-        delivery_time: maiorPrazo 
-      }, ...opcoesFinais]); // Retorna o grátis + as opções pagas (PAC/SEDEX)
+        delivery_time: "8 a 17" 
+      }]);
     }
 
+    // Se não ganhou grátis, retorna as opções pagas normais
     return res.status(200).json(opcoesFinais);
 
   } catch (error) {
