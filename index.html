@@ -605,21 +605,13 @@ let valorFreteGlobal = 0;
 let nomeFreteGlobal = "";
 
     // Função para filtrar por Categoria (Botões)
+// CORREÇÃO 2: Ajuste na função dos botões de categoria
 function filtrarCategoria(categoria, elemento) {
-    // 1. Gerenciar visual dos botões
     document.querySelectorAll('.btn-categoria').forEach(btn => btn.classList.remove('active'));
     if (elemento) elemento.classList.add('active');
-
-    // 2. Filtrar o array de dados e chamar a função de carregar
-    if (categoria.toLowerCase() === 'todos') {
-        carregarProdutos(meusProdutos);
-    } else {
-        const filtrados = meusProdutos.filter(p => 
-            p.categoria.toLowerCase() === categoria.toLowerCase() || 
-            (p.secao && p.secao.toLowerCase() === categoria.toLowerCase())
-        );
-        carregarProdutos(filtrados);
-    }
+    
+    // Chamamos a função filtrar() para que ela considere Marca + Busca + Categoria juntos
+    filtrar(); 
 }
 
 // Função para filtrar por Marca (Select) e Busca (Input)
@@ -679,7 +671,7 @@ function carregarProdutos(lista = meusProdutos) {
 
         const card = document.createElement('div');
         card.className = 'card';
-        card.innerHTML = `
+2        card.innerHTML = `
             ${promo.emPromocao ? `<div class="selo-promo">OFERTA</div>` : ''}
             
             <img src="${p.imagem}" class="img-principal" alt="${p.nome}" 
@@ -997,9 +989,12 @@ function abrirDetalhes(p) {
     document.getElementById('detalhe-nome').innerText = p.nome;
     document.getElementById('detalhe-marca').innerText = p.marca;
     document.getElementById('detalhe-descricao').innerText = p.descricao || "Fragrância exclusiva.";
-    // GARANTE QUE O MODAL APAREÇA
-    const modal = document.getElementById('modal-detalhes');
-    if(modal) modal.style.display = 'flex';
+    
+    const mensagemWhats = encodeURIComponent(`Olá! Gostaria de saber mais sobre o perfume: *${p.nome}*`);
+    const btnWhats = document.getElementById('btn-whats-detalhe');
+    if(btnWhats) btnWhats.onclick = () => window.open(`https://wa.me/5563992576211?text=${mensagemWhats}`, '_blank');
+
+    document.getElementById('modal-detalhes').style.display = 'flex';
 }
     
     // Criar o link do WhatsApp para este produto específico
@@ -1102,6 +1097,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
