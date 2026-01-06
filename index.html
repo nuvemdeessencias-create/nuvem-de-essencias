@@ -679,7 +679,7 @@ function filtrar() {
     carregarProdutos(filtrados);
 }
 
-  function carregarProdutos(lista = meusProdutos) {
+ function carregarProdutos(lista = meusProdutos) {
     const container = document.getElementById('listaProdutos');
     if (!container) return;
     container.innerHTML = ""; 
@@ -691,13 +691,19 @@ function filtrar() {
         const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal, ml: mlInicial });
         const pDados = JSON.stringify(p).replace(/"/g, '&quot;');
 
-        const categoriaLimpa = (p.categoria || "").toUpperCase();
-        const ehPerfume = categoriaLimpa === "ALTA PERFUMARIA" || categoriaLimpa === "PERFUMES ÁRABES";
+        // --- LÓGICA DE DECISÃO CORRIGIDA ---
+        // Pegamos a seção do seu arquivo (alta, arabe, kits, maquiagem, velas)
+        const secaoProduto = (p.secao || "").toLowerCase().trim();
+        
+        // Se for perfume ou kit, EH PERFUME (Botões Quadrados)
+        const ehPerfume = secaoProduto === "alta" || 
+                          secaoProduto === "arabe" || 
+                          secaoProduto === "kits";
 
         let seletorHtml = "";
 
         if (ehPerfume) {
-            // Mantém os QUADRADOS para perfumes
+            // Desenha os QUADRADOS para perfumes
             seletorHtml = `
                 <div class="variacao-container" style="margin-bottom: 10px;">
                     ${p.opcoes.map((opt, idx) => `
@@ -707,13 +713,13 @@ function filtrar() {
                         </button>`).join('')}
                 </div>`;
         } else {
-            // Cria a ABA (Dropdown) para Batons, Velas, etc.
+            // Desenha a ABA (Dropdown) para maquiagem e velas
             seletorHtml = `
                 <div style="width: 100%; display: flex; justify-content: center; margin-bottom: 10px;">
-                    <select class="seletor-estilo-aba" style="width: 90%; padding: 8px; border-radius: 8px; border: 1px solid #ccc;" 
+                    <select class="seletor-estilo-aba" style="width: 90%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; background: #fff;" 
                             onchange="selecionarVariacaoSelect('${p.id}', this.value, '${p.marca}')">
                         ${p.opcoes.map((opt) => `
-                            <option value="${opt.valor}">${opt.valor.split('|')[0]}</option>
+                            <option value="${opt.valor}">${opt.texto}</option>
                         `).join('')}
                     </select>
                 </div>`;
@@ -729,9 +735,9 @@ function filtrar() {
             
             <div class="info-container" style="padding: 0 10px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
                 <span class="marca-tag">${p.marca}</span>
-                <div class="nome-perfume" style="min-height: 40px; display: flex; align-items: center; justify-content: center; text-align: center;">${p.nome}</div>
+                <div class="nome-perfume">${p.nome}</div>
                 
-                <div id="preco-container-${p.id}" style="margin: 10px 0; min-height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
+                <div id="preco-container-${p.id}" style="margin: 5px 0; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
                 </div>
 
                 <div class="estoque-label" id="estoque-${p.id}" style="font-size:12px; font-weight:bold; margin-bottom: 8px; color: ${primeiraOpcao.disponivel ? '#d32f2f' : 'red'}">
@@ -1130,6 +1136,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
