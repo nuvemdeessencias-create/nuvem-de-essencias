@@ -906,6 +906,55 @@ function adicionarComPromocao(id, nome, mlId, qtdId) {
         }
     }
 
+    function prepararDadosParaAsaas() {
+    if (typeof sacola === 'undefined' || sacola.length === 0) return null;
+
+    let dados = {
+        valorTotalPix: 0,        // Total com descontos de PIX
+        valorTotalCartao6x: 0,   // Total com descontos de 6x (se houver)
+        valorTotalOriginal: 0,   // Total PREÇO CHEIO (para opção de 10x)
+        maxParcelasPromo: 10,    // Indica se o carrinho tem restrição de 6x
+        temPromo6xAtiva: false,
+        itensDetalhados: []
+    };
+
+    sacola.forEach(item => {
+        const p = meusProdutos.find(prod => prod.id === item.id);
+        const [mlSelt, precoSelt] = item.ml.split('|');
+        const precoOriginal = parseFloat(precoSelt);
+
+        const infoPromo = processarPrecoProduto({ 
+            id: item.id, 
+            ml: mlSelt, 
+            preco: precoOriginal 
+        });
+
+        // 1. Soma para PIX
+        dados.valorTotalPix += infoPromo.pixValor * item.qtd;
+
+        // 2. Soma para PREÇO CHEIO (Opção de 10x que o cliente pode escolher)
+        dados.valorTotalOriginal += precoOriginal * item.qtd;
+
+        // 3. Soma para CARTÃO COM DESCONTO (Regra dos 6x)
+        if (infoPromo.tem6x) {
+            dados.maxParcelasPromo = 6;
+            dados.temPromo6xAtiva = true;
+            dados.valorTotalCartao6x += infoPromo.valor6x * item.qtd;
+        } else {
+            // Se o item não tem promo de 6x, no plano de 6x ele custa o valor normal
+            dados.valorTotalCartao6x += precoOriginal * item.qtd;
+        }
+
+        dados.itensDetalhados.push({
+            nome: p.nome,
+            quantidade: item.qtd,
+            precoUnitario: precoOriginal
+        });
+    });
+
+    return dados;
+}
+
     // Adiciona o item à sacola
     sacola.push({ 
         id, nome, ml, 
@@ -1136,6 +1185,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
