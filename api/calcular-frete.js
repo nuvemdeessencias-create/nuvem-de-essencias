@@ -5,8 +5,8 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
 
-  // ADICIONADO: tem_promo vindo do corpo da requisição
-  const { cep_destino, valor_total, tem_promo } = req.body;
+  // ADICIONADO: qtd_total vindo do corpo da requisição
+  const { cep_destino, valor_total, tem_promo, qtd_total } = req.body;
   const token = process.env.MELHOR_ENVIO_TOKEN;
   
   const cepLimpo = cep_destino ? cep_destino.replace(/\D/g, '') : "";
@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   try {
     let opcoesFinais = [];
 
-    // 1. REGRA ARAGUAÍNA (Mantida igual)
+    // 1. REGRA ARAGUAÍNA (Mantida 100% igual conforme solicitado)
     if (cepLimpo.startsWith("778")) {
       return res.status(200).json([
         { name: "Entrega Local (Araguaína)", price: 10.00, delivery_time: 1 },
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       ]);
     }
 
-    // 2. BUSCA NO MELHOR ENVIO
+    // 2. BUSCA NO MELHOR ENVIO (PAC/SEDEX)
     if (cepLimpo.length === 8) {
       const payload = {
         "from": { "postal_code": "77809270" },
@@ -57,18 +57,26 @@ export default async function handler(req, res) {
       }
     }
 
-    // 3. NOVA LÓGICA DE FRETE GRÁTIS VS PROMOÇÃO
-    // Se NÃO tem promoção E o valor é >= 700, limpa tudo e deixa só o GRÁTIS
+    // 3. NOVA LÓGICA DE FRETE GRÁTIS
+    let ganhaFreteGratis = false;
+
     if (!tem_promo && valorNum >= 700) {
+      // Regra 1: Não promocional >= 700
+      ganhaFreteGratis = true;
+    } else if (qtd_total >= 2 && valorNum >= 999) {
+      // Regra 2: Qualquer mistura ou promo >= 999 (com 2+ itens)
+      ganhaFreteGratis = true;
+    }
+
+    if (ganhaFreteGratis) {
       const maiorPrazo = opcoesFinais.length > 0 ? "8 a 17" : "10 a 15"; 
       return res.status(200).json([{ 
         name: "Frete Grátis (Promocional)", 
         price: 0, 
         delivery_time: maiorPrazo 
-      }]);
+      }, ...opcoesFinais]); // Retorna o grátis + as opções pagas (PAC/SEDEX)
     }
 
-    // Se TIVER promoção ou valor < 700, retorna as opções pagas (PAC/SEDEX) encontradas
     return res.status(200).json(opcoesFinais);
 
   } catch (error) {
