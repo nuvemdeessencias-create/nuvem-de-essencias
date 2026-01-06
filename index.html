@@ -631,7 +631,6 @@ window.onload = function() {
 function formatarMoeda(valor) {
     return valor.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
-
 function carregarProdutos() {
     const container = document.getElementById('listaProdutos');
     if (!container || typeof meusProdutos === 'undefined') return;
@@ -641,54 +640,48 @@ function carregarProdutos() {
         try {
             const card = document.createElement('div');
             card.className = 'card';
-            card.setAttribute('data-id', p.id); // Importante para localizar o card
-            card.setAttribute('data-marca', (p.marca || "").toUpperCase());
-            card.setAttribute('data-secao', p.secao || "");
+            card.setAttribute('data-id', p.id);
 
-            // Pegamos a primeira opção disponível para o preço inicial
             const primeiraOpcao = p.opcoes[0];
-            const precoOriginal = parseFloat(primeiraOpcao.valor.split('|')[1]);
-            const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal });
-            const pJson = JSON.stringify(p).replace(/"/g, '&quot;');
-
-            const botoesML = p.opcoes.map((opt, index) => {
-                const ativo = index === 0 ? 'active' : '';
-                const soML = opt.valor.split('|')[0].toUpperCase(); 
-                return `
-                    <button class="btn-ml-nuvem ${ativo}" 
-                            onclick="selecionarVariacaoManual('${p.id}', '${opt.valor}', '${p.marca}', this)">
-                        <span>${soML}</span>
-                        ${opt.promoPix ? `<span class="tag-pix-btn">PIX OFF</span>` : ''}
-                    </button>
-                `;
-            }).join('');
+            const [mlInicial, precoTexto] = primeiraOpcao.valor.split('|');
+            const precoOriginal = parseFloat(precoTexto);
+            
+            // BUSCA PROMOÇÃO (Passando o ML inicial)
+            const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal, ml: mlInicial });
+            const pJson = JSON.stringify(p).replace(/"/g, '"');
 
             card.innerHTML = `
-                ${promo.emPromocao ? `<div class="selo-promo">${promo.descontoPercentual}% OFF NO PIX</div>` : ''}
-                <img src="${p.imagem}" class="img-principal" alt="${p.nome}" style="cursor:pointer;" onclick="abrirDetalhes(${pJson})">
+                ${promo.emPromocao ? `<div class="selo-promo">OFERTA</div>` : ''}
+                <img src="${p.imagem}" class="img-principal" alt="${p.nome}" onclick="abrirDetalhes(${pJson})">
                 
-                <div class="info" style="width: 100%; padding: 0 15px; box-sizing: border-box; text-align: center;">
+                <div class="info" style="width: 100%; padding: 0 15px; text-align: center;">
                     <span class="marca-tag">${p.marca}</span>
                     <div class="nome-perfume">${p.nome}</div>
                     
-                    <div id="preco-container-${p.id}" style="margin-bottom: 10px; min-height: 50px;">
+                    <div id="preco-container-${p.id}" style="margin-bottom: 10px; min-height: 85px;">
+                        <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${formatarMoeda(precoOriginal)}</div>
+                        <div style="font-size:11px; color:#666; margin-bottom:5px;">até 10x de R$ ${formatarMoeda(precoOriginal/10)} sem juros</div>
                         ${promo.emPromocao ? `
-                            <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${formatarMoeda(precoOriginal)}</span>
-                            <div style="color:#28a745; font-weight:bold; font-size:18px;">
-                                R$ ${formatarMoeda(promo.precoFinal)} 
-                                <span style="font-size:12px; display:block;">no PIX (${promo.descontoPercentual}% OFF)</span>
-                            </div>
-                        ` : `
-                            <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${formatarMoeda(precoOriginal)}</div>
-                            <div style="font-size:10px; color:#666;">Preço único</div>
-                        `}
+                            <div style="display:flex; flex-direction:column; gap:3px; align-items:center;">
+                                <span style="background:#e8f5e9; color:#2e7d32; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold;">
+                                    💰 PIX: R$ ${formatarMoeda(promo.pixValor)} (${promo.pixPercentual}% OFF)
+                                </span>
+                                ${promo.tem6x ? `
+                                <span style="background:#fff3e0; color:#ef6c00; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold;">
+                                    💳 6x de R$ ${formatarMoeda(promo.parcela6x)} (${promo.percentual6x}% OFF)
+                                </span>` : ''}
+                            </div>` : ''}
                     </div>
 
-                    <div class="estoque-label" id="estoque-${p.id}">
-                        ${primeiraOpcao.disponivel ? primeiraOpcao.estoque + ' unidades' : 'INDISPONÍVEL'}
-                    </div>
+                    <div class="estoque-label" id="estoque-${p.id}">${primeiraOpcao.disponivel ? primeiraOpcao.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
                     
-                    <div class="variacao-container">${botoesML}</div>
+                    <div class="variacao-container">
+                        ${p.opcoes.map((opt, idx) => `
+                            <button class="btn-ml-nuvem ${idx === 0 ? 'active' : ''}" 
+                                    onclick="selecionarVariacaoManual('${p.id}', '${opt.valor}', '${p.marca}', this)">
+                                <span>${opt.valor.split('|')[0]}</span>
+                            </button>`).join('')}
+                    </div>
 
                     <div class="qtd-container">
                         <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, '${p.id}')">-</button>
@@ -703,7 +696,7 @@ function carregarProdutos() {
                         <div id="btn-container-${p.id}">
                             ${primeiraOpcao.disponivel ? 
                                 `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')">+ ADICIONAR À SACOLA</button>` : 
-                                `<button class="btn-add-sacola" style="background:#666; cursor:not-allowed;" disabled>ESGOTADO</button>`}
+                                `<button class="btn-add-sacola" style="background:#666;" disabled>ESGOTADO</button>`}
                         </div>
                     </div>
                 </div>`; 
@@ -717,21 +710,22 @@ function selecionarVariacaoManual(id, valorSelt, marca, elemento) {
     card.querySelectorAll('.btn-ml-nuvem').forEach(b => b.classList.remove('active'));
     elemento.classList.add('active');
 
+    // 1. Grava a variação selecionada no input escondido
     document.getElementById(`ml-${id}`).value = valorSelt;
 
-    // Localizar a opção no array de produtos para ver o estoque
+    // 2. Localiza os dados dessa variação específica
     const produto = meusProdutos.find(p => p.id === id);
     const opcao = produto.opcoes.find(o => o.valor === valorSelt);
 
-    // 1. Atualiza Preço
+    // 3. ATUALIZA O PREÇO (Aqui ele verifica se é Mercedes 50ml, 100ml ou CK One)
     atualizarPrecoCard(id, valorSelt, marca);
 
-    // 2. Atualiza Imagem (para Batons que têm imagemCor)
+    // 4. ATUALIZA IMAGEM (Mantendo a funcionalidade para Batons/Cores)
     if (opcao.imagemCor) {
         card.querySelector('.img-principal').src = opcao.imagemCor;
     }
 
-    // 3. Atualiza Texto de Estoque e Botão Compra
+    // 5. ATUALIZA ESTOQUE E BOTÕES
     const labelEstoque = document.getElementById(`estoque-${id}`);
     const containerBotao = document.getElementById(`btn-container-${id}`);
     const inputQtd = document.getElementById(`q-${id}`);
@@ -747,25 +741,37 @@ function selecionarVariacaoManual(id, valorSelt, marca, elemento) {
         containerBotao.innerHTML = `<button class="btn-add-sacola" style="background:#666; cursor:not-allowed;" disabled>ESGOTADO</button>`;
         inputQtd.value = 0;
     }
-}
-    
-// FUNÇÃO PARA MUDAR O PREÇO QUANDO MUDA O ML
+}    
+// FUNÇÃO PARA MUDAR O PREÇO QUANDO MUDA O ML (Com suporte a Pix e 6x)
 function atualizarPrecoCard(id, valorSelt, marca) {
-    const precoBase = parseFloat(valorSelt.split('|')[1]);
+    const [ml, precoTexto] = valorSelt.split('|');
+    const precoBase = parseFloat(precoTexto);
     const container = document.getElementById(`preco-container-${id}`);
-    const promo = processarPrecoProduto({ id: id, marca: marca, preco: precoBase });
+    
+    // Agora passamos o ML também para a busca da promoção
+    const promo = processarPrecoProduto({ id: id, marca: marca, preco: precoBase, ml: ml });
 
+    // Preço padrão (Sempre mostra o valor de 10x sem juros)
+    let html = `
+        <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${formatarMoeda(precoBase)}</div>
+        <div style="font-size:11px; color:#666; margin-bottom:5px;">até 10x de R$ ${formatarMoeda(precoBase/10)} sem juros</div>
+    `;
+
+    // Se houver promoção (Pix ou 6x), adiciona as tags coloridas abaixo
     if (promo.emPromocao) {
-        container.innerHTML = `
-            <span style="text-decoration:line-through; color:#999; font-size:12px;">R$ ${formatarMoeda(precoBase)}</span>
-            <div style="color:#28a745; font-weight:bold; font-size:18px;">
-                R$ ${formatarMoeda(promo.precoFinal)} 
-                <span style="font-size:12px; display:block;">no PIX (${promo.descontoPercentual}% OFF)</span>
+        html += `
+            <div style="display:flex; flex-direction:column; gap:3px; align-items:center;">
+                <span style="background:#e8f5e9; color:#2e7d32; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold; width: fit-content;">
+                    💰 PIX: R$ ${formatarMoeda(promo.pixValor)} (${promo.pixPercentual}% OFF)
+                </span>
+                ${promo.tem6x ? `
+                <span style="background:#fff3e0; color:#ef6c00; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold; width: fit-content;">
+                    💳 6x de R$ ${formatarMoeda(promo.parcela6x)} (${promo.percentual6x}% OFF)
+                </span>` : ''}
             </div>`;
-    } else {
-        container.innerHTML = `<div style="color:#333; font-weight:bold; font-size:18px;">R$ ${formatarMoeda(precoBase)}</div>
-                               <div style="font-size:10px; color:#666;">Preço único</div>`;
     }
+
+    container.innerHTML = html;
 }
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
@@ -997,6 +1003,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
