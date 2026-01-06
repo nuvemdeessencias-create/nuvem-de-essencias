@@ -214,17 +214,12 @@ header {
     margin: 0 auto; 
 }
 
-.card { 
-    background: var(--azul-card); 
-    color: var(--texto-escuro); 
-    border-radius: 12px; 
-    overflow: hidden; 
-    display: flex; 
-    flex-direction: column; 
-    align-items: center; 
-    padding-bottom: 20px; 
-    box-shadow: 0 8px 15px rgba(0,0,0,0.2); 
-    position: relative; 
+/* Card mais compacto e com margem interna segura */
+.card {
+    padding: 12px !important; /* Respiro interno para nada tocar na borda */
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* Espaçamento menor entre elementos */
 }
 
 /* Reduzido de 180px para 140px para encurtar o card verticalmente */
@@ -410,14 +405,11 @@ header {
     box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
-/* Garante que o container de preço não fique apertado */
+/* Container de preço sem altura mínima excessiva */
 [id^="preco-container-"] {
-    min-height: 95px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    margin-bottom: 10px;
+    min-height: auto !important; 
+    margin: 5px 0 !important;
+    padding: 5px 0;
 }
 /* FILTROS */
 .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -1108,6 +1100,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
