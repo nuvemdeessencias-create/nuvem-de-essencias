@@ -606,22 +606,20 @@ let nomeFreteGlobal = "";
 
     // Função para filtrar por Categoria (Botões)
 function filtrarCategoria(categoria, elemento) {
-    // 1. Gerenciar visual dos botões (cor de destaque)
+    // 1. Gerenciar visual dos botões
     document.querySelectorAll('.btn-categoria').forEach(btn => btn.classList.remove('active'));
-    elemento.classList.add('active');
+    if (elemento) elemento.classList.add('active');
 
-    // 2. Filtrar os cards na tela
-    const cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        const secaoCard = card.getAttribute('data-secao').toLowerCase();
-        
-        // Lógica: se for 'todos' ou se a seção do card bater com a clicada
-        if (categoria === 'todos' || secaoCard === categoria.toLowerCase()) {
-            card.style.display = "flex";
-        } else {
-            card.style.display = "none";
-        }
-    });
+    // 2. Filtrar o array de dados e chamar a função de carregar
+    if (categoria.toLowerCase() === 'todos') {
+        carregarProdutos(meusProdutos);
+    } else {
+        const filtrados = meusProdutos.filter(p => 
+            p.categoria.toLowerCase() === categoria.toLowerCase() || 
+            (p.secao && p.secao.toLowerCase() === categoria.toLowerCase())
+        );
+        carregarProdutos(filtrados);
+    }
 }
 
 // Função para filtrar por Marca (Select) e Busca (Input)
@@ -657,80 +655,83 @@ window.onload = function() {
 function formatarMoeda(valor) {
     return valor.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
-function carregarProdutos() {
+// FUNÇÃO CENTRAL DE EXIBIÇÃO - CORRIGE FILTROS E CLIQUES
+function carregarProdutos(lista = meusProdutos) {
     const container = document.getElementById('listaProdutos');
-    if (!container || typeof meusProdutos === 'undefined') return;
+    if (!container) return;
     container.innerHTML = ""; 
 
-    meusProdutos.forEach(p => {
-        try {
-            const card = document.createElement('div');
-            card.className = 'card';
-            card.setAttribute('data-id', p.id);
+    // Se a lista estiver vazia (filtro sem resultados), avisa o usuário
+    if (lista.length === 0) {
+        container.innerHTML = `<p style="color:white; text-align:center; width:100%; margin-top:50px;">Nenhum produto encontrado nesta categoria.</p>`;
+        return;
+    }
 
-            const primeiraOpcao = p.opcoes[0];
-            const [mlInicial, precoTexto] = primeiraOpcao.valor.split('|');
-            const precoOriginal = parseFloat(precoTexto);
+    lista.forEach(p => {
+        const primeiraOpcao = p.opcoes[0];
+        const [mlInicial, precoTexto] = primeiraOpcao.valor.split('|');
+        const precoOriginal = parseFloat(precoTexto) || 0;
+        
+        const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal, ml: mlInicial });
+        
+        // CORREÇÃO CRUCIAL: Transforma o objeto em texto seguro para o clique não quebrar
+        const pDados = JSON.stringify(p).replace(/"/g, '&quot;');
+
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+            ${promo.emPromocao ? `<div class="selo-promo">OFERTA</div>` : ''}
             
-            // BUSCA PROMOÇÃO (Passando o ML inicial)
-            const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal, ml: mlInicial });
-            const pJson = JSON.stringify(p).replace(/"/g, '"');
-
-            card.innerHTML = `
-                ${promo.emPromocao ? `<div class="selo-promo">OFERTA</div>` : ''}
-                <img src="${p.imagem}" class="img-principal" alt="${p.nome}" onclick="abrirDetalhes(${pJson})">
+            <img src="${p.imagem}" class="img-principal" alt="${p.nome}" 
+                 onclick="abrirDetalhes(${pDados})" style="cursor:pointer;">
+            
+            <div class="info-container" style="padding: 0 10px; width: 100%; box-sizing: border-box;">
+                <span class="marca-tag">${p.marca}</span>
+                <div class="nome-perfume">${p.nome}</div>
                 
-                <div class="info" style="width: 100%; padding: 0 15px; text-align: center;">
-                    <span class="marca-tag">${p.marca}</span>
-                    <div class="nome-perfume">${p.nome}</div>
-                    
-                    <div id="preco-container-${p.id}" style="margin-bottom: 10px; min-height: 85px;">
-                        <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${formatarMoeda(precoOriginal)}</div>
-                        <div style="font-size:11px; color:#666; margin-bottom:5px;">até 10x de R$ ${formatarMoeda(precoOriginal/10)} sem juros</div>
-                        ${promo.emPromocao ? `
-                            <div style="display:flex; flex-direction:column; gap:3px; align-items:center;">
-                                <span style="background:#e8f5e9; color:#2e7d32; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold;">
-                                    💰 PIX: R$ ${formatarMoeda(promo.pixValor)} (${promo.pixPercentual}% OFF)
-                                </span>
-                                ${promo.tem6x ? `
-                                <span style="background:#fff3e0; color:#ef6c00; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold;">
-                                    💳 6x de R$ ${formatarMoeda(promo.parcela6x)} (${promo.percentual6x}% OFF)
-                                </span>` : ''}
-                            </div>` : ''}
+                <div id="preco-container-${p.id}" style="margin: 5px 0; min-height: 70px;">
+                    <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${formatarMoeda(precoOriginal)}</div>
+                    <div style="color:#001f3f; font-size:12px; font-weight:600; margin-bottom:5px;">
+                        ${precoOriginal > 0 ? `até 10x de R$ ${formatarMoeda(precoOriginal/10)} sem juros` : 'Indisponível'}
                     </div>
+                    ${promo.emPromocao ? `
+                        <div style="display:flex; flex-direction:column; gap:2px; align-items:center;">
+                            <span class="tag-promo-pix">💰 PIX: R$ ${formatarMoeda(promo.pixValor)}</span>
+                        </div>` : ''}
+                </div>
 
-                    <div class="estoque-label" id="estoque-${p.id}">${primeiraOpcao.disponivel ? primeiraOpcao.estoque + ' unidades' : 'INDISPONÍVEL'}</div>
-                    
-                    <div class="variacao-container">
-                        ${p.opcoes.map((opt, idx) => `
-                            <button class="btn-ml-nuvem ${idx === 0 ? 'active' : ''}" 
-                                    onclick="selecionarVariacaoManual('${p.id}', '${opt.valor}', '${p.marca}', this)">
-                                <span>${opt.valor.split('|')[0]}</span>
-                            </button>`).join('')}
-                    </div>
+                <div class="estoque-label" id="estoque-${p.id}" style="font-size:11px; font-weight:bold; color: ${primeiraOpcao.disponivel ? '#d32f2f' : 'red'}">
+                    ${primeiraOpcao.disponivel ? primeiraOpcao.estoque + ' unidades' : 'INDISPONÍVEL'}
+                </div>
+                
+                <div class="variacao-container" style="margin: 8px 0;">
+                    ${p.opcoes.map((opt, idx) => `
+                        <button class="btn-ml-nuvem ${idx === 0 ? 'active' : ''}" 
+                                onclick="selecionarVariacaoManual('${p.id}', '${opt.valor}', '${p.marca}', this)">
+                            ${opt.valor.split('|')[0]}
+                        </button>`).join('')}
+                </div>
 
-                    <div class="qtd-container">
-                        <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, '${p.id}')">-</button>
-                        <input type="text" id="q-${p.id}" value="${primeiraOpcao.disponivel ? 1 : 0}" readonly class="input-qtd">
-                        <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, '${p.id}')">+</button>
-                    </div>
+                <div class="qtd-container" style="margin-bottom: 10px;">
+                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, '${p.id}')">-</button>
+                    <input type="text" id="q-${p.id}" value="${primeiraOpcao.disponivel ? 1 : 0}" readonly class="input-qtd">
+                    <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, '${p.id}')">+</button>
+                </div>
 
-                    <input type="hidden" id="ml-${p.id}" value="${primeiraOpcao.valor}">
-                    
-                    <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
-                        <button class="btn-add-cart" onclick="abrirDetalhes(${pJson})">VER DETALHES</button>
-                        <div id="btn-container-${p.id}">
-                            ${primeiraOpcao.disponivel ? 
-                                `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')">+ ADICIONAR À SACOLA</button>` : 
-                                `<button class="btn-add-sacola" style="background:#666;" disabled>ESGOTADO</button>`}
-                        </div>
+                <input type="hidden" id="ml-${p.id}" value="${primeiraOpcao.valor}">
+                
+                <div class="btn-container-acoes" style="display:flex; flex-direction:column; gap:5px; width:100%; align-items:center;">
+                    <button class="btn-add-cart" onclick="abrirDetalhes(${pDados})" style="width:95% !important; cursor:pointer;">VER DETALHES</button>
+                    <div id="btn-container-${p.id}" style="width:100%; display:flex; justify-content:center;">
+                        ${primeiraOpcao.disponivel ? 
+                            `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="width:95% !important;">+ ADICIONAR À SACOLA</button>` : 
+                            `<button class="btn-add-sacola" style="background:#000; color:#fff; width:95% !important;" disabled>ESGOTADO</button>`}
                     </div>
-                </div>`; 
-            container.appendChild(card);
-        } catch (err) { console.error(err); }
+                </div>
+            </div>`; 
+        container.appendChild(card);
     });
 }
-
 function selecionarVariacaoManual(id, valorSelt, marca, elemento) {
     const card = elemento.closest('.card');
     card.querySelectorAll('.btn-ml-nuvem').forEach(b => b.classList.remove('active'));
@@ -996,6 +997,10 @@ function abrirDetalhes(p) {
     document.getElementById('detalhe-nome').innerText = p.nome;
     document.getElementById('detalhe-marca').innerText = p.marca;
     document.getElementById('detalhe-descricao').innerText = p.descricao || "Fragrância exclusiva.";
+    // GARANTE QUE O MODAL APAREÇA
+    const modal = document.getElementById('modal-detalhes');
+    if(modal) modal.style.display = 'flex';
+}
     
     // Criar o link do WhatsApp para este produto específico
     const mensagemWhats = encodeURIComponent(`Olá! Gostaria de saber mais sobre o perfume: *${p.nome}* (${p.marca})`);
@@ -1097,6 +1102,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
