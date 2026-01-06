@@ -539,18 +539,21 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         </div>
     </div>
 
-    <div class="cart-footer">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333; font-size: 18px;">
-            <span>Total:</span>
-            <span>R$ <span id="cart-total">0,00</span></span>
-        </div>
-        <button class="btn-whats" onclick="finalizarWhatsApp()">
-            ENVIAR PEDIDO
-        </button>
+   <div class="cart-footer">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333; font-size: 18px;">
+        <span>Total:</span>
+        <span>R$ <span id="cart-total">0,00</span></span>
     </div>
-</div>
 
-    <div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; margin-bottom: 20px; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
+    <button class="btn-checkout-asaas" onclick="abrirCheckoutAsaas()" style="width: 100%; background: #2e7d32; color: white; padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 16px;">
+        💳 FINALIZAR PAGAMENTO
+    </button>
+
+    <button class="btn-whats-secundario" onclick="finalizarWhatsApp()" style="width: 100%; background: #25d366; color: white; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" width="16" height="16">
+        Pedir pelo WhatsApp
+    </button>
+</div>    <div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; margin-bottom: 20px; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
     <p style="color: #ffffff; font-size: 14px; margin: 0; font-weight: bold; letter-spacing: 0.5px;">
         ✨ Sinta o aroma dos sonhos e realce sua beleza! ✨
     </p>
@@ -1135,6 +1138,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
