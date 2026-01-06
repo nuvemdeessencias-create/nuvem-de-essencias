@@ -777,79 +777,48 @@ async function calcularFrete() {
     resultadoDiv.innerHTML = "<p style='color:#666'>Calculando...</p>";
     
     const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
-    
-    // REGRA 1: Verifica se existe QUALQUER item em promoção na sacola
-    const temPromo = sacola.some(item => item.emPromocao === true);
+    const qtdTotal = sacola.reduce((sum, i) => sum + i.qtd, 0); // Soma total de frascos
+    const temPromo = sacola.some(item => item.emPromocao === true); //
 
-try {
-    const response = await fetch('/api/calcular-frete', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        // Agora enviamos também o "tem_promo" para a API
-        body: JSON.stringify({ 
-            cep_destino: cep, 
-            valor_total: subtotal, 
-            tem_promo: temPromo 
-        })
-    });
+    try {
+        const response = await fetch('/api/calcular-frete', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                cep_destino: cep, 
+                valor_total: subtotal, 
+                tem_promo: temPromo,
+                qtd_total: qtdTotal // Enviado para validar regra de 2+ itens
+            })
+        });
+        
         const data = await response.json();
         
         if(!data || data.length === 0) {
-            resultadoDiv.innerHTML = "<p style='color:orange'>Nenhuma transportadora atende este CEP.</p>";
+            resultadoDiv.innerHTML = "<p style='color:orange'>CEP não atendido ou valor insuficiente.</p>";
             return;
         }
 
-        // REGRA 2: Filtrar apenas a OPÇÃO de frete grátis, mantendo as outras
-        const fretesFiltrados = data.filter(op => {
-            const nomeF = op.name.toLowerCase();
-            const ehGratis = op.price == 0 || nomeF.includes("grátis");
-            const ehLocal = nomeF.includes("local") || nomeF.includes("araguaína");
+        // Renderiza apenas o que a API enviou (se for Grátis, só aparece ele)
+        resultadoDiv.innerHTML = data.map((op) => {
+            const prazoTexto = isNaN(Number(op.delivery_time)) ? `${op.delivery_time} dias` : `${op.delivery_time} dias`;
 
-            // Se for entrega local em Araguaína, SEMPRE mostra
-            if (ehLocal) return true;
-
-            // Se for frete grátis por transportadora:
-            if (ehGratis) {
-                // SÓ aparece se NÃO tiver promo E o total for >= 700
-                return !temPromo && subtotal >= 700;
-            }
-
-            // Mantém sempre as opções pagas (SEDEX, PAC, etc)
-            return true;
-        });
-
-        // Exibe o resultado final
-      resultadoDiv.innerHTML = fretesFiltrados.map((op, index) => {
-    // Convertemos para número para garantir a comparação
-    const prazoValue = Number(op.delivery_time);
-
-    let prazoTexto = "";
-    if (prazoValue === 0) {
-        prazoTexto = "Imediato";
-    } else if (prazoValue === 1) {
-        prazoTexto = "1 dia";
-    } else {
-        // Se for um range (ex: 8-17), o Number() vira NaN, então usamos o texto original
-        prazoTexto = isNaN(prazoValue) ? `${op.delivery_time} dias` : `${prazoValue} dias`;
-    }
-
-    return `
-        <div class="opcao-frete-card" onclick="selecionarFrete('${op.name}', ${op.price}, this)" 
-             style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
-            <div style="text-align:left;">
-                <strong style="font-size:12px;">${op.name}</strong><br>
-                <small style="color: #666;">Prazo: ${prazoTexto}</small> 
-            </div>
-            <strong style="color:#b89356;">
-                ${op.price == 0 ? 'GRÁTIS' : 'R$ ' + formatarMoeda(op.price)}
-            </strong>
-        </div>`;
-}).join('');
+            return `
+                <div class="opcao-frete-card" onclick="selecionarFrete('${op.name}', ${op.price}, this)" 
+                     style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; color:#333; border-radius:8px;">
+                    <div style="text-align:left;">
+                        <strong style="font-size:12px;">${op.name}</strong><br>
+                        <small style="color: #666;">Prazo estimado: ${prazoTexto}</small> 
+                    </div>
+                    <strong style="color:#b89356;">
+                        ${op.price == 0 ? 'GRÁTIS' : 'R$ ' + formatarMoeda(op.price)}
+                    </strong>
+                </div>`;
+        }).join('');
     } catch (e) {
         resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao calcular. Tente pelo WhatsApp.</p>";
     }
 }
-
 function selecionarFrete(nome, valor, elemento) {
     valorFreteGlobal = valor;
     nomeFreteGlobal = nome;
@@ -920,14 +889,13 @@ function toggleCart() { document.getElementById('cart-modal').classList.toggle('
 function removerItem(index) {
     sacola.splice(index, 1); 
 
-    // SEMPRE que remover algo, limpamos o frete antigo
-    // porque o peso da sacola mudou e o valor anterior não vale mais
+    // MANTIDO: Limpamos o frete antigo para evitar erros de cálculo
     valorFreteGlobal = 0;
     nomeFreteGlobal = "";
 
     const resultadoFrete = document.getElementById('opcoes-frete');
     if (resultadoFrete) {
-        // Limpa as opções de PAC/SEDEX e pede novo cálculo
+        // Alerta o cliente que a mudança na sacola exige novo cálculo
         resultadoFrete.innerHTML = "<p style='color:#b89356; font-size:12px;'>O peso mudou. Calcule o frete novamente.</p>";
     }
 
@@ -1029,6 +997,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
