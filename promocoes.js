@@ -1,78 +1,82 @@
 /* SISTEMA DE PROMOÇÕES - NUVEM DE ESSÊNCIAS */
 
 const configuracaoPromocoes = {
-    ativo: true, // Chave mestre para ligar/desligar tudo
+    ativo: true,            // Chave Mestre: Desliga TUDO (Pix, 6x, etc)
+    permitir6xGlobal: true, // Chave Global para a modalidade 6x
 
-    // MODALIDADE POR ID (Prioridade Máxima)
     porId: {
-        // --- TESTES ATIVOS (7%) ---
-        "ckone": 0.07,
-        "clubblack": 0.07,
-        "sabah": 0.07,
+        // --- PROMOÇÃO ATIVA (CK ONE) ---
+        "ckone": {
+            ativa: true,
+            descontoPix: 0.15,    // 15% de desconto no Pix
+            permite10x: true,     // Ativa 10x sem juros valor original
+            promo6x: { 
+                ativo: true,      // ATIVO apenas para o CK ONE por enquanto
+                desconto: 0.06,   // 6% de desconto
+                maxParcelas: 6 
+            }
+        },
 
-        // --- LISTA COMPLETA (0 = Desativado) ---
-        "fucsia": 0,
-        "rojo": 0,
-        "shakira-ama": 0,
-        "chloe": 0,
-        "gabriela": 0,
-        "lady": 0,
-        "invictus": 0,
-        "diamond": 0,
-        "animale-f": 0,
-        "animale-m": 0,
-        "silver": 0,
-        "azahar": 0,
-        "hugomen": 0,
-        "blue": 0,
-        "icon": 0,
-        "power": 0,
-        "azzaro": 0,
-        "cool": 0,
-        "nautica": 0,
-        "bareeq": 0,
-        "fakhar": 0,
-        "asad-lattafa": 0,
-        "kitamarillo": 0,
-        "coffretfucsia": 0,
-        "kitblue": 0
-    },
-
-    // MODALIDADE POR MARCA (Aplica a todos os itens da marca)
-    porMarca: {
-        // "SHAKIRA": 0.10  <-- Exemplo: se ativar aqui, todos da Shakira ganham 10%
+        // --- CATALOGO (6x DESATIVADO - Mude 'ativa' para true quando quiser ligar) ---
+        "clubblack": { ativa: false, descontoPix: 0.07, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "sabah": { ativa: false, descontoPix: 0.07, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "fucsia": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "rojo": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "shakira-ama": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "chloe": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "gabriela": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "lady": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "invictus": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "diamond": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "animale-f": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "animale-m": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "silver": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "azahar": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "hugomen": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "blue": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "icon": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "power": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "azzaro": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "cool": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "nautica": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "bareeq": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "fakhar": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "asad-lattafa": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "kitamarillo": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "coffretfucsia": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "kitblue": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        
+        // --- BATONS E VELAS ---
+        "batom-fucsia": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
+        "vela-lavanda": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } }
     }
 };
 
-/**
- * Função Inteligente para processar o preço
- * Agora ela ignora maiúsculas/minúsculas automaticamente
- */
 function processarPrecoProduto(p) {
-    if (!configuracaoPromocoes.ativo) {
-        return { precoFinal: p.preco, emPromocao: false, descontoPercentual: 0 };
-    }
-
-    let desconto = 0;
     const idBusca = p.id.toLowerCase();
-    const marcaBusca = p.marca.toUpperCase();
+    const promo = configuracaoPromocoes.porId[idBusca];
 
-    // 1. VERIFICA POR ID
-    if (configuracaoPromocoes.porId[idBusca] && configuracaoPromocoes.porId[idBusca] > 0) {
-        desconto = configuracaoPromocoes.porId[idBusca];
-    } 
-    // 2. VERIFICA POR MARCA (se não tiver desconto específico no ID)
-    else if (configuracaoPromocoes.porMarca[marcaBusca] && configuracaoPromocoes.porMarca[marcaBusca] > 0) {
-        desconto = configuracaoPromocoes.porMarca[marcaBusca];
-    }
-
-    if (desconto > 0) {
-        return {
-            precoFinal: p.preco * (1 - desconto),
-            emPromocao: true,
-            descontoPercentual: (desconto * 100).toFixed(0)
+    if (!configuracaoPromocoes.ativo || !promo || !promo.ativa) {
+        return { 
+            emPromocao: false,
+            precoOriginal: p.preco,
+            pixValor: p.preco,
+            valor10x: p.preco,
+            maxParcelas: 10
         };
     }
 
-    return { precoFinal: p.preco, emPromocao: false, descontoPercentual: 0 };
+    const permite6x = configuracaoPromocoes.permitir6xGlobal && promo.promo6x && promo.promo6x.ativo;
+    
+    return {
+        emPromocao: true,
+        precoOriginal: p.preco,
+        pixValor: p.preco * (1 - promo.descontoPix),
+        pixPercentual: Math.round(promo.descontoPix * 100),
+        tem6x: permite6x,
+        valor6x: permite6x ? p.preco * (1 - promo.promo6x.desconto) : p.preco,
+        percentual6x: permite6x ? Math.round(promo.promo6x.desconto * 100) : 0,
+        valor10x: p.preco,
+        maxParcelas: 10
+    };
 }
