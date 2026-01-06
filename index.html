@@ -632,6 +632,10 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
 <script>
 
+    function formatarMoeda(valor) {
+    return valor.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
 function prepararDadosParaAsaas() {
     if (typeof sacola === 'undefined' || sacola.length === 0) return null;
     let dados = {
@@ -1074,9 +1078,6 @@ function atualizarSacola() {
 }
 
 // --- UTILITÁRIOS ---
-function formatarMoeda(valor) {
-    return valor.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
 
 function alterarQtd(idInput, delta, produtoId) {
     const input = document.getElementById(idInput);
@@ -1178,6 +1179,10 @@ function finalizarWhatsApp() {
 }
 
 </script>
+
+    </body>
+</html>
+    
 <div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
     <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; position:relative; color:#333; text-align:center;">
         <span onclick="fecharDetalhes()" style="position:absolute; top:10px; right:15px; font-size:25px; cursor:pointer;">&times;</span>
@@ -1283,6 +1288,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
