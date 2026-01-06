@@ -794,7 +794,6 @@ function atualizarPrecoCard(id, valorSelt, marca) {
     container.innerHTML = html;
 }
 
-// --- SACOLA E PAGAMENTO ---
 function adicionarComPromocao(id, nome, mlId, qtdId) {
     const selectMl = document.getElementById(mlId);
     const [ml, precoBruto] = selectMl.value.split('|');
@@ -802,28 +801,66 @@ function adicionarComPromocao(id, nome, mlId, qtdId) {
     const qtd = parseInt(document.getElementById(qtdId).value);
     const pOriginal = meusProdutos.find(item => item.id === id);
     
+    // Processa se o item tem direito a desconto (Pix ou 6x)
     const promo = processarPrecoProduto({ id: id, marca: pOriginal.marca, preco: precoBase, ml: ml });
 
-    if (!promo.emPromocao) {
-        sacola.push({ id, nome, ml, preco: precoBase, qtd, emPromocao: false, maxParcelas: 10, tipoPagamento: "Cartão até 10x" });
-        confirmarAdicao();
-        return;
-    }
-
-    let mensagem = `Escolha a condição de pagamento:\n\n1. PIX: R$ ${formatarMoeda(promo.pixValor)}\n`;
-    if(promo.tem6x) mensagem += `2. CARTÃO ATÉ 6x: R$ ${formatarMoeda(promo.valor6x)}\n`;
-    mensagem += `3. CARTÃO ATÉ 10x: R$ ${formatarMoeda(promo.valor10x)}\n\nDigite 1, 2 ou 3:`;
-
-    const escolha = prompt(mensagem, "1");
     let precoFinal = precoBase;
     let descLabel = "Cartão até 10x";
-    let parcelas = 10;
+    let parcelasPermitidas = 10;
     let isPromo = false;
 
-    if (escolha === "1") { precoFinal = promo.pixValor; descLabel = "PIX"; parcelas = 1; isPromo = true; }
-    else if (escolha === "2" && promo.tem6x) { precoFinal = promo.valor6x; descLabel = "PROMO 6x"; parcelas = 6; isPromo = true; }
+    // Se tiver promoção, pergunta a preferência do cliente
+    if (promo.emPromocao) {
+        let mensagem = `Escolha a condição de pagamento:\n\n`;
+        mensagem += `1. PIX: R$ ${formatarMoeda(promo.pixValor)}\n`;
+        if(promo.tem6x) {
+            mensagem += `2. CARTÃO ATÉ 6x: R$ ${formatarMoeda(promo.valor6x)}\n`;
+        }
+        mensagem += `3. CARTÃO ATÉ 10x: R$ ${formatarMoeda(promo.valor10x)}\n\n`;
+        mensagem += `Digite o número (1, 2 ou 3):`;
 
-    sacola.push({ id, nome, ml, preco: precoFinal, qtd, emPromocao: isPromo, tipoPagamento: descLabel, maxParcelas: parcelas });
+        const escolha = prompt(mensagem, "1");
+
+        if (escolha === "1") { 
+            precoFinal = promo.pixValor; 
+            descLabel = "PIX"; 
+            parcelasPermitidas = 1; 
+            isPromo = true;
+        } else if (escolha === "2" && promo.tem6x) { 
+            precoFinal = promo.valor6x; 
+            descLabel = "PROMO 6x"; 
+            parcelasPermitidas = 6; 
+            isPromo = true;
+        }
+    }
+
+    // Adiciona o item à sacola
+    sacola.push({ 
+        id, nome, ml, 
+        preco: precoFinal, 
+        qtd, 
+        emPromocao: isPromo,
+        tipoPagamento: descLabel,
+        maxParcelas: parcelasPermitidas
+    });
+
+    // --- INÍCIO DA TRAVA DE SEGURANÇA ---
+    // Zera as variáveis globais de frete para invalidar cálculos antigos
+    valorFreteGlobal = 0;
+    nomeFreteGlobal = "";
+
+    // Atualiza o painel de frete visualmente para avisar o cliente
+    const resultadoFrete = document.getElementById('opcoes-frete');
+    if (resultadoFrete) {
+        resultadoFrete.innerHTML = `
+            <div style="background: #fff3e0; padding: 10px; border-radius: 8px; border: 1px solid #ffb74d; margin-top: 10px;">
+                <p style="color:#e65100; font-size:12px; font-weight:bold; margin:0; text-align:center;">
+                    ⚠️ Sacola atualizada! Calcule o frete novamente para este novo peso.
+                </p>
+            </div>`;
+    }
+    // --- FIM DA TRAVA DE SEGURANÇA ---
+
     confirmarAdicao();
 }
 
@@ -872,14 +909,19 @@ function alterarQtd(idInput, delta, produtoId) {
 }
 
 function removerItem(index) {
-    sacola.splice(index, 1);
+    sacola.splice(index, 1); 
+
+    // Zera o frete para evitar que aproveitem o valor antigo
     valorFreteGlobal = 0;
     nomeFreteGlobal = "";
-    const res = document.getElementById('opcoes-frete');
-    if (res) res.innerHTML = "<p style='color:#b89356; font-size:12px;'>Calcule o frete novamente.</p>";
-    atualizarSacola();
-}
 
+    const resultadoFrete = document.getElementById('opcoes-frete');
+    if (resultadoFrete) {
+        resultadoFrete.innerHTML = "<p style='color:#b89356; font-size:12px;'>Item removido. Recalcule o frete.</p>";
+    }
+
+    atualizarSacola(); 
+}
 function confirmarAdicao() { atualizarSacola(); toggleCart(); }
 
 function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
@@ -1022,6 +1064,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
