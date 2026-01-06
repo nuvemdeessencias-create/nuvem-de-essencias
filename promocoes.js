@@ -1,23 +1,39 @@
 /* SISTEMA DE PROMOÇÕES - NUVEM DE ESSÊNCIAS */
 
 const configuracaoPromocoes = {
-    ativo: true,            // Chave Mestre: Desliga TUDO (Pix, 6x, etc)
+    ativo: true,            // Chave Mestre: Desliga TUDO
     permitir6xGlobal: true, // Chave Global para a modalidade 6x
 
     porId: {
-        // --- PROMOÇÃO ATIVA (CK ONE) ---
+        // --- PROMOÇÃO ATIVA (QUALQUER ML) ---
         "ckone": {
             ativa: true,
-            descontoPix: 0.15,    // 15% de desconto no Pix
-            permite10x: true,     // Ativa 10x sem juros valor original
+            descontoPix: 0.15,    // 15% OFF
+            permite10x: true,     
             promo6x: { 
-                ativo: true,      // ATIVO apenas para o CK ONE por enquanto
-                desconto: 0.06,   // 6% de desconto
+                ativo: true,      
+                desconto: 0.06,   // 6% OFF
                 maxParcelas: 6 
             }
         },
 
-        // --- CATALOGO (6x DESATIVADO - Mude 'ativa' para true quando quiser ligar) ---
+        // --- ESTRUTURAS ESPECÍFICAS (DESATIVADAS) ---
+        // Mercedes 100ml
+        "mercedes-benz|100ML": { 
+            ativa: false, 
+            descontoPix: 0.10,
+            permite10x: true,
+            promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 }
+        },
+        // Mercedes 50ml
+        "mercedes-benz|50ML": { 
+            ativa: false, 
+            descontoPix: 0.10,
+            permite10x: true,
+            promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 }
+        },
+
+        // --- CATALOGO GERAL (Desativados - Mude 'ativa' para true para ligar) ---
         "clubblack": { ativa: false, descontoPix: 0.07, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
         "sabah": { ativa: false, descontoPix: 0.07, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
         "fucsia": { ativa: false, descontoPix: 0.15, permite10x: true, promo6x: { ativo: false, desconto: 0.06, maxParcelas: 6 } },
@@ -52,9 +68,16 @@ const configuracaoPromocoes = {
     }
 };
 
+/**
+ * Processador de Preço Inteligente
+ */
 function processarPrecoProduto(p) {
     const idBusca = p.id.toLowerCase();
-    const promo = configuracaoPromocoes.porId[idBusca];
+    const mlBusca = p.ml ? p.ml.toUpperCase().trim() : "";
+    
+    // Busca específica (ID|ML) tem prioridade sobre busca geral (ID)
+    const chaveEspecifica = `${idBusca}|${mlBusca}`;
+    const promo = configuracaoPromocoes.porId[chaveEspecifica] || configuracaoPromocoes.porId[idBusca];
 
     if (!configuracaoPromocoes.ativo || !promo || !promo.ativa) {
         return { 
@@ -75,6 +98,7 @@ function processarPrecoProduto(p) {
         pixPercentual: Math.round(promo.descontoPix * 100),
         tem6x: permite6x,
         valor6x: permite6x ? p.preco * (1 - promo.promo6x.desconto) : p.preco,
+        parcela6x: permite6x ? (p.preco * (1 - promo.promo6x.desconto) / 6) : 0,
         percentual6x: permite6x ? Math.round(promo.promo6x.desconto * 100) : 0,
         valor10x: p.preco,
         maxParcelas: 10
