@@ -653,56 +653,38 @@ function filtrar() {
     carregarProdutos(filtrados);
 }
 
-// --- RENDERIZAÇÃO DE PRODUTOS ---
-function carregarProdutos(lista = meusProdutos) {
+  function carregarProdutos(lista = meusProdutos) {
     const container = document.getElementById('listaProdutos');
     if (!container) return;
     container.innerHTML = ""; 
-
-    if (lista.length === 0) {
-        container.innerHTML = `<p style="color:white; text-align:center; width:100%; margin-top:50px;">Nenhum produto encontrado.</p>`;
-        return;
-    }
 
     lista.forEach(p => {
         const primeiraOpcao = p.opcoes[0];
         const [mlInicial, precoTexto] = primeiraOpcao.valor.split('|');
         const precoOriginal = parseFloat(precoTexto) || 0;
-        
         const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal, ml: mlInicial });
-        
-        // Escapa aspas para não quebrar o HTML do onclick
         const pDados = JSON.stringify(p).replace(/"/g, '&quot;');
 
         const card = document.createElement('div');
         card.className = 'card';
-        card.setAttribute('data-marca', p.marca.toUpperCase());
         card.innerHTML = `
             ${promo.emPromocao ? `<div class="selo-promo">OFERTA</div>` : ''}
             
             <img src="${p.imagem}" class="img-principal" alt="${p.nome}" 
                  onclick="abrirDetalhes(${pDados})" style="cursor:pointer;">
             
-            <div class="info-container" style="padding: 0 10px; width: 100%; box-sizing: border-box;">
+            <div class="info-container" style="padding: 0 10px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
                 <span class="marca-tag">${p.marca}</span>
-                <div class="nome-perfume">${p.nome}</div>
+                <div class="nome-perfume" style="min-height: 40px; display: flex; align-items: center; justify-content: center; text-align: center;">${p.nome}</div>
                 
-                <div id="preco-container-${p.id}" style="margin: 5px 0; min-height: 70px;">
-                    <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${formatarMoeda(precoOriginal)}</div>
-                    <div style="color:#001f3f; font-size:12px; font-weight:600; margin-bottom:5px;">
-                        ${precoOriginal > 0 ? `até 10x de R$ ${formatarMoeda(precoOriginal/10)} sem juros` : 'Indisponível'}
+                <div id="preco-container-${p.id}" style="margin: 10px 0; min-height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;">
                     </div>
-                    ${promo.emPromocao ? `
-                        <div style="display:flex; flex-direction:column; gap:2px; align-items:center;">
-                            <span class="tag-promo-pix">💰 PIX: R$ ${formatarMoeda(promo.pixValor)}</span>
-                        </div>` : ''}
-                </div>
 
-                <div class="estoque-label" id="estoque-${p.id}" style="font-size:11px; font-weight:bold; color: ${primeiraOpcao.disponivel ? '#666' : 'red'}">
+                <div class="estoque-label" id="estoque-${p.id}" style="font-size:12px; font-weight:bold; margin-bottom: 8px; color: ${primeiraOpcao.disponivel ? '#d32f2f' : 'red'}">
                     ${primeiraOpcao.disponivel ? primeiraOpcao.estoque + ' unidades' : 'INDISPONÍVEL'}
                 </div>
                 
-                <div class="variacao-container" style="margin: 8px 0;">
+                <div class="variacao-container" style="margin-bottom: 10px;">
                     ${p.opcoes.map((opt, idx) => `
                         <button class="btn-ml-nuvem ${idx === 0 ? 'active' : ''}" 
                                 onclick="selecionarVariacaoManual('${p.id}', '${opt.valor}', '${p.marca}', this)">
@@ -710,7 +692,7 @@ function carregarProdutos(lista = meusProdutos) {
                         </button>`).join('')}
                 </div>
 
-                <div class="qtd-container" style="margin-bottom: 10px;">
+                <div class="qtd-container" style="margin-bottom: 15px;">
                     <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, '${p.id}')">-</button>
                     <input type="text" id="q-${p.id}" value="${primeiraOpcao.disponivel ? 1 : 0}" readonly class="input-qtd">
                     <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, '${p.id}')">+</button>
@@ -718,18 +700,21 @@ function carregarProdutos(lista = meusProdutos) {
 
                 <input type="hidden" id="ml-${p.id}" value="${primeiraOpcao.valor}">
                 
-                <div class="btn-container-acoes" style="display:flex; flex-direction:column; gap:5px; width:100%; align-items:center;">
-                    <button class="btn-add-cart" onclick="abrirDetalhes(${pDados})" style="width:95% !important; cursor:pointer;">VER DETALHES</button>
+                <div class="btn-container-acoes" style="display:flex; flex-direction:column; gap:8px; width:100%; align-items:center;">
+                    <button class="btn-add-cart" onclick="abrirDetalhes(${pDados})" style="width:100% !important;">VER DETALHES</button>
                     <div id="btn-container-${p.id}" style="width:100%; display:flex; justify-content:center;">
                         ${primeiraOpcao.disponivel ? 
-                            `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="width:95% !important;">+ ADICIONAR À SACOLA</button>` : 
-                            `<button class="btn-add-sacola" style="background:#000; color:#fff; width:95% !important;" disabled>ESGOTADO</button>`}
+                            `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="width:100% !important;">+ ADICIONAR À SACOLA</button>` : 
+                            `<button class="btn-add-sacola" style="background:#000; color:#fff; width:100% !important;" disabled>ESGOTADO</button>`}
                     </div>
                 </div>
             </div>`; 
         container.appendChild(card);
+        
+        // CHAMA A ATUALIZAÇÃO DE PREÇO IMEDIATAMENTE PARA CARREGAR AS TAGS CORRETAS
+        atualizarPrecoCard(p.id, primeiraOpcao.valor, p.marca);
     });
-}
+}  
 
 // --- MANIPULAÇÃO DE VARIAÇÕES E PREÇOS ---
 function selecionarVariacaoManual(id, valorSelt, marca, elemento) {
@@ -769,25 +754,43 @@ function atualizarPrecoCard(id, valorSelt, marca) {
     const [ml, precoTexto] = valorSelt.split('|');
     const precoBase = parseFloat(precoTexto);
     const container = document.getElementById(`preco-container-${id}`);
+    
+    if (!container) return;
+
+    // Busca os dados da promoção (PIX e 6x)
     const promo = processarPrecoProduto({ id: id, marca: marca, preco: precoBase, ml: ml });
 
     let html = `
-        <div style="color:#333; font-weight:bold; font-size:18px;">R$ ${formatarMoeda(precoBase)}</div>
-        <div style="font-size:11px; color:#666; margin-bottom:5px;">até 10x de R$ ${formatarMoeda(precoBase/10)} sem juros</div>
+        <div style="color:#333; font-weight:bold; font-size:20px; line-height: 1;">R$ ${formatarMoeda(precoBase)}</div>
+        <div style="color:#001f3f; font-size:12px; font-weight:600; margin: 4px 0 8px 0;">
+            até 10x de R$ ${formatarMoeda(precoBase/10)} sem juros
+        </div>
     `;
 
+    // Container para as tags de desconto (Pix e 6x)
     if (promo.emPromocao) {
+        html += `<div style="display:flex; flex-direction:column; gap:4px; align-items:center; width: 100%;">`;
+        
+        // Tag PIX
         html += `
-            <div style="display:flex; flex-direction:column; gap:3px; align-items:center;">
-                <span style="background:#e8f5e9; color:#2e7d32; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold; width: fit-content;">
-                    💰 PIX: R$ ${formatarMoeda(promo.pixValor)} (${promo.pixPercentual}% OFF)
-                </span>
-                ${promo.tem6x ? `
-                <span style="background:#fff3e0; color:#ef6c00; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:bold; width: fit-content;">
-                    💳 6x de R$ ${formatarMoeda(promo.parcela6x)} (${promo.percentual6x}% OFF)
-                </span>` : ''}
-            </div>`;
+            <span style="background:#e8f5e9; color:#2e7d32; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:bold; display: flex; align-items: center; gap: 4px;">
+                💰 PIX: R$ ${formatarMoeda(promo.pixValor)}
+            </span>`;
+
+        // Tag 6x CARTÃO (Se existir na regra)
+        if (promo.tem6x) {
+            html += `
+                <span style="background:#fff3e0; color:#ef6c00; padding:3px 10px; border-radius:4px; font-size:11px; font-weight:bold; display: flex; align-items: center; gap: 4px;">
+                    💳 6x de R$ ${formatarMoeda(promo.parcela6x)} (-${promo.percentual6x}%)
+                </span>`;
+        }
+        
+        html += `</div>`;
+    } else {
+        // Espaçador para manter o alinhamento quando NÃO há promoção
+        html += `<div style="height: 38px;"></div>`;
     }
+
     container.innerHTML = html;
 }
 
@@ -1019,6 +1022,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
