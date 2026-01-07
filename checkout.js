@@ -133,13 +133,13 @@ function coletarDadosCheckout(metodoPagamento, event) {
             cidade: document.getElementById('end_cidade').value,
             estado: document.getElementById('end_estado').value
         },
-        pagamento: {
-            metodo: metodoPagamento,
-            valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : dadosCarrinho.valorTotalCartao6x) + valorFreteGlobal,
-            parcelasMaximas: dadosCarrinho.temPromo6xAtiva ? 6 : 10,
-            itens: dadosCarrinho.itensDetalhados
-        }
-    };
+       // No seu checkout.js
+pagamento: {
+    método: métodoPagamento,
+    valor: (métodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : dadosCarrinho.valorTotalCartao6x) + valorFreteGlobal, // Mude de 'valentia' para 'valor'
+    parcelasMaximas: dadosCarrinho.temPromo6xAtiva ? 6 : 10,
+    itens: dadosCarrinho.itensDetalhes
+}
 
     if (!checkout.cliente.nome || checkout.cliente.cpfCnpj.length < 11 || !checkout.endereco.cep) {
         return alert("Por favor, preencha Nome, CPF e CEP corretamente.");
