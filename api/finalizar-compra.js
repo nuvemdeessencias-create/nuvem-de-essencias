@@ -49,18 +49,18 @@ export default async function handler(req, res) {
         };
 
         // 3. ADICIONAR REGRAS DE PARCELAMENTO (Se não for PIX)
-        if (pagamento.metodo !== 'PIX') {
-    // Para Cartão, precisamos definir que o padrão é 1 parcela (a vista) 
-    // e permitir que o cliente mude no checkout do Asaas
-    paymentBody.installmentCount = 1; 
-    paymentBody.totalFixedAmount = pagamento.valor;
-    
-    paymentBody.installmentOptions = {
-        maxInstallmentCount: pagamento.parcelasMaximas || 10,
-        unlimitedInstallments: false
-    };
-}
-
+       if (pagamento.metodo !== 'PIX') {
+            // Define o número inicial de parcelas como 1 (Obrigatório pelo Asaas)
+            paymentBody.installmentCount = 1; 
+            
+            // Trava o valor total para garantir que não haja juros extras
+            paymentBody.totalFixedAmount = pagamento.valor; 
+            
+            paymentBody.installmentOptions = {
+                maxInstallmentCount: pagamento.parcelasMaximas || 10,
+                unlimitedInstallments: false
+            };
+        }
         // 4. GERAR A COBRANÇA NO ASAAS
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
