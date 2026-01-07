@@ -78,7 +78,7 @@ function buscarCEP(cep) {
 }
 
 // ESTA FUNÇÃO AGORA CONECTA COM A VERCEL
-function coletarDadosCheckout(metodoPagamento) {
+function coletarDadosCheckout(metodoPagamento, event) {
     const dadosCarrinho = prepararDadosParaAsaas();
     if (!dadosCarrinho) return alert("Seu carrinho está vazio!");
 
