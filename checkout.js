@@ -140,7 +140,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
             
             // SOMA O VALOR DO PRODUTO + VALOR DO FRETE
             valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : dadosCarrinho.valorTotalCartao6x) + valorFreteGlobal,
-            
+            parcelasMaximas: dadosCarrinho.temPromo6xAtiva ? 6 : 10,
             itens: dadosCarrinho.itensDetalhados
         }
     };
