@@ -1,9 +1,9 @@
-// api/finalizar-compra.js
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).send('Método não permitido');
 
     // Pega a chave da Vercel (Ambiente Seguro)
     const ASAAS_API_KEY = process.env.ASAAS_API_KEY; 
+    
     // Mude para 'https://www.asaas.com/api/v3' quando for para produção (dinheiro real)
     const ASAAS_URL = 'https://sandbox.asaas.com/api/v3';
 
@@ -33,12 +33,34 @@ export default async function handler(req, res) {
 
         const customerData = await customerRes.json();
 
-        // Verifica se houve erro na criação do cliente (ex: CPF inválido)
         if (customerData.errors) {
             return res.status(400).json({ error: "Erro no cadastro do cliente", details: customerData.errors });
         }
 
-        // 2. CRIAR A COBRANÇA (PIX OU CARTÃO)
+        // 2. PREPARAR O CORPO DA COBRANÇA
+        const paymentBody = {
+            customer: customerData.id,
+            billingType: pagamento.metodo, 
+            value: pagamento.valor, // Valor total (Produtos + Frete)
+            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+            description: "Pedido Nuvem de Essências",
+            externalReference: `PED-${Date.now()}`,
+            postalService: false
+        };
+
+        // 3. ADICIONAR REGRAS DE PARCELAMENTO (Se não for PIX)
+        if (pagamento.metodo !== 'PIX') {
+            paymentBody.installmentCount = 1; // Começa selecionado em 1x
+            paymentBody.totalFixedAmount = pagamento.valor; // Trava o valor para não ter juros
+            
+            // Define o máximo de parcelas (6 ou 10) que enviamos do checkout.js
+            paymentBody.installmentOptions = {
+                maxInstallmentCount: pagamento.parcelasMaximas || 10,
+                unlimitedInstallments: false
+            };
+        }
+
+        // 4. GERAR A COBRANÇA NO ASAAS
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
             headers: { 
@@ -46,16 +68,7 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json',
                 'User-Agent': 'NuvemDeEssencias'
             },
-body: JSON.stringify({
-    customer: customerData.id,
-    billingType: pagamento.metodo, 
-    value: pagamento.valor,
-    dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-    // AJUSTE AQUI: Só envia parcelas se NÃO for PIX
-    installments: pagamento.metodo === 'PIX' ? undefined : (pagamento.parcelasMaximas || 1),
-    description: "Pedido Nuvem de Essências",
-    externalReference: `PED-${Date.now()}`
-})
+            body: JSON.stringify(paymentBody)
         });
 
         const paymentData = await paymentRes.json();
@@ -64,7 +77,7 @@ body: JSON.stringify({
             return res.status(400).json({ error: "Erro ao gerar cobrança", details: paymentData.errors });
         }
 
-        // 3. RETORNAR SUCESSO (O front-end vai usar paymentData.invoiceUrl)
+        // 5. RETORNAR SUCESSO
         return res.status(200).json(paymentData);
 
     } catch (error) {
