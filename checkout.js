@@ -38,15 +38,12 @@ function prepararDadosParaAsaas() {
 }
 
 function abrirCheckoutAsaas() {
-    // 1. Verifica se a sacola está vazia
     if (typeof sacola === 'undefined' || sacola.length === 0) {
         return alert("Sua sacola está vazia!");
     }
 
-    // 2. TRAVA DE SEGURANÇA: Verifica se o frete foi selecionado
     if (!nomeFreteGlobal || nomeFreteGlobal === "") {
         alert("⚠️ Por favor, calcule e SELECIONE uma opção de frete antes de finalizar!");
-        // Se a sacola estiver fechada, abre ela para o cliente escolher o frete
         if (typeof toggleCart === "function") {
             const cartModal = document.getElementById('cart-modal');
             if (cartModal && !cartModal.classList.contains('active')) toggleCart();
@@ -54,7 +51,6 @@ function abrirCheckoutAsaas() {
         return; 
     }
     
-    // Fecha a sacola para mostrar o formulário de endereço
     if (typeof toggleCart === "function") {
         const cartModal = document.getElementById('cart-modal');
         if (cartModal && cartModal.classList.contains('active')) toggleCart();
@@ -66,14 +62,12 @@ function abrirCheckoutAsaas() {
     if (resumoDiv) {
         let blocoCartao = "";
 
-        // LÓGICA DA PROMOÇÃO: Só mostra "6x com desc" se a promo estiver ativa
         if (dados.temPromo6xAtiva) {
             blocoCartao = `
                 <p><strong>Total Cartão:</strong> R$ ${formatarMoeda(dados.valorTotalCartao6x + valorFreteGlobal)} (Até 6x c/ desc.)</p>
                 <p style="font-size: 11px; color: #666;">*Opção de 10x sem desconto disponível no próximo passo.</p>
             `;
         } else {
-            // Se NÃO tem promo, mostra o valor normal em até 10x
             blocoCartao = `
                 <p><strong>Total Cartão:</strong> R$ ${formatarMoeda(dados.valorTotalOriginal + valorFreteGlobal)} (Até 10x sem juros)</p>
             `;
@@ -110,19 +104,23 @@ function buscarCEP(cep) {
         .catch(err => console.error("Erro ao buscar CEP", err));
 }
 
-// ESTA FUNÇÃO AGORA CONECTA COM A VERCEL
 function coletarDadosCheckout(metodoPagamento, event) {
     const dadosCarrinho = prepararDadosParaAsaas();
     if (!dadosCarrinho) return alert("Seu carrinho está vazio!");
 
-    // VALIDAÇÃO DE SEGURANÇA: Garante que o frete existe antes de enviar
     if (typeof valorFreteGlobal === 'undefined' || valorFreteGlobal === null) {
         return alert("Erro: Frete não identificado. Por favor, calcule o frete novamente.");
     }
 
+    // --- AJUSTE DE SEGURANÇA: VALIDAÇÃO DO NOME COMPLETO ---
+    const nomeInput = document.getElementById('cliente_nome').value.trim();
+    if (nomeInput.split(' ').length < 2) {
+        return alert("⚠️ Por favor, digite seu NOME COMPLETO (nome e sobrenome). O sistema de pagamento exige isso para validar seu CPF.");
+    }
+
     const checkout = {
         cliente: {
-            nome: document.getElementById('cliente_nome').value,
+            nome: nomeInput,
             email: document.getElementById('cliente_email').value,
             cpfCnpj: document.getElementById('cliente_cpf').value.replace(/\D/g, ''),
             telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
@@ -136,27 +134,22 @@ function coletarDadosCheckout(metodoPagamento, event) {
             estado: document.getElementById('end_estado').value
         },
         pagamento: {
-            metodo: metodoPagamento, // 'PIX' ou 'CREDIT_CARD'
-            
-            // SOMA O VALOR DO PRODUTO + VALOR DO FRETE
+            metodo: metodoPagamento,
             valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : dadosCarrinho.valorTotalCartao6x) + valorFreteGlobal,
             parcelasMaximas: dadosCarrinho.temPromo6xAtiva ? 6 : 10,
             itens: dadosCarrinho.itensDetalhados
         }
     };
 
-    // Validação básica de preenchimento
     if (!checkout.cliente.nome || checkout.cliente.cpfCnpj.length < 11 || !checkout.endereco.cep) {
         return alert("Por favor, preencha Nome, CPF e CEP corretamente.");
     }
 
-    // FEEDBACK PARA O USUÁRIO (Botão Processando)
     const btnAcao = event.target; 
     const textoOriginal = btnAcao.innerText;
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
-    // ENVIO PARA A API NA VERCEL
     fetch('/api/finalizar-compra', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -167,7 +160,9 @@ function coletarDadosCheckout(metodoPagamento, event) {
         if (res.ok && data.invoiceUrl) {
             window.location.href = data.invoiceUrl;
         } else {
-            throw new Error(data.error || "Erro ao processar pagamento");
+            // Melhora a exibição do erro para o usuário
+            const msgErro = data.details ? data.details[0].description : (data.error || "Erro ao processar");
+            throw new Error(msgErro);
         }
     })
     .catch(err => {
