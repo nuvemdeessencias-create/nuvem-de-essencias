@@ -46,16 +46,16 @@ export default async function handler(req, res) {
                 'Content-Type': 'application/json',
                 'User-Agent': 'NuvemDeEssencias'
             },
-            body: JSON.stringify({
-                customer: customerData.id,
-                billingType: pagamento.metodo, // 'PIX' ou 'CREDIT_CARD'
-                value: pagamento.valor,
-                dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-                // Se for PIX, installmentCount deve ser omitido ou ser 1
-                installmentCount: pagamento.metodo === 'PIX' ? null : (pagamento.parcelasMaximas || 1),
-                description: "Pedido Nuvem de Essências",
-                externalReference: `PED-${Date.now()}`
-            })
+body: JSON.stringify({
+    customer: customerData.id,
+    billingType: pagamento.metodo, 
+    value: pagamento.valor,
+    dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+    // AJUSTE AQUI: Só envia parcelas se NÃO for PIX
+    installments: pagamento.metodo === 'PIX' ? undefined : (pagamento.parcelasMaximas || 1),
+    description: "Pedido Nuvem de Essências",
+    externalReference: `PED-${Date.now()}`
+})
         });
 
         const paymentData = await paymentRes.json();
