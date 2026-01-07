@@ -29,15 +29,21 @@ export default async function handler(req, res) {
         const customerData = await customerRes.json();
         if (customerData.errors) return res.status(400).json({ error: "Erro no cliente", details: customerData.errors });
 
-        // 2. CRIAR UMA COBRANÇA "UNDEFINED" (Gera um link de checkout)
-        // Isso permite que o cliente escolha a forma de pagamento na tela do Asaas
+        // 2. CRIAR A COBRANÇA COM REGRAS DE PARCELAMENTO
         const paymentBody = {
             customer: customerData.id,
-            billingType: 'UNDEFINED', // MÁGICA AQUI: Abre todas as opções (Pix, Cartão, Boleto)
+            billingType: 'UNDEFINED', // Permite Cartão ou PIX na tela do Asaas
             value: pagamento.valor,
+            totalFixedAmount: pagamento.valor, // GARANTE O "SEM JUROS" (Valor não aumenta)
             dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
             description: "Pedido Nuvem de Essências",
-            externalReference: `PED-${Date.now()}`
+            externalReference: `PED-${Date.now()}`,
+            // CONFIGURAÇÃO DAS PARCELAS
+            installmentCount: 1, 
+            installmentOptions: {
+                maxInstallmentCount: pagamento.parcelasMaximas || 10, // Limite de 10x
+                unlimitedInstallments: false
+            }
         };
 
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
@@ -55,10 +61,10 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: "Erro na cobrança", details: paymentData.errors });
         }
 
-        // 3. RETORNAR O LINK PARA O SEU SITE REDIRECIONAR
+        // 3. RETORNA A URL PARA O REDIRECIONAMENTO QUE VOCÊ JÁ TEM
         return res.status(200).json({
             success: true,
-            invoiceUrl: paymentData.invoiceUrl // Este é o link da página de pagamento
+            invoiceUrl: paymentData.invoiceUrl 
         });
 
     } catch (error) {
