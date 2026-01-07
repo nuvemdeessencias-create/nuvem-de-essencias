@@ -48,10 +48,19 @@ function abrirCheckoutAsaas() {
     const resumoDiv = document.getElementById('resumoValores');
     
     if (resumoDiv) {
+        // Criamos o texto do Cartão dependendo se tem promo ou não
+        let textoCartao = "";
+        if (dados.temPromo6xAtiva) {
+            textoCartao = `<strong>Total Cartão:</strong> R$ ${formatarMoeda(dados.valorTotalCartao6x)} (Até 6x c/ desc.)`;
+        } else {
+            // Se não tem promo, mostra o valor original
+            textoCartao = `<strong>Total Cartão:</strong> R$ ${formatarMoeda(dados.valorTotalOriginal)} (Até 10x sem juros)`;
+        }
+
         resumoDiv.innerHTML = `
             <p><strong>Total PIX:</strong> R$ ${formatarMoeda(dados.valorTotalPix)}</p>
-            <p><strong>Total Cartão:</strong> R$ ${formatarMoeda(dados.valorTotalCartao6x)} (Até 6x c/ desc.)</p>
-            <p style="font-size: 11px; color: #666;">*Opção de 10x sem desconto disponível no próximo passo.</p>
+            <p>${textoCartao}</p>
+            ${dados.temPromo6xAtiva ? '<p style="font-size: 11px; color: #666;">*Opção de 10x sem desconto disponível no próximo passo.</p>' : ''}
         `;
     }
     
