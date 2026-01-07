@@ -38,29 +38,53 @@ function prepararDadosParaAsaas() {
 }
 
 function abrirCheckoutAsaas() {
+    // 1. Verifica se a sacola está vazia
     if (typeof sacola === 'undefined' || sacola.length === 0) {
         return alert("Sua sacola está vazia!");
     }
+
+    // 2. TRAVA DE SEGURANÇA: Verifica se o frete foi selecionado
+    if (!nomeFreteGlobal || nomeFreteGlobal === "") {
+        alert("⚠️ Por favor, calcule e SELECIONE uma opção de frete antes de finalizar!");
+        // Se a sacola estiver fechada, abre ela para o cliente escolher o frete
+        if (typeof toggleCart === "function") {
+            const cartModal = document.getElementById('cart-modal');
+            if (cartModal && !cartModal.classList.contains('active')) toggleCart();
+        }
+        return; 
+    }
     
-    if (typeof toggleCart === "function") toggleCart();
+    // Fecha a sacola para mostrar o formulário de endereço
+    if (typeof toggleCart === "function") {
+        const cartModal = document.getElementById('cart-modal');
+        if (cartModal && cartModal.classList.contains('active')) toggleCart();
+    }
 
     const dados = prepararDadosParaAsaas();
     const resumoDiv = document.getElementById('resumoValores');
     
     if (resumoDiv) {
-        // Criamos o texto do Cartão dependendo se tem promo ou não
-        let textoCartao = "";
+        let blocoCartao = "";
+
+        // LÓGICA DA PROMOÇÃO: Só mostra "6x com desc" se a promo estiver ativa
         if (dados.temPromo6xAtiva) {
-            textoCartao = `<strong>Total Cartão:</strong> R$ ${formatarMoeda(dados.valorTotalCartao6x)} (Até 6x c/ desc.)`;
+            blocoCartao = `
+                <p><strong>Total Cartão:</strong> R$ ${formatarMoeda(dados.valorTotalCartao6x + valorFreteGlobal)} (Até 6x c/ desc.)</p>
+                <p style="font-size: 11px; color: #666;">*Opção de 10x sem desconto disponível no próximo passo.</p>
+            `;
         } else {
-            // Se não tem promo, mostra o valor original
-            textoCartao = `<strong>Total Cartão:</strong> R$ ${formatarMoeda(dados.valorTotalOriginal)} (Até 10x sem juros)`;
+            // Se NÃO tem promo, mostra o valor normal em até 10x
+            blocoCartao = `
+                <p><strong>Total Cartão:</strong> R$ ${formatarMoeda(dados.valorTotalOriginal + valorFreteGlobal)} (Até 10x sem juros)</p>
+            `;
         }
 
         resumoDiv.innerHTML = `
-            <p><strong>Total PIX:</strong> R$ ${formatarMoeda(dados.valorTotalPix)}</p>
-            <p>${textoCartao}</p>
-            ${dados.temPromo6xAtiva ? '<p style="font-size: 11px; color: #666;">*Opção de 10x sem desconto disponível no próximo passo.</p>' : ''}
+            <div style="border-bottom: 1px solid #eee; margin-bottom: 10px; padding-bottom: 5px;">
+                <span style="color: #2e7d32; font-weight: bold;">🚚 Frete: ${nomeFreteGlobal}</span>
+            </div>
+            <p><strong>Total PIX:</strong> R$ ${formatarMoeda(dados.valorTotalPix + valorFreteGlobal)}</p>
+            ${blocoCartao}
         `;
     }
     
