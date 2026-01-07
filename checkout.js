@@ -115,6 +115,11 @@ function coletarDadosCheckout(metodoPagamento, event) {
     const dadosCarrinho = prepararDadosParaAsaas();
     if (!dadosCarrinho) return alert("Seu carrinho está vazio!");
 
+    // VALIDAÇÃO DE SEGURANÇA: Garante que o frete existe antes de enviar
+    if (typeof valorFreteGlobal === 'undefined' || valorFreteGlobal === null) {
+        return alert("Erro: Frete não identificado. Por favor, calcule o frete novamente.");
+    }
+
     const checkout = {
         cliente: {
             nome: document.getElementById('cliente_nome').value,
@@ -132,24 +137,26 @@ function coletarDadosCheckout(metodoPagamento, event) {
         },
         pagamento: {
             metodo: metodoPagamento, // 'PIX' ou 'CREDIT_CARD'
-            // Se for cartão, ele usa o valorTotalCartao6x calculado na função anterior
-            valor: metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : dadosCarrinho.valorTotalCartao6x,
+            
+            // SOMA O VALOR DO PRODUTO + VALOR DO FRETE
+            valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : dadosCarrinho.valorTotalCartao6x) + valorFreteGlobal,
+            
             itens: dadosCarrinho.itensDetalhados
         }
     };
 
-    // Validação básica
+    // Validação básica de preenchimento
     if (!checkout.cliente.nome || checkout.cliente.cpfCnpj.length < 11 || !checkout.endereco.cep) {
         return alert("Por favor, preencha Nome, CPF e CEP corretamente.");
     }
 
-    // FEEDBACK PARA O USUÁRIO
-    const btnAcao = event.target; // Captura o botão clicado
+    // FEEDBACK PARA O USUÁRIO (Botão Processando)
+    const btnAcao = event.target; 
     const textoOriginal = btnAcao.innerText;
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
-    // CHAMADA PARA A API NA VERCEL
+    // ENVIO PARA A API NA VERCEL
     fetch('/api/finalizar-compra', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -158,7 +165,6 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
-            // REDIRECIONA PARA O PAGAMENTO
             window.location.href = data.invoiceUrl;
         } else {
             throw new Error(data.error || "Erro ao processar pagamento");
