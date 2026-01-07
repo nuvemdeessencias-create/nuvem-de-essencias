@@ -31,20 +31,18 @@ export default async function handler(req, res) {
 
         // 2. CRIAR A COBRANÇA COM REGRAS DE PARCELAMENTO
         const paymentBody = {
-            customer: customerData.id,
-            billingType: 'UNDEFINED', // Permite Cartão ou PIX na tela do Asaas
-            value: pagamento.valor,
-            totalFixedAmount: pagamento.valor, // GARANTE O "SEM JUROS" (Valor não aumenta)
-            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-            description: "Pedido Nuvem de Essências",
-            externalReference: `PED-${Date.now()}`,
-            // CONFIGURAÇÃO DAS PARCELAS
-            installmentCount: 1, 
-            installmentOptions: {
-                maxInstallmentCount: pagamento.parcelasMaximas || 10, // Limite de 10x
-                unlimitedInstallments: false
-            }
-        };
+    customer: customerData.id,
+    billingType: 'UNDEFINED', 
+    value: pagamento.valor, // Agora vai ler corretamente porque você mudou no checkout.js
+    dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+    description: "Pedido Nuvem de Essências",
+    externalReference: `PED-${Date.now()}`,
+    // Ajuste nas opções de parcelamento para Links de Pagamento
+    installmentOptions: {
+        maxInstallmentCount: pagamento.parcelasMaximas || 10,
+        unlimitedInstallments: false
+    }
+};
 
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
