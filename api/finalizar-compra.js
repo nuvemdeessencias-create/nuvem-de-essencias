@@ -4,7 +4,7 @@ export default async function handler(req, res) {
     // Chave de API configurada nas Variáveis de Ambiente da Vercel
     const ASAAS_API_KEY = process.env.ASAAS_API_KEY; 
     
-    // URL de Sandbox para testes. Mude para 'https://www.asaas.com/api/v3' em produção.
+    // URL de Sandbox para testes.
     const ASAAS_URL = 'https://sandbox.asaas.com/api/v3';
 
     const { cliente, endereco, pagamento } = req.body;
@@ -37,21 +37,23 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: "Erro no cadastro do cliente", details: customerData.errors });
         }
 
-        // 2. PREPARAR O CORPO DA COBRANÇA (Básico)
+        // 2. PREPARAR O CORPO DA COBRANÇA
+        // O Asaas exige o campo 'value' na raiz para calcular as parcelas
         const paymentBody = {
             customer: customerData.id,
-            billingType: pagamento.metodo, // 'PIX' ou 'CREDIT_CARD'
-            value: pagamento.valor, // Valor total enviado pelo checkout.js
-            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Vencimento em 24h
+            billingType: pagamento.metodo === 'PIX' ? 'PIX' : 'CREDIT_CARD',
+            value: pagamento.valor, 
+            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
             description: "Pedido Nuvem de Essências",
             externalReference: `PED-${Date.now()}`,
             postalService: false
         };
 
-        // 3. REGRAS ESPECÍFICAS PARA CARTÃO (Evita erro de valor da parcela)
+        // 3. REGRAS DE PARCELAMENTO (Se for Cartão)
+        // Adicionando explicitamente o installmentCount para evitar o erro de 'valor da parcela'
         if (pagamento.metodo !== 'PIX') {
-            paymentBody.installmentCount = 1; // Define cobrança inicial como 1x (Obrigatório)
-            paymentBody.totalFixedAmount = pagamento.valor; // Trava o valor para não mudar com parcelas
+            paymentBody.installmentCount = 1; 
+            paymentBody.totalFixedAmount = pagamento.valor;
             
             paymentBody.installmentOptions = {
                 maxInstallmentCount: pagamento.parcelasMaximas || 10,
@@ -73,14 +75,15 @@ export default async function handler(req, res) {
         const paymentData = await paymentRes.json();
 
         if (paymentData.errors) {
-            return res.status(400).json({ error: "Erro ao gerar cobrança", details: paymentData.errors });
+            // Se houver erro, retornamos o primeiro erro detalhado do Asaas
+            const msg = paymentData.errors[0].description || "Erro ao gerar cobrança";
+            return res.status(400).json({ error: msg, details: paymentData.errors });
         }
 
-        // 5. RETORNAR SUCESSO (Inclui a invoiceUrl para o redirecionamento)
+        // 5. RETORNAR SUCESSO
         return res.status(200).json(paymentData);
 
     } catch (error) {
-        console.error("Erro Interno:", error);
         return res.status(500).json({ error: "Erro interno no servidor", message: error.message });
     }
 }
