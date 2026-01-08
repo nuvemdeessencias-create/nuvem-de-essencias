@@ -913,24 +913,7 @@ function adicionarComPromocao(id, nome, mlId, qtdId) {
     }
 }
 
-    // --- INÍCIO DA TRAVA DE SEGURANÇA ---
-    // Zera as variáveis globais de frete para invalidar cálculos antigos
-    valorFreteGlobal = 0;
-    nomeFreteGlobal = "";
-
-    // Atualiza o painel de frete visualmente para avisar o cliente
-    const resultadoFrete = document.getElementById('opcoes-frete');
-    if (resultadoFrete) {
-        resultadoFrete.innerHTML = `
-            <div style="background: #fff3e0; padding: 10px; border-radius: 8px; border: 1px solid #ffb74d; margin-top: 10px;">
-                <p style="color:#e65100; font-size:12px; font-weight:bold; margin:0; text-align:center;">
-                    ⚠️ Sacola atualizada! Calcule o frete novamente para este novo peso.
-                </p>
-            </div>`;
-    }
-    // --- FIM DA TRAVA DE SEGURANÇA ---
-
-    confirmarAdicao();
+   
 
 function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
@@ -1188,6 +1171,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
