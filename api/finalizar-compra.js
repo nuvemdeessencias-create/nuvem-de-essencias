@@ -22,27 +22,32 @@ export default async function handler(req, res) {
                 postalCode: endereco.cep,
                 address: endereco.rua,
                 addressNumber: endereco.numero,
-                province: endereco.bairro
+                province: endereco.bairro,
+                notificationDisabled: true
             })
         });
 
         const customerData = await customerRes.json();
         if (customerData.errors) return res.status(400).json({ error: "Erro no cliente", details: customerData.errors });
 
-        // 2. CRIAR A COBRANÇA COM REGRAS DE PARCELAMENTO
-       const paymentBody = {
-    customer: customerData.id,
-    billingType: 'UNDEFINED', // Isso força a abertura do checkout do Asaas
-    value: pagamento.valor, // Agora vai ler corretamente do front-end
-    dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-    description: "Pedido Nuvem de Essências",
-    externalReference: `PED-${Date.now()}`,
-    // Define o limite de parcelas (6 ou 10) sem forçar um cálculo imediato
-    installmentOptions: {
-        maxInstallmentCount: pagamento.parcelasMaximas || 10,
-        unlimitedInstallments: false
-    }
-};
+        // 2. CRIAR A COBRANÇA
+        // REMOVEMOS o installmentCount aqui para o Asaas não tentar processar como cobrança única imediata
+        const paymentBody = {
+            customer: customerData.id,
+            billingType: 'UNDEFINED', 
+            value: pagamento.valor, 
+            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+            description: "Pedido Nuvem de Essências",
+            externalReference: `PED-${Date.now()}`,
+        };
+
+        // Só adicionamos as opções de parcelamento se o valor for válido
+        if (pagamento.valor > 0) {
+            paymentBody.installmentOptions = {
+                maxInstallmentCount: pagamento.parcelasMaximas || 10,
+                unlimitedInstallments: false
+            };
+        }
 
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
@@ -56,10 +61,13 @@ export default async function handler(req, res) {
         const paymentData = await paymentRes.json();
 
         if (paymentData.errors) {
-            return res.status(400).json({ error: "Erro na cobrança", details: paymentData.errors });
+            // Se o Asaas der erro, enviamos a descrição exata do erro para o seu alert no site
+            return res.status(400).json({ 
+                error: paymentData.errors[0].description, 
+                details: paymentData.errors 
+            });
         }
 
-        // 3. RETORNA A URL PARA O REDIRECIONAMENTO QUE VOCÊ JÁ TEM
         return res.status(200).json({
             success: true,
             invoiceUrl: paymentData.invoiceUrl 
