@@ -138,9 +138,13 @@ function coletarDadosCheckout(metodoPagamento, event) {
         }
     })
     .catch(err => {
-        alert("Falha: " + err.message);
-        // DESTRAVA O BOTÃO SE DER ERRO NO SERVIDOR
-        btnAcao.innerText = textoOriginal;
-        btnAcao.disabled = false;
-    });
+    alert("Falha: " + err.message);
+    
+    // REINICIAR BOTÕES (Isso evita que fiquem travados em 'Processando')
+    const btnPix = document.querySelector("button[onclick*='PIX']");
+    const btnCartao = document.querySelector("button[onclick*='CREDIT_CARD']");
+    
+    if(btnPix) { btnPix.innerText = "PAGAR PIX"; btnPix.disabled = false; }
+    if(btnCartao) { btnCartao.innerText = "CARTÃO"; btnCartao.disabled = false; }
+});
 }
