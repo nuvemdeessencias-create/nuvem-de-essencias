@@ -30,14 +30,14 @@ export default async function handler(req, res) {
         if (customerData.errors) return res.status(400).json({ error: "Erro no cliente", details: customerData.errors });
 
         // 2. CRIAR A COBRANÇA COM REGRAS DE PARCELAMENTO
-        const paymentBody = {
+       const paymentBody = {
     customer: customerData.id,
-    billingType: 'UNDEFINED', 
-    value: pagamento.valor, // Agora vai ler corretamente porque você mudou no checkout.js
+    billingType: 'UNDEFINED', // Isso força a abertura do checkout do Asaas
+    value: pagamento.valor, // Agora vai ler corretamente do front-end
     dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
     description: "Pedido Nuvem de Essências",
     externalReference: `PED-${Date.now()}`,
-    // Ajuste nas opções de parcelamento para Links de Pagamento
+    // Define o limite de parcelas (6 ou 10) sem forçar um cálculo imediato
     installmentOptions: {
         maxInstallmentCount: pagamento.parcelasMaximas || 10,
         unlimitedInstallments: false
