@@ -34,20 +34,19 @@ export default async function handler(req, res) {
         // REMOVEMOS o installmentCount aqui para o Asaas não tentar processar como cobrança única imediata
 
        // DENTRO DE api/finalizar-compra.js
-// Substitua o bloco do paymentBody na sua API por este:
+
 const paymentBody = {
     customer: customerData.id,
     billingType: 'CREDIT_CARD', 
+    // USAMOS APENAS O VALOR TOTAL
+    value: pagamento.valor,
+    totalValue: pagamento.valor, 
     dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
     description: "Pedido Nuvem de Essências",
     externalReference: `PED-${Date.now()}`,
 
-    // SEGUNDO A DOC: Para criar pagamento parcelado, enviamos esses dois
-    // Vamos iniciar como 2 parcelas para "forçar" o sistema a entender que é parcelável
-    installmentCount: 2, 
-    installmentValue: (pagamento.valor / 2).toFixed(2),
-    
-    // Isso permitirá que o cliente altere para 1x, 3x, etc., no checkout
+    // NÃO enviamos installmentCount fora do bloco options para não travar o valor
+    // O segredo para liberar a "aba de mudar" é este bloco abaixo:
     installmentOptions: {
         maxInstallmentCount: pagamento.parcelasMaximas || 10,
         unlimitedInstallments: false
