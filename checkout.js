@@ -1,4 +1,8 @@
-/* --- checkout.js TOTALMENTE CORRIGIDO --- */
+/* --- checkout.js TOTALMENTE CORRIGIDO E PROFISSIONAL --- */
+
+// Variáveis de controle global para o novo modal
+let parcelasEscolhidasGlobal = 1;
+let parcelaConfirmada = false;
 
 function buscarCEP(cep) {
     const valor = cep.replace(/\D/g, '');
@@ -59,30 +63,35 @@ function abrirCheckoutAsaas() {
     if (typeof sacola === 'undefined' || sacola.length === 0) return alert("Sua sacola está vazia!");
     if (!nomeFreteGlobal) return alert("⚠️ Selecione o frete antes de finalizar!");
 
-    // RESET DE SEGURANÇA: Garante que os botões não estejam travados em 'Processando'
-    const botoes = document.querySelectorAll('#modalCheckout button');
-    botoes.forEach(btn => {
-        if (btn.innerText === "PROCESSANDO...") {
-            // Restaura o texto original baseado no que estava antes
-            btn.innerText = btn.getAttribute('data-original-text') || (btn.onclick.toString().includes('PIX') ? "PAGAR PIX" : "CARTÃO");
-            btn.disabled = false;
-        }
-    });
+    // Reset de segurança dos botões
+    const btnPix = document.querySelector("button[onclick*='PIX']");
+    const btnCartao = document.querySelector("button[onclick*='CREDIT_CARD']");
+    if(btnPix) { btnPix.innerText = "PAGAR PIX"; btnPix.disabled = false; }
+    if(btnCartao) { btnCartao.innerText = "CARTÃO"; btnCartao.disabled = false; }
+
+    parcelaConfirmada = false; // Reseta trava de parcelas ao abrir
 
     const modalCheckout = document.getElementById('modalCheckout');
     if (modalCheckout) modalCheckout.style.display = 'flex';
 }
+
+function fecharModalParcelas() {
+    document.getElementById('modalParcelas').style.display = 'none';
+    parcelaConfirmada = false;
+    // Destrava o botão do cartão caso o usuário desista de escolher as parcelas
+    const btnCartao = document.querySelector("button[onclick*='CREDIT_CARD']");
+    if (btnCartao) { btnCartao.innerText = "CARTÃO"; btnCartao.disabled = false; }
+}
+
 function coletarDadosCheckout(metodoPagamento, event) {
     const btnAcao = event.target;
-    const textoOriginal = btnAcao.innerText;
-
     const dadosCarrinho = prepararDadosParaAsaas();
     const nomeInput = document.getElementById('cliente_nome').value.trim();
 
     // VALIDAÇÕES INICIAIS
     if (nomeInput.split(' ').length < 2) {
         alert("⚠️ Por favor, digite seu NOME COMPLETO.");
-        return; // Sai da função sem travar o botão
+        return;
     }
 
     const cpfLimpo = document.getElementById('cliente_cpf').value.replace(/\D/g, '');
@@ -91,17 +100,30 @@ function coletarDadosCheckout(metodoPagamento, event) {
         return;
     }
 
-    let parcelasEscolhidas = 1;
     const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
+    const valorTotalBase = (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal) + valorFreteGlobal;
 
-    if (metodoPagamento === 'CREDIT_CARD') {
-        const escolha = prompt(`Em quantas vezes deseja parcelar? (1 a ${limiteParcelas}x)`, "1");
-        parcelasEscolhidas = parseInt(escolha);
-
-        if (isNaN(parcelasEscolhidas) || parcelasEscolhidas < 1 || parcelasEscolhidas > limiteParcelas) {
-            alert(`⚠️ Por favor, escolha um número de 1 a ${limiteParcelas}.`);
-            return;
+    // NOVO SISTEMA DE PARCELAMENTO PROFISSIONAL
+    if (metodoPagamento === 'CREDIT_CARD' && !parcelaConfirmada) {
+        const lista = document.getElementById('listaParcelas');
+        lista.innerHTML = '';
+        
+        for (let i = 1; i <= limiteParcelas; i++) {
+            const valorParcela = (valorTotalBase / i).toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
+            const btn = document.createElement('button');
+            btn.innerHTML = `<span style="color:#020b1f">${i}x</span> de <span style="color:#2ecc71; font-weight:bold">${valorParcela}</span>`;
+            btn.style = "padding:15px; border:1px solid #eee; border-radius:10px; background:#fcfcfc; cursor:pointer; text-align:left; font-size:15px; transition:0.2s;";
+            
+            btn.onclick = () => {
+                parcelasEscolhidasGlobal = i;
+                parcelaConfirmada = true;
+                document.getElementById('modalParcelas').style.display = 'none';
+                coletarDadosCheckout('CREDIT_CARD', { target: document.querySelector("button[onclick*='CREDIT_CARD']") });
+            };
+            lista.appendChild(btn);
         }
+        document.getElementById('modalParcelas').style.display = 'flex';
+        return;
     }
 
     // MONTAGEM DO OBJETO DE CHECKOUT
@@ -122,8 +144,8 @@ function coletarDadosCheckout(metodoPagamento, event) {
         },
         pagamento: {
             metodo: metodoPagamento,
-            valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal)) + valorFreteGlobal,
-            parcelas: parcelasEscolhidas, 
+            valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix + valorFreteGlobal : valorTotalBase),
+            parcelas: parcelasEscolhidasGlobal, 
             parcelasMaximas: limiteParcelas,
             itens: dadosCarrinho.itensDetalhados
         }
@@ -147,13 +169,9 @@ function coletarDadosCheckout(metodoPagamento, event) {
         }
     })
     .catch(err => {
-    alert("Falha: " + err.message);
-    
-    // REINICIAR BOTÕES (Isso evita que fiquem travados em 'Processando')
-    const btnPix = document.querySelector("button[onclick*='PIX']");
-    const btnCartao = document.querySelector("button[onclick*='CREDIT_CARD']");
-    
-    if(btnPix) { btnPix.innerText = "PAGAR PIX"; btnPix.disabled = false; }
-    if(btnCartao) { btnCartao.innerText = "CARTÃO"; btnCartao.disabled = false; }
-});
+        alert("Falha: " + err.message);
+        parcelaConfirmada = false;
+        btnAcao.innerText = (metodoPagamento === 'PIX' ? "PAGAR PIX" : "CARTÃO");
+        btnAcao.disabled = false;
+    });
 }
