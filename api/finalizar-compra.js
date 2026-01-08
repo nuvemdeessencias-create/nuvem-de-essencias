@@ -32,14 +32,21 @@ export default async function handler(req, res) {
 
         // 2. CRIAR A COBRANÇA
         // REMOVEMOS o installmentCount aqui para o Asaas não tentar processar como cobrança única imediata
+
         const paymentBody = {
-            customer: customerData.id,
-            billingType: 'UNDEFINED', 
-            value: pagamento.valor, 
-            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-            description: "Pedido Nuvem de Essências",
-            externalReference: `PED-${Date.now()}`,
-        };
+    customer: customerData.id,
+    billingType: 'UNDEFINED', 
+    value: pagamento.valor, 
+    dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+    description: "Pedido Nuvem de Essências",
+    externalReference: `PED-${Date.now()}`,
+    // AJUSTE AQUI: Adicionamos installmentCount para liberar o seletor de parcelas
+    installmentCount: 1, // Isso define que começa em 1x, mas libera o seletor abaixo
+    installmentOptions: {
+        maxInstallmentCount: pagamento.parcelasMaximas || 10,
+        unlimitedInstallments: false
+    }
+};
 
         // Só adicionamos as opções de parcelamento se o valor for válido
         if (pagamento.valor > 0) {
