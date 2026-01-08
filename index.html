@@ -836,7 +836,6 @@ function atualizarPrecoCard(id, valorSelt, marca) {
     
     if (!container) return;
 
-    // Busca os dados da promoção apenas para exibição visual no card
     const promo = processarPrecoProduto({ id: id, marca: marca, preco: precoBase, ml: ml });
 
     let html = `
@@ -846,17 +845,14 @@ function atualizarPrecoCard(id, valorSelt, marca) {
         </div>
     `;
 
-    // Container para as tags de desconto (Pix e 6x)
     if (promo.emPromocao) {
         html += `<div style="display:flex; flex-direction:column; gap:3px; align-items:center; width: 100%; margin-top: 2px;">`;
         
-        // Tag PIX (Estilo Nuvem)
         html += `
             <span class="tag-promo-pix">
                 💰 PIX: R$ ${formatarMoeda(promo.pixValor)}
             </span>`;
 
-        // Tag 6x CARTÃO (Se existir na regra)
         if (promo.tem6x) {
             html += `
                 <span class="tag-promo-6x">
@@ -866,14 +862,13 @@ function atualizarPrecoCard(id, valorSelt, marca) {
         
         html += `</div>`;
     } else {
-        // Espaçador menor (10px) para não empurrar o card para baixo em itens sem promo
         html += `<div style="height: 10px;"></div>`;
     }
 
     container.innerHTML = html;
 }
-
-function adicionarComPromocao(id, nome, mlId, qtdId) {
+    
+    function adicionarComPromocao(id, nome, mlId, qtdId) {
     const selectMl = document.getElementById(mlId);
     const [ml, precoBruto] = selectMl.value.split('|');
     const precoBase = parseFloat(precoBruto);
@@ -888,11 +883,9 @@ function adicionarComPromocao(id, nome, mlId, qtdId) {
     let isPromo = false;
 
     if (promo.emPromocao) {
-        let mensagem = `Escolha a condição de pagamento:\n\n`;
-        mensagem += `1. PIX: R$ ${formatarMoeda(promo.pixValor)}\n`;
+        let mensagem = `Escolha a condição de pagamento:\n\n1. PIX: R$ ${formatarMoeda(promo.pixValor)}\n`;
         if(promo.tem6x) mensagem += `2. CARTÃO ATÉ 6x: R$ ${formatarMoeda(promo.valor6x)}\n`;
-        mensagem += `3. CARTÃO ATÉ 10x: R$ ${formatarMoeda(promo.valor10x)}\n\n`;
-        mensagem += `Digite o número (1, 2 ou 3):`;
+        mensagem += `3. CARTÃO ATÉ 10x: R$ ${formatarMoeda(promo.valor10x)}\n\nDigite o número (1, 2 ou 3):`;
 
         const escolha = prompt(mensagem, "1");
 
@@ -907,7 +900,6 @@ function adicionarComPromocao(id, nome, mlId, qtdId) {
             parcelasPermitidas = 6; 
             isPromo = true;
         } else {
-            // FORÇA 10X se escolher 3 ou cancelar
             precoFinal = promo.valor10x;
             descLabel = "Cartão até 10x";
             parcelasPermitidas = 10;
@@ -921,9 +913,10 @@ function adicionarComPromocao(id, nome, mlId, qtdId) {
         qtd, 
         emPromocao: isPromo,
         tipoPagamento: descLabel,
-        maxParcelas: parcelasPermitidas
+        maxParcelas: parcelasPermitidas 
     });
-    confirmarAdicao();
+
+    if (typeof confirmarAdicao === "function") confirmarAdicao();
 }
 
     // --- INÍCIO DA TRAVA DE SEGURANÇA ---
@@ -1202,6 +1195,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
