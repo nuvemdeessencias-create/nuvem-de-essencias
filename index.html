@@ -743,7 +743,7 @@ function filtrar() {
                     <div class="estoque-label" id="estoque-${p.id}" style="font-size:12px; font-weight:bold; margin-bottom: 8px; color: ${primeiraOpcao.disponivel ? '#d32f2f' : 'red'}">
                         ${primeiraOpcao.disponivel ? primeiraOpcao.estoque + ' unidades' : 'INDISPONÍVEL'}
                     </div>
-                    ${seletorHtml}
+                    ${seletorHtml}8
                     <div class="qtd-container" style="margin-bottom: 15px;">
                         <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, '${p.id}')">-</button>
                         <input type="text" id="q-${p.id}" value="${primeiraOpcao.disponivel ? 1 : 0}" readonly class="input-qtd">
@@ -991,9 +991,31 @@ function removerItem(index) {
 
     atualizarSacola(); 
 }
-function confirmarAdicao() { atualizarSacola(); toggleCart(); }
+function confirmarAdicao() { 
+    atualizarSacola(); 
+    // toggleCart();  <-- APAGAMOS ESSA LINHA PARA NÃO ABRIR
+    mostrarAvisoCarrinho(); // ADICIONAMOS O NOVO AVISO
+}
 
-function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
+    function mostrarAvisoCarrinho() {
+    const antigo = document.getElementById("aviso-sacola-toast");
+    if(antigo) antigo.remove();
+
+    const aviso = document.createElement('div');
+    aviso.id = "aviso-sacola-toast";
+    // Estilo para ficar elegante e discreto no topo
+    aviso.style = "position: fixed; top: 85px; right: 20px; background: #2e7d32; color: white; padding: 12px 20px; border-radius: 8px; z-index: 15000; box-shadow: 0 4px 15px rgba(0,0,0,0.4); display: flex; align-items: center; gap: 12px; font-family: sans-serif; animation: slideIn 0.3s forwards;";
+    
+    aviso.innerHTML = `
+        <span style="font-size: 14px;">🛒 Adicionado com sucesso!</span>
+        <button onclick="toggleCart(); this.parentElement.remove();" style="background: white; color: #2e7d32; border: none; padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 12px;">VER AGORA</button>
+        <b onclick="this.parentElement.remove()" style="cursor: pointer; font-size: 18px; padding-left: 5px;">✕</b>
+    `;
+
+    document.body.appendChild(aviso);
+    setTimeout(() => { if(aviso) aviso.remove(); }, 4000);
+}
+    
 
 // --- MODAL DE DETALHES ---
 function abrirDetalhes(p) {
