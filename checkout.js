@@ -11,7 +11,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
         return alert("⚠️ Por favor, digite seu NOME COMPLETO (nome e sobrenome).");
     }
 
-    // MONTAGEM DO OBJETO DE ENVIO
+    // MONTAGEM DO OBJETO - Note que fechei a chave corretamente no final
     const checkout = {
         cliente: {
             nome: nomeInput,
@@ -28,13 +28,14 @@ function coletarDadosCheckout(metodoPagamento, event) {
             estado: document.getElementById('end_estado').value
         },
         pagamento: {
-            metodo: metodoPagamento, // Sem acento para evitar erros
+            metodo: metodoPagamento,
             valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : dadosCarrinho.valorTotalCartao6x) + valorFreteGlobal,
             parcelasMaximas: dadosCarrinho.temPromo6xAtiva ? 6 : 10,
-            itens: dadosCarrinho.itensDetalhados // Corrigido para bater com o nome na função prepararDados
+            itens: dadosCarrinho.itensDetalhados
         }
-    }; // A chave de fechamento que estava faltando estava aqui!
+    }; // <--- ESSA CHAVE ESTAVA FALTANDO E TRAVANDO TUDO
 
+    // Validação básica antes de enviar
     if (!checkout.cliente.nome || checkout.cliente.cpfCnpj.length < 11 || !checkout.endereco.cep) {
         return alert("Por favor, preencha Nome, CPF e CEP corretamente.");
     }
@@ -44,6 +45,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
+    // Envio para a sua API na Vercel
     fetch('/api/finalizar-compra', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -52,8 +54,10 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
+            // Se der tudo certo, redireciona para o Asaas
             window.location.href = data.invoiceUrl;
         } else {
+            // Se a API der erro, mostra o motivo real (ex: CPF inválido)
             const msgErro = data.details ? data.details[0].description : (data.error || "Erro ao processar");
             throw new Error(msgErro);
         }
