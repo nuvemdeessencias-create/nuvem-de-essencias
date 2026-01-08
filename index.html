@@ -880,7 +880,6 @@ function adicionarComPromocao(id, nome, mlId, qtdId) {
     const qtd = parseInt(document.getElementById(qtdId).value);
     const pOriginal = meusProdutos.find(item => item.id === id);
     
-    // Processa se o item tem direito a desconto (Pix ou 6x)
     const promo = processarPrecoProduto({ id: id, marca: pOriginal.marca, preco: precoBase, ml: ml });
 
     let precoFinal = precoBase;
@@ -888,13 +887,10 @@ function adicionarComPromocao(id, nome, mlId, qtdId) {
     let parcelasPermitidas = 10;
     let isPromo = false;
 
-    // Se tiver promoção, pergunta a preferência do cliente
     if (promo.emPromocao) {
         let mensagem = `Escolha a condição de pagamento:\n\n`;
         mensagem += `1. PIX: R$ ${formatarMoeda(promo.pixValor)}\n`;
-        if(promo.tem6x) {
-            mensagem += `2. CARTÃO ATÉ 6x: R$ ${formatarMoeda(promo.valor6x)}\n`;
-        }
+        if(promo.tem6x) mensagem += `2. CARTÃO ATÉ 6x: R$ ${formatarMoeda(promo.valor6x)}\n`;
         mensagem += `3. CARTÃO ATÉ 10x: R$ ${formatarMoeda(promo.valor10x)}\n\n`;
         mensagem += `Digite o número (1, 2 ou 3):`;
 
@@ -910,9 +906,15 @@ function adicionarComPromocao(id, nome, mlId, qtdId) {
             descLabel = "PROMO 6x"; 
             parcelasPermitidas = 6; 
             isPromo = true;
+        } else {
+            // FORÇA 10X se escolher 3 ou cancelar
+            precoFinal = promo.valor10x;
+            descLabel = "Cartão até 10x";
+            parcelasPermitidas = 10;
+            isPromo = false;
         }
     }
-    // Adiciona o item à sacola
+
     sacola.push({ 
         id, nome, ml, 
         preco: precoFinal, 
@@ -921,6 +923,8 @@ function adicionarComPromocao(id, nome, mlId, qtdId) {
         tipoPagamento: descLabel,
         maxParcelas: parcelasPermitidas
     });
+    confirmarAdicao();
+}
 
     // --- INÍCIO DA TRAVA DE SEGURANÇA ---
     // Zera as variáveis globais de frete para invalidar cálculos antigos
@@ -1198,6 +1202,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
