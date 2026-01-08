@@ -752,7 +752,7 @@ function filtrar() {
                     <div class="estoque-label" id="estoque-${p.id}" style="font-size:12px; font-weight:bold; margin-bottom: 8px; color: ${primeiraOpcao.disponivel ? '#d32f2f' : 'red'}">
                         ${primeiraOpcao.disponivel ? primeiraOpcao.estoque + ' unidades' : 'INDISPONÍVEL'}
                     </div>
-                    ${seletorHtml}8
+                    ${seletorHtml}
                     <div class="qtd-container" style="margin-bottom: 15px;">
                         <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, '${p.id}')">-</button>
                         <input type="text" id="q-${p.id}" value="${primeiraOpcao.disponivel ? 1 : 0}" readonly class="input-qtd">
@@ -1188,6 +1188,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
