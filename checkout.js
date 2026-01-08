@@ -1,4 +1,4 @@
-/* --- checkout.js CORRIGIDO E TOTALMENTE SINCRONIZADO --- */
+/* --- checkout.js TOTALMENTE CORRIGIDO --- */
 
 function buscarCEP(cep) {
     const valor = cep.replace(/\D/g, '');
@@ -64,15 +64,25 @@ function abrirCheckoutAsaas() {
 }
 
 function coletarDadosCheckout(metodoPagamento, event) {
+    const btnAcao = event.target;
+    const textoOriginal = btnAcao.innerText;
+
     const dadosCarrinho = prepararDadosParaAsaas();
     const nomeInput = document.getElementById('cliente_nome').value.trim();
 
+    // VALIDAÇÕES INICIAIS
     if (nomeInput.split(' ').length < 2) {
-        return alert("⚠️ Por favor, digite seu NOME COMPLETO.");
+        alert("⚠️ Por favor, digite seu NOME COMPLETO.");
+        return; // Sai da função sem travar o botão
+    }
+
+    const cpfLimpo = document.getElementById('cliente_cpf').value.replace(/\D/g, '');
+    if (cpfLimpo.length < 11) {
+        alert("⚠️ CPF inválido.");
+        return;
     }
 
     let parcelasEscolhidas = 1;
-    // Pega o limite real da sacola (10x, 6x ou 1)
     const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
 
     if (metodoPagamento === 'CREDIT_CARD') {
@@ -80,16 +90,17 @@ function coletarDadosCheckout(metodoPagamento, event) {
         parcelasEscolhidas = parseInt(escolha);
 
         if (isNaN(parcelasEscolhidas) || parcelasEscolhidas < 1 || parcelasEscolhidas > limiteParcelas) {
-            return alert(`Por favor, escolha um número de 1 a ${limiteParcelas}.`);
+            alert(`⚠️ Por favor, escolha um número de 1 a ${limiteParcelas}.`);
+            return;
         }
     }
 
-    // MONTAGEM COM VALORES CORRIGIDOS
+    // MONTAGEM DO OBJETO DE CHECKOUT
     const checkout = {
         cliente: {
             nome: nomeInput,
             email: document.getElementById('cliente_email').value,
-            cpfCnpj: document.getElementById('cliente_cpf').value.replace(/\D/g, ''),
+            cpfCnpj: cpfLimpo,
             telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
         },
         endereco: {
@@ -102,7 +113,6 @@ function coletarDadosCheckout(metodoPagamento, event) {
         },
         pagamento: {
             metodo: metodoPagamento,
-            // CORREÇÃO: Usando valorTotalOriginal em vez de valorTotal inexistente
             valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal)) + valorFreteGlobal,
             parcelas: parcelasEscolhidas, 
             parcelasMaximas: limiteParcelas,
@@ -110,11 +120,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
         }
     };
 
-    if (checkout.cliente.cpfCnpj.length < 11) {
-        return alert("CPF inválido.");
-    }
-
-    const btnAcao = event.target; 
+    // ATIVA O ESTADO DE CARREGAMENTO
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
@@ -133,7 +139,8 @@ function coletarDadosCheckout(metodoPagamento, event) {
     })
     .catch(err => {
         alert("Falha: " + err.message);
-        btnAcao.innerText = "FINALIZAR PAGAMENTO";
+        // DESTRAVA O BOTÃO SE DER ERRO NO SERVIDOR
+        btnAcao.innerText = textoOriginal;
         btnAcao.disabled = false;
     });
 }
