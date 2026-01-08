@@ -989,21 +989,6 @@ function removerItem(index) {
         resultadoFrete.innerHTML = "<p style='color:#b89356; font-size:12px;'>Item removido. Recalcule o frete.</p>";
     }
 
-
-// --- FUNÇÕES DA SACOLA ---
-
-// 1. Abrir/Fechar a Sacola
-window.toggleCart = function() { 
-    const modal = document.getElementById('cart-modal');
-    if (modal) {
-        modal.classList.toggle('active');
-        // Usamos apenas a classe 'active' para não interferir no CSS original
-    } else {
-        console.error("Elemento 'cart-modal' não encontrado!");
-    }
-};
-
-// 2. Mostrar o Aviso Discreto (Toast)
 function mostrarAvisoCarrinho() {
     const antigo = document.getElementById("aviso-sacola-toast");
     if(antigo) antigo.remove();
@@ -1013,7 +998,7 @@ function mostrarAvisoCarrinho() {
     aviso.style = "position: fixed; top: 100px; right: 20px; background: #2e7d32; color: white; padding: 15px 20px; border-radius: 8px; z-index: 99999; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 15px; font-family: sans-serif;";
     
     aviso.innerHTML = `
-        <span style="font-weight: bold;">🛍️ Produto na sacola!</span>
+        <span style="font-weight: bold;">🛍️ Adicionado com sucesso!</span>
         <button onclick="window.toggleCart(); this.parentElement.remove();" style="background: white; color: #2e7d32; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 12px; text-transform: uppercase;">VER AGORA</button>
         <b onclick="this.parentElement.remove()" style="cursor: pointer; font-size: 20px; padding-left: 5px;">✕</b>
     `;
@@ -1022,16 +1007,13 @@ function mostrarAvisoCarrinho() {
     setTimeout(() => { if(aviso) aviso.remove(); }, 5000);
 }
 
-// 3. Função disparada ao clicar em comprar
 function confirmarAdicao() { 
-    // Certifique-se que a função atualizarSacola() existe abaixo
     if (typeof atualizarSacola === "function") {
         atualizarSacola(); 
     }
-    // toggleCart(); <-- Comentado para não abrir sozinho
     mostrarAvisoCarrinho(); 
 }
-    
+
 
 // --- MODAL DE DETALHES ---
 function abrirDetalhes(p) {
@@ -1206,6 +1188,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
