@@ -1,31 +1,25 @@
-/* --- checkout.js CORRIGIDO E COMPLETO --- */
+/* --- checkout.js CORRIGIDO E TOTALMENTE SINCRONIZADO --- */
 
-// 1. FUNÇÃO DE BUSCA AUTOMÁTICA DE CEP
 function buscarCEP(cep) {
-    const valor = cep.replace(/\D/g, ''); // Remove tudo que não é número
-    if (valor.length !== 8) return; // Só dispara a busca com 8 dígitos
+    const valor = cep.replace(/\D/g, '');
+    if (valor.length !== 8) return;
 
-    // Busca os dados na API ViaCEP
     fetch(`https://viacep.com.br/ws/${valor}/json/`)
         .then(res => res.json())
         .then(dados => {
             if (!dados.erro) {
-                // Preenche os campos do formulário automaticamente
                 document.getElementById('end_rua').value = dados.logradouro || "";
                 document.getElementById('end_bairro').value = dados.bairro || "";
                 document.getElementById('end_cidade').value = dados.localidade || "";
                 document.getElementById('end_estado').value = dados.uf || "";
-                
-                // Move o cursor automaticamente para o campo número
                 document.getElementById('end_numero').focus();
             } else {
-                alert("CEP não encontrado. Por favor, preencha manualmente.");
+                alert("CEP não encontrado.");
             }
         })
         .catch(err => console.error("Erro ao buscar CEP:", err));
 }
 
-// 2. FUNÇÃO PARA PREPARAR OS DADOS DO CARRINHO
 function prepararDadosParaAsaas() {
     if (typeof sacola === 'undefined' || sacola.length === 0) return null;
     
@@ -33,7 +27,6 @@ function prepararDadosParaAsaas() {
         valorTotalPix: 0,
         valorTotalCartao6x: 0,
         valorTotalOriginal: 0,
-        temPromo6xAtiva: false,
         itensDetalhados: []
     };
 
@@ -45,7 +38,6 @@ function prepararDadosParaAsaas() {
         dados.valorTotalPix += infoPromo.pixValor * item.qtd;
 
         if (infoPromo.tem6x) {
-            dados.temPromo6xAtiva = true; 
             dados.valorTotalCartao6x += infoPromo.valor6x * item.qtd;
         } else {
             dados.valorTotalCartao6x += precoOriginal * item.qtd;
@@ -63,17 +55,10 @@ function prepararDadosParaAsaas() {
     return dados;
 }
 
-// 3. FUNÇÃO PARA ABRIR O MODAL DE PAGAMENTO
 function abrirCheckoutAsaas() {
-    if (typeof sacola === 'undefined' || sacola.length === 0) {
-        return alert("Sua sacola está vazia!");
-    }
+    if (typeof sacola === 'undefined' || sacola.length === 0) return alert("Sua sacola está vazia!");
+    if (!nomeFreteGlobal) return alert("⚠️ Selecione o frete antes de finalizar!");
 
-    if (!nomeFreteGlobal) {
-        return alert("⚠️ Selecione o frete antes de finalizar!");
-    }
-
-    const dados = prepararDadosParaAsaas();
     const modalCheckout = document.getElementById('modalCheckout');
     if (modalCheckout) modalCheckout.style.display = 'flex';
 }
@@ -86,9 +71,8 @@ function coletarDadosCheckout(metodoPagamento, event) {
         return alert("⚠️ Por favor, digite seu NOME COMPLETO.");
     }
 
-    // --- DEFINIÇÃO DAS PARCELAS ---
     let parcelasEscolhidas = 1;
-    // Pega o limite real salvo na sacola (1, 6 ou 10)
+    // Pega o limite real da sacola (10x, 6x ou 1)
     const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
 
     if (metodoPagamento === 'CREDIT_CARD') {
@@ -100,7 +84,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
         }
     }
 
-    // --- MONTAGEM DO OBJETO DE CHECKOUT ---
+    // MONTAGEM COM VALORES CORRIGIDOS
     const checkout = {
         cliente: {
             nome: nomeInput,
@@ -118,8 +102,8 @@ function coletarDadosCheckout(metodoPagamento, event) {
         },
         pagamento: {
             metodo: metodoPagamento,
-            // Ajuste automático do valor total baseado na escolha
-            valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotal)) + valorFreteGlobal,
+            // CORREÇÃO: Usando valorTotalOriginal em vez de valorTotal inexistente
+            valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal)) + valorFreteGlobal,
             parcelas: parcelasEscolhidas, 
             parcelasMaximas: limiteParcelas,
             itens: dadosCarrinho.itensDetalhados
@@ -134,7 +118,6 @@ function coletarDadosCheckout(metodoPagamento, event) {
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
-    // --- ENVIO DOS DADOS ---
     fetch('/api/finalizar-compra', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -153,4 +136,4 @@ function coletarDadosCheckout(metodoPagamento, event) {
         btnAcao.innerText = "FINALIZAR PAGAMENTO";
         btnAcao.disabled = false;
     });
-} // <--- ESTA É A ÚNICA CHAVE QUE DEVE FECHAR A FUNÇÃO NO FINAL
+}
