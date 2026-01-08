@@ -78,7 +78,7 @@ function abrirCheckoutAsaas() {
     if (modalCheckout) modalCheckout.style.display = 'flex';
 }
 
-// 4. FUNÇÃO PARA COLETAR DADOS E ENVIAR PARA A API
+// 4. FUNÇÃO PARA COLETAR DADOS E ENVIAR PARA A API (VERSÃO COM ESCOLHA DE PARCELAS)
 function coletarDadosCheckout(metodoPagamento, event) {
     const dadosCarrinho = prepararDadosParaAsaas();
     const nomeInput = document.getElementById('cliente_nome').value.trim();
@@ -86,6 +86,20 @@ function coletarDadosCheckout(metodoPagamento, event) {
     if (nomeInput.split(' ').length < 2) {
         return alert("⚠️ Por favor, digite seu NOME COMPLETO.");
     }
+
+    // --- NOVIDADE AQUI: PERGUNTA AS PARCELAS SE FOR CARTÃO ---
+    let parcelasEscolhidas = 1;
+    const limiteParcelas = dadosCarrinho.temPromo6xAtiva ? 6 : 10;
+
+    if (metodoPagamento === 'CREDIT_CARD') {
+        const escolha = prompt(`Em quantas vezes deseja parcelar? (1 a ${limiteParcelas}x)`);
+        parcelasEscolhidas = parseInt(escolha);
+
+        if (isNaN(parcelasEscolhidas) || parcelasEscolhidas < 1 || parcelasEscolhidas > limiteParcelas) {
+            return alert(`Por favor, escolha um número de 1 a ${limiteParcelas}.`);
+        }
+    }
+    // -------------------------------------------------------
 
     const checkout = {
         cliente: {
@@ -105,7 +119,8 @@ function coletarDadosCheckout(metodoPagamento, event) {
         pagamento: {
             metodo: metodoPagamento,
             valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : dadosCarrinho.valorTotalCartao6x) + valorFreteGlobal,
-            parcelasMaximas: dadosCarrinho.temPromo6xAtiva ? 6 : 10,
+            parcelas: parcelasEscolhidas, // ENVIAMOS A ESCOLHA DO CLIENTE
+            parcelasMaximas: limiteParcelas,
             itens: dadosCarrinho.itensDetalhados
         }
     };
@@ -126,7 +141,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
-            window.location.href = data.invoiceUrl; // REDIRECIONA PARA O ASAAS
+            window.location.href = data.invoiceUrl;
         } else {
             throw new Error(data.error || "Erro no processamento");
         }
