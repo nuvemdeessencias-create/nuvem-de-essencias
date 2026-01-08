@@ -37,17 +37,19 @@ export default async function handler(req, res) {
 // Substitua o bloco do paymentBody na sua API por este:
 const paymentBody = {
     customer: customerData.id,
-    billingType: 'UNDEFINED', // Mantém 'UNDEFINED' para o cliente escolher o método na tela azul
+    const paymentBody = {
+    customer: customerData.id,
+    billingType: 'CREDIT_CARD', // Mudamos para CREDIT_CARD para forçar a abertura do formulário com parcelas
     value: pagamento.valor, 
+    totalValue: pagamento.valor, // ADICIONADO: Obrigatório para validar parcelamento
     dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
     description: "Pedido Nuvem de Essências",
     externalReference: `PED-${Date.now()}`,
     
-    // ESTE BLOCO É O QUE DEFINE O PARCELAMENTO
-    installmentCount: 1, // Define que começa em 1x por padrão
+    // A CONFIGURAÇÃO QUE LIBERA O SELETOR
+    installmentCount: 1, // Começa exibindo o valor de 1x
     installmentOptions: {
-        // Aqui o sistema usa o que o checkout.js calculou (6 ou 10)
-        maxInstallmentCount: pagamento.parcelasMaximas || 10, 
+        maxInstallmentCount: pagamento.parcelasMaximas || 10, // Respeita os 6x ou 10x do seu site
         unlimitedInstallments: false
     }
 };
