@@ -998,6 +998,8 @@ function removerItem(index) {
         resultadoFrete.innerHTML = "<p style='color:#b89356; font-size:12px;'>Item removido. Recalcule o frete.</p>";
     }
 
+
+    // 2. SEGUNDO: A função do aviso (ajustada)
 function mostrarAvisoCarrinho() {
     const antigo = document.getElementById("aviso-sacola-toast");
     if(antigo) antigo.remove();
@@ -1016,12 +1018,13 @@ function mostrarAvisoCarrinho() {
     setTimeout(() => { if(aviso) aviso.remove(); }, 5000);
 }
 
+// 3. TERCEIRO: A função de adicionar (FECHADA CORRETAMENTE AGORA)
 function confirmarAdicao() { 
     if (typeof atualizarSacola === "function") {
         atualizarSacola(); 
     }
-    mostrarAvisoCarrinho(); 
-}
+    mostrarAvisoCarrinho(); // <-- Chamada correta
+} // <-- ESSA CHAVE É O QUE FALTAVA PARA OS PRODUTOS VOLTAREM
 
 
 // --- MODAL DE DETALHES ---
@@ -1197,6 +1200,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
