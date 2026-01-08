@@ -635,6 +635,15 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     
 <script>
 
+window.toggleCart = function() {
+    const modal = document.getElementById('cart-modal');
+    if (modal) {
+        modal.classList.toggle('active');
+    } else {
+        console.error("Erro: cart-modal não encontrado");
+    }
+};
+
 // --- VARIÁVEIS GLOBAIS ---
 let sacola = []; 
 let valorFreteGlobal = 0;
@@ -1188,6 +1197,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
