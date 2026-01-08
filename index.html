@@ -860,16 +860,21 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
     container.innerHTML = html;
 }
 
-    function adicionarComPromocao(id, nome, mlId, qtdId) {
+   function adicionarComPromocao(id, nome, mlId, qtdId) {
     const selectMl = document.getElementById(mlId);
+    if (!selectMl) return; // Segurança caso o elemento não exista
+
     const [ml, precoBruto] = selectMl.value.split('|');
     const precoBase = parseFloat(precoBruto);
-    const qtd = parseInt(document.getElementById(qtdId).value);
-    const pOriginal = meusProdutos.find(item => item.id === id);
+    const qtdInput = document.getElementById(qtdId);
+    const qtd = qtdInput ? parseInt(qtdInput.value) : 1;
     
+    const pOriginal = meusProdutos.find(item => item.id === id);
+    if (!pOriginal) return;
+
     const promo = processarPrecoProduto({ id: id, marca: pOriginal.marca, preco: precoBase, ml: ml });
 
-    // Se NÃO estiver em promoção, adiciona direto
+    // --- CASO 1: NÃO ESTÁ EM PROMOÇÃO ---
     if (!promo.emPromocao) {
         sacola.push({ 
             id, nome, ml, 
@@ -879,46 +884,55 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
             tipoPagamento: "Cartão até 10x",
             maxParcelas: 10 
         });
-        confirmarAdicao(); // Aquela função que mostra o balão de sucesso
-        atualizarSacola();
+
+        // Verificação de segurança que você pediu
+        if (typeof confirmarAdicao === "function") {
+            confirmarAdicao();
+        }
+        
+        if (typeof atualizarSacola === "function") {
+            atualizarSacola();
+        }
         return;
     }
 
-    // Se ESTIVER em promoção, abre o MODAL AZUL PROFISSIONAL
+    // --- CASO 2: ESTÁ EM PROMOÇÃO (ABRIR MODAL) ---
     const container = document.getElementById('containerOpcoesPromo');
-    container.innerHTML = ''; // Limpa opções anteriores
+    if (!container) {
+        console.error("Erro: Elemento 'containerOpcoesPromo' não encontrado no HTML.");
+        return;
+    }
+    
+    container.innerHTML = ''; // Limpa botões antigos
 
-    // Definimos as opções que aparecerão nos botões
     const opcoes = [
-        { num: "1", texto: "À VISTA NO PIX", valor: promo.pixValor, desc: "Melhor desconto", parcelas: 1, promo: true },
-        { num: "2", texto: "CARTÃO ATÉ 6X", valor: promo.valor6x, desc: "Parcelamento exclusivo", parcelas: 6, promo: true, mostrar: promo.tem6x },
-        { num: "3", texto: "CARTÃO ATÉ 10X", valor: promo.valor10x, desc: "Preço original", parcelas: 10, promo: false, mostrar: true }
+        { texto: "À VISTA NO PIX", valor: promo.pixValor, desc: "Melhor desconto", parcelas: 1, promo: true, mostrar: true },
+        { texto: "CARTÃO ATÉ 6X", valor: promo.valor6x, desc: "Parcelamento exclusivo", parcelas: 6, promo: true, mostrar: promo.tem6x },
+        { texto: "CARTÃO ATÉ 10X", valor: promo.valor10x, desc: "Preço original", parcelas: 10, promo: false, mostrar: true }
     ];
 
     opcoes.forEach(opt => {
-        if (opt.mostrar === false) return; // Pula a opção 6x se não estiver disponível
+        if (!opt.mostrar) return;
 
         const btn = document.createElement('button');
         const valorFormatado = opt.valor.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
         
         btn.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; pointer-events: none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; pointer-events: none; width: 100%;">
                 <div style="text-align:left;">
-                    <strong style="display:block; font-size:13px; color:#fff;">${opt.texto}</strong>
+                    <strong style="display:block; font-size:13px; color:#fff; margin:0;">${opt.texto}</strong>
                     <span style="font-size:11px; color:#b89356;">${opt.desc}</span>
                 </div>
                 <div style="font-size:16px; font-weight:bold; color:#fff;">${valorFormatado}</div>
             </div>
         `;
         
-        btn.style = "background:#041236; border:1px solid #1a2a4d; padding:15px; border-radius:12px; cursor:pointer; transition:0.3s; width:100%; margin-bottom:5px;";
+        btn.style = "background:#041236; border:1px solid #1a2a4d; padding:15px; border-radius:12px; cursor:pointer; transition:0.3s; width:100%; margin-bottom:10px; display:block;";
         
-        // Efeito de passar o mouse
         btn.onmouseover = () => btn.style.border = "1px solid #b89356";
         btn.onmouseout = () => btn.style.border = "1px solid #1a2a4d";
 
         btn.onclick = () => {
-            // Lógica de adicionar à sacola ao clicar
             sacola.push({ 
                 id, nome, ml, 
                 preco: opt.valor, 
@@ -928,23 +942,29 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
                 maxParcelas: opt.parcelas 
             });
             
-            document.getElementById('modalPromocaoOpcoes').style.display = 'none';
-            confirmarAdicao(); // Mostra o balão de sucesso
-            atualizarSacola(); // Atualiza os números da sacola
+            // Fecha o modal azul
+            const modalPromo = document.getElementById('modalPromocaoOpcoes');
+            if (modalPromo) modalPromo.style.display = 'none';
+
+            // Chamadas seguras das funções de feedback
+            if (typeof confirmarAdicao === "function") {
+                confirmarAdicao();
+            }
+            if (typeof atualizarSacola === "function") {
+                atualizarSacola();
+            }
         };
         
         container.appendChild(btn);
     });
 
-    // Mostra o modal
-    document.getElementById('modalPromocaoOpcoes').style.display = 'flex';
-}
-
-    if (typeof confirmarAdicao === "function") {
-        confirmarAdicao();
+    const modalFinal = document.getElementById('modalPromocaoOpcoes');
+    if (modalFinal) {
+        modalFinal.style.display = 'flex';
+    } else {
+        alert("Erro visual: O modal de promoção não foi encontrado no seu index.html");
     }
 }
-
    
 
 function atualizarSacola() {
@@ -1232,6 +1252,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
