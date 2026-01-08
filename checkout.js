@@ -1,17 +1,65 @@
+/* --- checkout.js CORRIGIDO --- */
+
+function prepararDadosParaAsaas() {
+    if (typeof sacola === 'undefined' || sacola.length === 0) return null;
+    
+    let dados = {
+        valorTotalPix: 0,
+        valorTotalCartao6x: 0,
+        valorTotalOriginal: 0,
+        temPromo6xAtiva: false,
+        itensDetalhados: []
+    };
+
+    sacola.forEach(item => {
+        const p = meusProdutos.find(prod => prod.id === item.id);
+        const precoOriginal = item.preco; 
+        const infoPromo = processarPrecoProduto({ id: item.id, ml: item.ml, preco: precoOriginal });
+
+        dados.valorTotalPix += infoPromo.pixValor * item.qtd;
+
+        // Corrigido de 'se' para 'if'
+        if (infoPromo.tem6x) {
+            dados.temPromo6xAtiva = true; // Corrigido de 'verdadeiro' para 'true'
+            dados.valorTotalCartao6x += infoPromo.valor6x * item.qtd;
+        } else {
+            dados.valorTotalCartao6x += precoOriginal * item.qtd;
+        }
+
+        dados.valorTotalOriginal += precoOriginal * item.qtd;
+        
+        dados.itensDetalhados.push({ 
+            nome: p.nome, 
+            quantidade: item.qtd, 
+            precoUnitario: precoOriginal 
+        });
+    });
+
+    return dados;
+}
+
+function abrirCheckoutAsaas() {
+    if (typeof sacola === 'undefined' || sacola.length === 0) {
+        return alert("Sua sacola está vazia!");
+    }
+
+    if (!nomeFreteGlobal) {
+        return alert("⚠️ Selecione o frete antes de finalizar!");
+    }
+
+    const dados = prepararDadosParaAsaas();
+    const modalCheckout = document.getElementById('modalCheckout');
+    if (modalCheckout) modalCheckout.style.display = 'flex';
+}
+
 function coletarDadosCheckout(metodoPagamento, event) {
     const dadosCarrinho = prepararDadosParaAsaas();
-    if (!dadosCarrinho) return alert("Seu carrinho está vazio!");
-
-    if (typeof valorFreteGlobal === 'undefined' || valorFreteGlobal === null) {
-        return alert("Erro: Frete não identificado. Por favor, calcule o frete novamente.");
-    }
-
     const nomeInput = document.getElementById('cliente_nome').value.trim();
+
     if (nomeInput.split(' ').length < 2) {
-        return alert("⚠️ Por favor, digite seu NOME COMPLETO (nome e sobrenome).");
+        return alert("⚠️ Por favor, digite seu NOME COMPLETO.");
     }
 
-    // MONTAGEM DO OBJETO - Note que fechei a chave corretamente no final
     const checkout = {
         cliente: {
             nome: nomeInput,
@@ -33,19 +81,17 @@ function coletarDadosCheckout(metodoPagamento, event) {
             parcelasMaximas: dadosCarrinho.temPromo6xAtiva ? 6 : 10,
             itens: dadosCarrinho.itensDetalhados
         }
-    }; // <--- ESSA CHAVE ESTAVA FALTANDO E TRAVANDO TUDO
+    };
 
-    // Validação básica antes de enviar
-    if (!checkout.cliente.nome || checkout.cliente.cpfCnpj.length < 11 || !checkout.endereco.cep) {
-        return alert("Por favor, preencha Nome, CPF e CEP corretamente.");
+    // Corrigido de 'comprimento' para 'length'
+    if (checkout.cliente.cpfCnpj.length < 11) {
+        return alert("CPF inválido.");
     }
 
     const btnAcao = event.target; 
-    const textoOriginal = btnAcao.innerText;
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
-    // Envio para a sua API na Vercel
     fetch('/api/finalizar-compra', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,18 +100,14 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
-            // Se der tudo certo, redireciona para o Asaas
-            window.location.href = data.invoiceUrl;
+            window.location.href = data.invoiceUrl; // REDIRECIONAMENTO
         } else {
-            // Se a API der erro, mostra o motivo real (ex: CPF inválido)
-            const msgErro = data.details ? data.details[0].description : (data.error || "Erro ao processar");
-            throw new Error(msgErro);
+            throw new Error(data.error || "Erro no processamento");
         }
     })
     .catch(err => {
-        console.error("Erro:", err);
         alert("Falha: " + err.message);
-        btnAcao.innerText = textoOriginal;
+        btnAcao.innerText = "FINALIZAR PAGAMENTO";
         btnAcao.disabled = false;
     });
 }
