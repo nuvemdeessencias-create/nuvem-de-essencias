@@ -33,28 +33,30 @@ export default async function handler(req, res) {
         // 2. CRIAR A COBRANÇA
         // REMOVEMOS o installmentCount aqui para o Asaas não tentar processar como cobrança única imediata
 
-        const paymentBody = {
+       // DENTRO DE api/finalizar-compra.js
+const paymentBody = {
     customer: customerData.id,
-    billingType: 'UNDEFINED', 
+    billingType: 'UNDEFINED', // Permite que o cliente escolha no checkout
     value: pagamento.valor, 
     dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
     description: "Pedido Nuvem de Essências",
     externalReference: `PED-${Date.now()}`,
-    // AJUSTE AQUI: Adicionamos installmentCount para liberar o seletor de parcelas
-    installmentCount: 1, // Isso define que começa em 1x, mas libera o seletor abaixo
-    installmentOptions: {
-        maxInstallmentCount: pagamento.parcelasMaximas || 10,
-        unlimitedInstallments: false
-    }
+    // O SEGREDO ESTÁ AQUI:
+    // Para liberar o parcelamento no checkout transparente do Asaas,
+    // não podemos enviar installmentOptions puro se quisermos que o cliente escolha.
+    // Vamos enviar o valor total e deixar o maxInstallmentCount configurado no painel 
+    // ou simplificar a chamada para que o Asaas gerencie:
+    installmentCount: 1, 
+    totalValue: pagamento.valor
 };
 
-        // Só adicionamos as opções de parcelamento se o valor for válido
-        if (pagamento.valor > 0) {
-            paymentBody.installmentOptions = {
-                maxInstallmentCount: pagamento.parcelasMaximas || 10,
-                unlimitedInstallments: false
-            };
-        }
+// Se o valor for maior que 20 reais, permitimos o parcelamento nas opções
+if (pagamento.valor > 20) {
+    paymentBody.installmentOptions = {
+        maxInstallmentCount: pagamento.parcelasMaximas || 10,
+        unlimitedInstallments: false
+    };
+}
 
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
