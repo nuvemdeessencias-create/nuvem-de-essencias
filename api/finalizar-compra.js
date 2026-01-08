@@ -37,20 +37,18 @@ export default async function handler(req, res) {
 
 const paymentBody = {
     customer: customerData.id,
-    billingType: 'CREDIT_CARD', 
-    // USAMOS APENAS O VALOR TOTAL
-    value: pagamento.valor,
-    totalValue: pagamento.valor, 
+    billingType: 'CREDIT_CARD',
     dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
     description: "Pedido Nuvem de Essências",
     externalReference: `PED-${Date.now()}`,
-
-    // NÃO enviamos installmentCount fora do bloco options para não travar o valor
-    // O segredo para liberar a "aba de mudar" é este bloco abaixo:
-    installmentOptions: {
-        maxInstallmentCount: pagamento.parcelasMaximas || 10,
-        unlimitedInstallments: false
-    }
+    
+    // Se o cliente escolheu mais de 1x, usamos a estrutura de parcelamento da doc
+    ...(pagamento.parcelas > 1 ? {
+        installmentCount: pagamento.parcelas,
+        installmentValue: (pagamento.valor / pagamento.parcelas).toFixed(2)
+    } : {
+        value: pagamento.valor // Cobrança à vista se for 1x
+    })
 };
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
