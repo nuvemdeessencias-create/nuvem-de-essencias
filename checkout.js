@@ -1,5 +1,31 @@
-/* --- checkout.js CORRIGIDO --- */
+/* --- checkout.js CORRIGIDO E COMPLETO --- */
 
+// 1. FUNÇÃO DE BUSCA AUTOMÁTICA DE CEP
+function buscarCEP(cep) {
+    const valor = cep.replace(/\D/g, ''); // Remove tudo que não é número
+    if (valor.length !== 8) return; // Só dispara a busca com 8 dígitos
+
+    // Busca os dados na API ViaCEP
+    fetch(`https://viacep.com.br/ws/${valor}/json/`)
+        .then(res => res.json())
+        .then(dados => {
+            if (!dados.erro) {
+                // Preenche os campos do formulário automaticamente
+                document.getElementById('end_rua').value = dados.logradouro || "";
+                document.getElementById('end_bairro').value = dados.bairro || "";
+                document.getElementById('end_cidade').value = dados.localidade || "";
+                document.getElementById('end_estado').value = dados.uf || "";
+                
+                // Move o cursor automaticamente para o campo número
+                document.getElementById('end_numero').focus();
+            } else {
+                alert("CEP não encontrado. Por favor, preencha manualmente.");
+            }
+        })
+        .catch(err => console.error("Erro ao buscar CEP:", err));
+}
+
+// 2. FUNÇÃO PARA PREPARAR OS DADOS DO CARRINHO
 function prepararDadosParaAsaas() {
     if (typeof sacola === 'undefined' || sacola.length === 0) return null;
     
@@ -18,9 +44,8 @@ function prepararDadosParaAsaas() {
 
         dados.valorTotalPix += infoPromo.pixValor * item.qtd;
 
-        // Corrigido de 'se' para 'if'
         if (infoPromo.tem6x) {
-            dados.temPromo6xAtiva = true; // Corrigido de 'verdadeiro' para 'true'
+            dados.temPromo6xAtiva = true; 
             dados.valorTotalCartao6x += infoPromo.valor6x * item.qtd;
         } else {
             dados.valorTotalCartao6x += precoOriginal * item.qtd;
@@ -38,6 +63,7 @@ function prepararDadosParaAsaas() {
     return dados;
 }
 
+// 3. FUNÇÃO PARA ABRIR O MODAL DE PAGAMENTO
 function abrirCheckoutAsaas() {
     if (typeof sacola === 'undefined' || sacola.length === 0) {
         return alert("Sua sacola está vazia!");
@@ -52,6 +78,7 @@ function abrirCheckoutAsaas() {
     if (modalCheckout) modalCheckout.style.display = 'flex';
 }
 
+// 4. FUNÇÃO PARA COLETAR DADOS E ENVIAR PARA A API
 function coletarDadosCheckout(metodoPagamento, event) {
     const dadosCarrinho = prepararDadosParaAsaas();
     const nomeInput = document.getElementById('cliente_nome').value.trim();
@@ -83,7 +110,6 @@ function coletarDadosCheckout(metodoPagamento, event) {
         }
     };
 
-    // Corrigido de 'comprimento' para 'length'
     if (checkout.cliente.cpfCnpj.length < 11) {
         return alert("CPF inválido.");
     }
@@ -100,7 +126,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
-            window.location.href = data.invoiceUrl; // REDIRECIONAMENTO
+            window.location.href = data.invoiceUrl; // REDIRECIONA PARA O ASAAS
         } else {
             throw new Error(data.error || "Erro no processamento");
         }
