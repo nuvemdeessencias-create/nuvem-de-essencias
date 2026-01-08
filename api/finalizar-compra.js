@@ -37,20 +37,17 @@ export default async function handler(req, res) {
 // Substitua o bloco do paymentBody na sua API por este:
 const paymentBody = {
     customer: customerData.id,
-    billingType: 'CREDIT_CARD', // Forçamos cartão para liberar o seletor de parcelas
+    billingType: 'UNDEFINED', // Mantém 'UNDEFINED' para o cliente escolher o método na tela azul
     value: pagamento.valor, 
     dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
     description: "Pedido Nuvem de Essências",
     externalReference: `PED-${Date.now()}`,
     
-    // CONFIGURAÇÃO DE PARCELAMENTO:
-    // Enviamos o valor total e o número de parcelas iniciais como o máximo permitido
-    // Isso forçará o Asaas a mostrar as opções de 1x até o limite.
-    installmentCount: 1, 
-    installmentValue: pagamento.valor, // Valor total na primeira parcela (à vista por padrão)
-    
+    // ESTE BLOCO É O QUE DEFINE O PARCELAMENTO
+    installmentCount: 1, // Define que começa em 1x por padrão
     installmentOptions: {
-        maxInstallmentCount: pagamento.parcelasMaximas || 10,
+        // Aqui o sistema usa o que o checkout.js calculou (6 ou 10)
+        maxInstallmentCount: pagamento.parcelasMaximas || 10, 
         unlimitedInstallments: false
     }
 };
