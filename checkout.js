@@ -59,10 +59,19 @@ function abrirCheckoutAsaas() {
     if (typeof sacola === 'undefined' || sacola.length === 0) return alert("Sua sacola está vazia!");
     if (!nomeFreteGlobal) return alert("⚠️ Selecione o frete antes de finalizar!");
 
+    // RESET DE SEGURANÇA: Garante que os botões não estejam travados em 'Processando'
+    const botoes = document.querySelectorAll('#modalCheckout button');
+    botoes.forEach(btn => {
+        if (btn.innerText === "PROCESSANDO...") {
+            // Restaura o texto original baseado no que estava antes
+            btn.innerText = btn.getAttribute('data-original-text') || (btn.onclick.toString().includes('PIX') ? "PAGAR PIX" : "CARTÃO");
+            btn.disabled = false;
+        }
+    });
+
     const modalCheckout = document.getElementById('modalCheckout');
     if (modalCheckout) modalCheckout.style.display = 'flex';
 }
-
 function coletarDadosCheckout(metodoPagamento, event) {
     const btnAcao = event.target;
     const textoOriginal = btnAcao.innerText;
