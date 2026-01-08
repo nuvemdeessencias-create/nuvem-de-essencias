@@ -829,7 +829,8 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
         inputQtd.value = 0;
     }
 }
-function atualizarPrecoCard(id, valorSelt, marca) {
+
+    function atualizarPrecoCard(id, valorSelt, marca) {
     const [ml, precoTexto] = valorSelt.split('|');
     const precoBase = parseFloat(precoTexto);
     const container = document.getElementById(`preco-container-${id}`);
@@ -847,28 +848,19 @@ function atualizarPrecoCard(id, valorSelt, marca) {
 
     if (promo.emPromocao) {
         html += `<div style="display:flex; flex-direction:column; gap:3px; align-items:center; width: 100%; margin-top: 2px;">`;
-        
-        html += `
-            <span class="tag-promo-pix">
-                💰 PIX: R$ ${formatarMoeda(promo.pixValor)}
-            </span>`;
+        html += `<span class="tag-promo-pix">💰 PIX: R$ ${formatarMoeda(promo.pixValor)}</span>`;
 
         if (promo.tem6x) {
-            html += `
-                <span class="tag-promo-6x">
-                    💳 6x de R$ ${formatarMoeda(promo.parcela6x)} (-${promo.percentual6x}%)
-                </span>`;
+            html += `<span class="tag-promo-6x">💳 6x de R$ ${formatarMoeda(promo.parcela6x)} (-${promo.percentual6x}%)</span>`;
         }
-        
         html += `</div>`;
     } else {
         html += `<div style="height: 10px;"></div>`;
     }
-
     container.innerHTML = html;
 }
-    
-    function adicionarComPromocao(id, nome, mlId, qtdId) {
+
+function adicionarComPromocao(id, nome, mlId, qtdId) {
     const selectMl = document.getElementById(mlId);
     const [ml, precoBruto] = selectMl.value.split('|');
     const precoBase = parseFloat(precoBruto);
@@ -916,7 +908,9 @@ function atualizarPrecoCard(id, valorSelt, marca) {
         maxParcelas: parcelasPermitidas 
     });
 
-    if (typeof confirmarAdicao === "function") confirmarAdicao();
+    if (typeof confirmarAdicao === "function") {
+        confirmarAdicao();
+    }
 }
 
     // --- INÍCIO DA TRAVA DE SEGURANÇA ---
@@ -1195,6 +1189,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
