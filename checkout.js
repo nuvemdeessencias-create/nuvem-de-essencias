@@ -80,25 +80,39 @@ function abrirCheckoutAsaas() {
 
 // 4. FUNÇÃO PARA COLETAR DADOS E ENVIAR PARA A API (VERSÃO COM ESCOLHA DE PARCELAS)
 function coletarDadosCheckout(metodoPagamento, event) {
+    // 1. Prepara os dados iniciais do carrinho
     const dadosCarrinho = prepararDadosParaAsaas();
     const nomeInput = document.getElementById('cliente_nome').value.trim();
 
+    // 2. Validação obrigatória do nome
     if (nomeInput.split(' ').length < 2) {
         return alert("⚠️ Por favor, digite seu NOME COMPLETO.");
     }
 
-    // --- NOVIDADE AQUI: PERGUNTA AS PARCELAS SE FOR CARTÃO ---
+    // 3. DEFINE O LIMITE DE PARCELAS DINAMICAMENTE (CORREÇÃO)
     let parcelasEscolhidas = 1;
-    const limiteParcelas = dadosCarrinho.temPromo6xAtiva ? 6 : 10;
+    
+    // IMPORTANTE: Aqui ele lê o limite que foi salvo na sacola (1, 6 ou 10)
+    // Isso remove a trava automática que estava fixa em 6
+    const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
 
     if (metodoPagamento === 'CREDIT_CARD') {
-        const escolha = prompt(`Em quantas vezes deseja parcelar? (1 a ${limiteParcelas}x)`);
+        // O prompt agora mostrará o limite real baseado na escolha do cliente
+        const escolha = prompt(`Em quantas vezes deseja parcelar? (1 a ${limiteParcelas}x)`, "1");
         parcelasEscolhidas = parseInt(escolha);
 
+        // Valida se o número digitado é válido e respeita o limite (ex: até 10)
         if (isNaN(parcelasEscolhidas) || parcelasEscolhidas < 1 || parcelasEscolhidas > limiteParcelas) {
-            return alert(`Por favor, escolha um número de 1 a ${limiteParcelas}.`);
+            return alert(`Por favor, escolha um número válido de 1 a ${limiteParcelas}.`);
         }
     }
+
+    // 4. ENVIO DOS DADOS (Certifique-se de que sua função de envio receba as 'parcelasEscolhidas')
+    console.log("Processando pagamento:", metodoPagamento, "Parcelas:", parcelasEscolhidas);
+    
+    // Exemplo de como prosseguir com o envio:
+    // realizarPagamentoAsaas(metodoPagamento, parcelasEscolhidas);
+}
     // -------------------------------------------------------
 
     const checkout = {
