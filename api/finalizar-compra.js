@@ -30,26 +30,29 @@ export default async function handler(req, res) {
         const customerData = await customerRes.json();
         if (customerData.errors) return res.status(400).json({ error: "Erro no cliente", details: customerData.errors });
 
-        // 2. CRIAR A COBRANÇA
-        // REMOVEMOS o installmentCount aqui para o Asaas não tentar processar como cobrança única imediata
+        // 2. CONFIGURAR O TIPO DE PAGAMENTO DINÂMICO
+        const ePix = pagamento.metodo === 'PIX';
 
-       // DENTRO DE api/finalizar-compra.js
+        const paymentBody = {
+            customer: customerData.id,
+            // Se o método vindo do front for 'PIX', envia PIX. Caso contrário, CREDIT_CARD.
+            billingType: ePix ? 'PIX' : 'CREDIT_CARD',
+            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+            description: "Pedido Nuvem de Essências",
+            externalReference: `PED-${Date.now()}`,
+            
+            // Lógica de valores e parcelas:
+            // Se for PIX ou 1x no cartão, enviamos apenas o 'value'.
+            // Se for parcelado, enviamos a contagem e o valor da parcela.
+            ...(ePix || pagamento.parcelas <= 1 ? {
+                value: pagamento.valor 
+            } : {
+                installmentCount: pagamento.parcelas,
+                installmentValue: (pagamento.valor / pagamento.parcelas).toFixed(2)
+            })
+        };
 
-const paymentBody = {
-    customer: customerData.id,
-    billingType: 'CREDIT_CARD',
-    dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-    description: "Pedido Nuvem de Essências",
-    externalReference: `PED-${Date.now()}`,
-    
-    // Se o cliente escolheu mais de 1x, usamos a estrutura de parcelamento da doc
-    ...(pagamento.parcelas > 1 ? {
-        installmentCount: pagamento.parcelas,
-        installmentValue: (pagamento.valor / pagamento.parcelas).toFixed(2)
-    } : {
-        value: pagamento.valor // Cobrança à vista se for 1x
-    })
-};
+        // 3. CRIAR A COBRANÇA NO ASAAS
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
             headers: { 
@@ -62,13 +65,13 @@ const paymentBody = {
         const paymentData = await paymentRes.json();
 
         if (paymentData.errors) {
-            // Se o Asaas der erro, enviamos a descrição exata do erro para o seu alert no site
             return res.status(400).json({ 
                 error: paymentData.errors[0].description, 
                 details: paymentData.errors 
             });
         }
 
+        // Retornamos a URL da fatura (que agora terá o QR Code se for PIX)
         return res.status(200).json({
             success: true,
             invoiceUrl: paymentData.invoiceUrl 
