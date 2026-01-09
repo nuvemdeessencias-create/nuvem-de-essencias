@@ -635,15 +635,6 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     
 <script>
 
-window.toggleCart = function() {
-    const modal = document.getElementById('cart-modal');
-    if (modal) {
-        modal.classList.toggle('active');
-    } else {
-        console.error("Erro: cart-modal não encontrado");
-    }
-};
-
 // --- VARIÁVEIS GLOBAIS ---
 let sacola = []; 
 let valorFreteGlobal = 0;
@@ -829,14 +820,14 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
         inputQtd.value = 0;
     }
 }
-
-    function atualizarPrecoCard(id, valorSelt, marca) {
+function atualizarPrecoCard(id, valorSelt, marca) {
     const [ml, precoTexto] = valorSelt.split('|');
     const precoBase = parseFloat(precoTexto);
     const container = document.getElementById(`preco-container-${id}`);
     
     if (!container) return;
 
+    // Busca os dados da promoção apenas para exibição visual no card
     const promo = processarPrecoProduto({ id: id, marca: marca, preco: precoBase, ml: ml });
 
     let html = `
@@ -846,199 +837,130 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
         </div>
     `;
 
+    // Container para as tags de desconto (Pix e 6x)
     if (promo.emPromocao) {
         html += `<div style="display:flex; flex-direction:column; gap:3px; align-items:center; width: 100%; margin-top: 2px;">`;
-        html += `<span class="tag-promo-pix">💰 PIX: R$ ${formatarMoeda(promo.pixValor)}</span>`;
+        
+        // Tag PIX (Estilo Nuvem)
+        html += `
+            <span class="tag-promo-pix">
+                💰 PIX: R$ ${formatarMoeda(promo.pixValor)}
+            </span>`;
 
+        // Tag 6x CARTÃO (Se existir na regra)
         if (promo.tem6x) {
-            html += `<span class="tag-promo-6x">💳 6x de R$ ${formatarMoeda(promo.parcela6x)} (-${promo.percentual6x}%)</span>`;
+            html += `
+                <span class="tag-promo-6x">
+                    💳 6x de R$ ${formatarMoeda(promo.parcela6x)} (-${promo.percentual6x}%)
+                </span>`;
         }
+        
         html += `</div>`;
     } else {
+        // Espaçador menor (10px) para não empurrar o card para baixo em itens sem promo
         html += `<div style="height: 10px;"></div>`;
     }
+
     container.innerHTML = html;
 }
 
-   function adicionarComPromocao(id, nome, mlId, qtdId) {
+function adicionarComPromocao(id, nome, mlId, qtdId) {
     const selectMl = document.getElementById(mlId);
-    if (!selectMl) return; // Segurança caso o elemento não exista
-
     const [ml, precoBruto] = selectMl.value.split('|');
     const precoBase = parseFloat(precoBruto);
-    const qtdInput = document.getElementById(qtdId);
-    const qtd = qtdInput ? parseInt(qtdInput.value) : 1;
-    
+    const qtd = parseInt(document.getElementById(qtdId).value);
     const pOriginal = meusProdutos.find(item => item.id === id);
-    if (!pOriginal) return;
-
+    
+    // Processa se o item tem direito a desconto (Pix ou 6x)
     const promo = processarPrecoProduto({ id: id, marca: pOriginal.marca, preco: precoBase, ml: ml });
 
-// --- CASO 1: NÃO ESTÁ EM PROMOÇÃO ---
-    if (!promo.emPromocao) {
-        sacola.push({ 
-            id, nome, ml, 
-            preco: precoBase, 
-            qtd, 
-            emPromocao: false,
-            tipoPagamento: "Cartão até 10x",
-            maxParcelas: 10 
-        });
+    let precoFinal = precoBase;
+    let descLabel = "Cartão até 10x";
+    let parcelasPermitidas = 10;
+    let isPromo = false;
 
-        // Use apenas esta chamada. 
-        // Como sua função confirmarAdicao() já tem atualizarSacola(true) dentro, 
-        // ela vai resetar o frete e mostrar o aviso verde de uma vez só.
-        if (typeof confirmarAdicao === "function") {
-            confirmarAdicao();
+    // Se tiver promoção, pergunta a preferência do cliente
+    if (promo.emPromocao) {
+        let mensagem = `Escolha a condição de pagamento:\n\n`;
+        mensagem += `1. PIX: R$ ${formatarMoeda(promo.pixValor)}\n`;
+        if(promo.tem6x) {
+            mensagem += `2. CARTÃO ATÉ 6x: R$ ${formatarMoeda(promo.valor6x)}\n`;
         }
-        return;
+        mensagem += `3. CARTÃO ATÉ 10x: R$ ${formatarMoeda(promo.valor10x)}\n\n`;
+        mensagem += `Digite o número (1, 2 ou 3):`;
+
+        const escolha = prompt(mensagem, "1");
+
+        if (escolha === "1") { 
+            precoFinal = promo.pixValor; 
+            descLabel = "PIX"; 
+            parcelasPermitidas = 1; 
+            isPromo = true;
+        } else if (escolha === "2" && promo.tem6x) { 
+            precoFinal = promo.valor6x; 
+            descLabel = "PROMO 6x"; 
+            parcelasPermitidas = 6; 
+            isPromo = true;
+        }
     }
-    // --- CASO 2: ESTÁ EM PROMOÇÃO (ABRIR MODAL) ---
-    const container = document.getElementById('containerOpcoesPromo');
-    if (!container) {
-        console.error("Erro: Elemento 'containerOpcoesPromo' não encontrado no HTML.");
-        return;
-    }
-    
-    container.innerHTML = ''; // Limpa botões antigos
-
-    const opcoes = [
-        { texto: "À VISTA NO PIX", valor: promo.pixValor, desc: "Melhor desconto", parcelas: 1, promo: true, mostrar: true },
-        { texto: "CARTÃO ATÉ 6X", valor: promo.valor6x, desc: "Parcelamento exclusivo", parcelas: 6, promo: true, mostrar: promo.tem6x },
-        { texto: "CARTÃO ATÉ 10X", valor: promo.valor10x, desc: "Preço original", parcelas: 10, promo: false, mostrar: true }
-    ];
-
-    opcoes.forEach(opt => {
-        if (!opt.mostrar) return;
-
-        const btn = document.createElement('button');
-        const valorFormatado = opt.valor.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
-        
-        btn.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; pointer-events: none; width: 100%;">
-                <div style="text-align:left;">
-                    <strong style="display:block; font-size:13px; color:#fff; margin:0;">${opt.texto}</strong>
-                    <span style="font-size:11px; color:#b89356;">${opt.desc}</span>
-                </div>
-                <div style="font-size:16px; font-weight:bold; color:#fff;">${valorFormatado}</div>
-            </div>
-        `;
-        
-        btn.style = "background:#041236; border:1px solid #1a2a4d; padding:15px; border-radius:12px; cursor:pointer; transition:0.3s; width:100%; margin-bottom:10px; display:block;";
-        
-        btn.onmouseover = () => btn.style.border = "1px solid #b89356";
-        btn.onmouseout = () => btn.style.border = "1px solid #1a2a4d";
-
-        btn.onclick = () => {
-            sacola.push({ 
-                id, nome, ml, 
-                preco: opt.valor, 
-                qtd, 
-                emPromocao: opt.promo,
-                tipoPagamento: opt.texto,
-                maxParcelas: opt.parcelas 
-            });
-            
-            // 1. Fecha o modal de escolha
-            const modalPromo = document.getElementById('modalPromocaoOpcoes');
-            if (modalPromo) modalPromo.style.display = 'none';
-
-            // 2. Dispara o reset do frete e o aviso de sucesso
-            if (typeof confirmarAdicao === "function") {
-                confirmarAdicao();
-            }
-        };
-        
-        // Aqui é onde o botão que acabamos de criar é colocado no HTML
-        container.appendChild(btn);
+    // Adiciona o item à sacola
+    sacola.push({ 
+        id, nome, ml, 
+        preco: precoFinal, 
+        qtd, 
+        emPromocao: isPromo,
+        tipoPagamento: descLabel,
+        maxParcelas: parcelasPermitidas
     });
 
-    // Mostra o modal após criar todos os botões
-    const modalFinal = document.getElementById('modalPromocaoOpcoes');
-    if (modalFinal) modalFinal.style.display = 'flex';
-}
+    // --- INÍCIO DA TRAVA DE SEGURANÇA ---
+    // Zera as variáveis globais de frete para invalidar cálculos antigos
+    valorFreteGlobal = 0;
+    nomeFreteGlobal = "";
 
-function atualizarSacola(veioDeAdicaoOuRemocao = false) {
-    // 1. Captura de Elementos com IDs REAIS do seu HTML
-    const itensCont = document.getElementById('sacola-conteudo'); 
-    const totalCont = document.getElementById('total-cont');      
-    const countCont = document.getElementById('cart-count');      
-    const areaOpcoesFrete = document.getElementById('opcoes-frete'); 
-    const resumoValores = document.querySelector('.resumo-valores');
-
-    // 2. Reset do Frete
-    if (veioDeAdicaoOuRemocao) {
-        valorFreteGlobal = 0;
-        nomeFreteGlobal = "";
-        if (areaOpcoesFrete) areaOpcoesFrete.innerHTML = "";
-
-        const avisoAntigo = document.getElementById('aviso-recalculo');
-        if (avisoAntigo) avisoAntigo.remove();
-
-        const aviso = document.createElement('div');
-        aviso.id = 'aviso-recalculo';
-        aviso.style = "background:rgba(184,147,86,0.1); padding:10px; border-radius:8px; border:1px solid #b89356; margin:10px 0; font-family:'Montserrat', sans-serif;";
-        aviso.innerHTML = `<p style="color:#b89356; font-size:12px; margin:0; font-weight:bold; text-align:center;">⚠️ SACOLA ALTERADA: Recalcule o frete.</p>`;
-        if (resumoValores) resumoValores.prepend(aviso);
-    }
-
-    // 3. Verificação de Sacola (Se estiver vazia, para aqui)
-    if (!sacola || sacola.length === 0) {
-        if (itensCont) itensCont.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Sua sacola está vazia.</p>';
-        if (totalCont) totalCont.innerText = "R$ 0,00";
-        if (countCont) countCont.innerText = "0";
-        return;
-    }
-
-    // 4. Renderização dos Itens (Usando um loop simples para evitar erros de map)
-    let subtotal = 0;
-    let htmlGerado = "";
-
-    for (let i = 0; i < sacola.length; i++) {
-        const item = sacola[i];
-        const valorItem = item.preco * item.qtd;
-        subtotal += valorItem;
-
-        // Tentamos formatar, se falhar, mostramos o número bruto
-        let precoFormatado;
-        try {
-            precoFormatado = formatarMoeda(valorItem).replace("R$", "").trim();
-        } catch (e) {
-            precoFormatado = valorItem.toFixed(2);
-        }
-
-        htmlGerado += `
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
-                <div style="text-align:left;">
-                    <strong style="font-size:13px; color:#333; display:block;">${item.nome.toUpperCase()}</strong>
-                    <span style="font-size:11px; color:#666;">${item.ml} | Qtd: ${item.qtd}</span><br>
-                    <span style="font-size:11px; color:#b89356; font-weight:bold;">${item.tipoPagamento}</span>
-                </div>
-                <div style="text-align:right;">
-                    <span style="font-size:13px; font-weight:bold; color:#333;">R$ ${precoFormatado}</span>
-                    <div onclick="removerItem(${i})" style="color:red; cursor:pointer; font-size:18px; margin-top:5px; font-weight:bold;">&times;</div>
-                </div>
+    // Atualiza o painel de frete visualmente para avisar o cliente
+    const resultadoFrete = document.getElementById('opcoes-frete');
+    if (resultadoFrete) {
+        resultadoFrete.innerHTML = `
+            <div style="background: #fff3e0; padding: 10px; border-radius: 8px; border: 1px solid #ffb74d; margin-top: 10px;">
+                <p style="color:#e65100; font-size:12px; font-weight:bold; margin:0; text-align:center;">
+                    ⚠️ Sacola atualizada! Calcule o frete novamente para este novo peso.
+                </p>
             </div>`;
     }
+    // --- FIM DA TRAVA DE SEGURANÇA ---
 
-    if (itensCont) itensCont.innerHTML = htmlGerado;
-
-    // 5. Cálculo Total e Fim do R$ R$
-    const totalGeral = subtotal + valorFreteGlobal;
-    if (totalCont) {
-        let totalLimpo;
-        try {
-            totalLimpo = formatarMoeda(totalGeral).replace("R$", "").trim();
-        } catch (e) {
-            totalLimpo = totalGeral.toFixed(2);
-        }
-        totalCont.innerText = "R$ " + totalLimpo;
-    }
-
-    if (countCont) countCont.innerText = sacola.length;
+    confirmarAdicao();
 }
 
-   
+function atualizarSacola() {
+    const itensCont = document.getElementById('cart-items');
+    const totalCont = document.getElementById('cart-total');
+    const countCont = document.getElementById('cart-count');
+    
+    let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
+
+    if (sacola.length === 0) {
+        itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
+    } else {
+        itensCont.innerHTML = sacola.map((item, index) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
+                <div style="text-align:left;">
+                    <b style="font-size:13px;">${item.nome}</b><br>
+                    <small>${item.ml} | Qtd: ${item.qtd}</small><br>
+                    <small style="color:${item.emPromocao ? '#2e7d32' : '#666'}; font-weight:bold;">${item.tipoPagamento}</small>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:13px; font-weight:bold;">R$ ${formatarMoeda(item.preco * item.qtd)}</div>
+                    <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px;">×</button>
+                </div>
+            </div>`).join('');
+    }
+
+    const totalGeral = subtotal + valorFreteGlobal;
+    totalCont.innerText = formatarMoeda(totalGeral);
+    countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
+}
 
 // --- UTILITÁRIOS ---
 function formatarMoeda(valor) {
@@ -1055,42 +977,23 @@ function alterarQtd(idInput, delta, produtoId) {
     if (novo >= 1 && novo <= max) input.value = novo;
 }
 
-// 1. REMOVER ITEM (CORRIGIDA)
 function removerItem(index) {
     sacola.splice(index, 1); 
+
+    // Zera o frete para evitar que aproveitem o valor antigo
     valorFreteGlobal = 0;
     nomeFreteGlobal = "";
+
     const resultadoFrete = document.getElementById('opcoes-frete');
     if (resultadoFrete) {
         resultadoFrete.innerHTML = "<p style='color:#b89356; font-size:12px;'>Item removido. Recalcule o frete.</p>";
     }
-    atualizarSacola(true);
+
+    atualizarSacola(); 
 }
+function confirmarAdicao() { atualizarSacola(); toggleCart(); }
 
-// 2. MOSTRAR AVISO (CORRIGIDA COM SACOLA 🛍️)
-function mostrarAvisoCarrinho() {
-    const antigo = document.getElementById("aviso-sacola-toast");
-    if(antigo) antigo.remove();
-
-    const aviso = document.createElement('div');
-    aviso.id = "aviso-sacola-toast";
-    aviso.style = "position: fixed; top: 100px; right: 20px; background: #2e7d32; color: white; padding: 15px 20px; border-radius: 8px; z-index: 99999; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 15px; font-family: sans-serif;";
-    
-    aviso.innerHTML = `
-        <span style="font-weight: bold;">🛍️ Adicionado com sucesso!</span>
-        <button onclick="window.toggleCart(); this.parentElement.remove();" style="background: white; color: #2e7d32; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 12px; text-transform: uppercase;">VER AGORA</button>
-        <b onclick="this.parentElement.remove()" style="cursor: pointer; font-size: 20px; padding-left: 5px;">✕</b>
-    `;
-
-    document.body.appendChild(aviso);
-    setTimeout(() => { if(aviso) aviso.remove(); }, 5000);
-}
-
-// 3. CONFIRMAR ADIÇÃO (CORRIGIDA E SEGURA)
-function confirmarAdicao() {
-    atualizarSacola(true); // O 'true' força o frete a virar 0
-    mostrarAvisoCarrinho();
-}
+function toggleCart() { document.getElementById('cart-modal').classList.toggle('active'); }
 
 // --- MODAL DE DETALHES ---
 function abrirDetalhes(p) {
@@ -1147,24 +1050,9 @@ async function calcularFrete() {
 function selecionarFrete(nome, valor, elemento) {
     valorFreteGlobal = valor;
     nomeFreteGlobal = nome;
-
-    // Borda dourada no selecionado
     document.querySelectorAll('.opcao-frete-card').forEach(c => c.style.borderColor = '#eee');
-    if (elemento) elemento.style.borderColor = '#b89356';
-
-    // Atualiza o total chamando a função principal com 'false' (para não sumir os cards)
-    atualizarSacola(false); 
-
-    // Feedback visual de sucesso
-    const resumoValores = document.querySelector('.resumo-valores');
-    if (resumoValores) {
-        const aviso = document.getElementById('aviso-recalculo');
-        if (aviso) {
-            aviso.style.background = "rgba(46, 204, 113, 0.1)";
-            aviso.style.borderColor = "#2ecc71";
-            aviso.innerHTML = `<p style="color:#2ecc71; font-size:12px; margin:0; font-weight:bold; text-align:center;">✅ Frete ${nome} selecionado!</p>`;
-        }
-    }
+    elemento.style.borderColor = '#b89356';
+    atualizarSacola();
 }
 
 function finalizarWhatsApp() {
@@ -1227,35 +1115,6 @@ function finalizarWhatsApp() {
     </div>
 </div>
 
-    <div id="modalParcelas" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:30000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
-    <div style="background:#fff; padding:25px; border-radius:15px; width:90%; max-width:380px; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.5);">
-        <div style="font-size: 35px; margin-bottom: 10px;">💳</div>
-        <h3 style="margin:0 0 5px 0; color:#020b1f; font-family:sans-serif;">Parcelamento</h3>
-        <p style="color:#666; font-size:14px; margin-bottom:20px;">Escolha a quantidade de parcelas:</p>
-        
-        <div id="listaParcelas" style="display:grid; grid-template-columns: 1fr; gap:8px; max-height:300px; overflow-y:auto; padding:5px;">
-            </div>
-
-        <button onclick="fecharModalParcelas()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer; font-weight:bold; font-size:13px;">
-            CANCELAR
-        </button>
-    </div>
-</div>
-
-<div id="modalPromocaoOpcoes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:40000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
-    <div style="background:#020b1f; padding:30px; border-radius:20px; width:95%; max-width:420px; text-align:center; border: 1px solid #b89356; box-shadow:0 20px 50px rgba(0,0,0,0.6);">
-        <div style="font-size: 40px; margin-bottom: 10px;">✨</div>
-        <h3 style="margin:0 0 10px 0; color:#fff; font-family:sans-serif; letter-spacing:1px;">Oferta Especial</h3>
-        <p style="color:#b89356; font-size:14px; margin-bottom:25px; font-weight:bold;">Como você prefere pagar este item?</p>
-        
-        <div id="containerOpcoesPromo" style="display:grid; grid-template-columns: 1fr; gap:12px;">
-            </div>
-
-        <button onclick="document.getElementById('modalPromocaoOpcoes').style.display='none'" style="margin-top:20px; background:none; border:none; color:#777; cursor:pointer; font-size:12px; text-transform:uppercase;">
-            Cancelar
-        </button>
-    </div>
-</div>
     
 <footer class="rodape-container">
     <div class="rodape-content">
@@ -1309,96 +1168,6 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
