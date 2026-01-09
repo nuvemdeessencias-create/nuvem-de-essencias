@@ -648,7 +648,7 @@ window.toggleCart = function() {
 let sacola = []; 
 let valorFreteGlobal = 0;
 let nomeFreteGlobal = "";
-
+let cepCalculadoGlobal = ""; // Guarda o CEP que foi usado para calcular o frete
 // --- INICIALIZAÇÃO ---
 window.onload = function() {
     if (typeof meusProdutos !== 'undefined') {
@@ -861,7 +861,15 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
 }
 
    function adicionarComPromocao(id, nome, mlId, qtdId) {
-    const selectMl = document.getElementById(mlId);
+       // RESETAR FRETE SEMPRE QUE ADICIONAR ALGO NOVO
+    valorFreteGlobal = 0;
+    nomeFreteGlobal = "";
+    cepCalculadoGlobal = ""; 
+    const resultadoFreteHTML = document.getElementById('opcoes-frete');
+    if (resultadoFreteHTML) {
+        resultadoFreteHTML.innerHTML = "<p style='color:#b89356; font-size:12px;'>Novo item adicionado. Recalcule o frete para atualizar o total.</p>";
+    }
+       const selectMl = document.getElementById(mlId);
     if (!selectMl) return; // Segurança caso o elemento não exista
 
     const [ml, precoBruto] = selectMl.value.split('|');
@@ -1069,6 +1077,7 @@ function fecharDetalhes() { document.getElementById('modal-detalhes').style.disp
 // --- FRETE E WHATSAPP ---
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
+    cepCalculadoGlobal = cep; // Salva o CEP atual para conferir no final
     const resultadoDiv = document.getElementById('opcoes-frete');
     if (sacola.length === 0) return alert("Adicione produtos primeiro.");
     if (cep.length !== 8) return alert("CEP inválido.");
@@ -1252,6 +1261,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
