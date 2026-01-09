@@ -874,7 +874,7 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
 
     const promo = processarPrecoProduto({ id: id, marca: pOriginal.marca, preco: precoBase, ml: ml });
 
-    // --- CASO 1: NÃO ESTÁ EM PROMOÇÃO ---
+// --- CASO 1: NÃO ESTÁ EM PROMOÇÃO ---
     if (!promo.emPromocao) {
         sacola.push({ 
             id, nome, ml, 
@@ -885,17 +885,14 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
             maxParcelas: 10 
         });
 
-        // Verificação de segurança que você pediu
+        // Use apenas esta chamada. 
+        // Como sua função confirmarAdicao() já tem atualizarSacola(true) dentro, 
+        // ela vai resetar o frete e mostrar o aviso verde de uma vez só.
         if (typeof confirmarAdicao === "function") {
             confirmarAdicao();
         }
-        
-        if (typeof atualizarSacola === "function") {
-            atualizarSacola();
-        }
         return;
     }
-
     // --- CASO 2: ESTÁ EM PROMOÇÃO (ABRIR MODAL) ---
     const container = document.getElementById('containerOpcoesPromo');
     if (!container) {
@@ -942,28 +939,23 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
                 maxParcelas: opt.parcelas 
             });
             
-            // Fecha o modal azul
+            // 1. Fecha o modal de escolha
             const modalPromo = document.getElementById('modalPromocaoOpcoes');
             if (modalPromo) modalPromo.style.display = 'none';
 
-            // Chamadas seguras das funções de feedback
+            // 2. Dispara o reset do frete e o aviso de sucesso
             if (typeof confirmarAdicao === "function") {
                 confirmarAdicao();
             }
-            if (typeof atualizarSacola === "function") {
-                atualizarSacola();
-            }
         };
         
+        // Aqui é onde o botão que acabamos de criar é colocado no HTML
         container.appendChild(btn);
     });
 
+    // Mostra o modal após criar todos os botões
     const modalFinal = document.getElementById('modalPromocaoOpcoes');
-    if (modalFinal) {
-        modalFinal.style.display = 'flex';
-    } else {
-        alert("Erro visual: O modal de promoção não foi encontrado no seu index.html");
-    }
+    if (modalFinal) modalFinal.style.display = 'flex';
 }
 
     function atualizarSacola(veioDeAdicaoOuRemocao = false) {
@@ -1304,6 +1296,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
