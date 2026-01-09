@@ -1151,26 +1151,27 @@ function selecionarFrete(nome, valor, elemento) {
     valorFreteGlobal = valor;
     nomeFreteGlobal = nome;
 
-    // Estilização visual (Borda dourada no selecionado)
+    // 1. Estilização visual (Borda dourada no selecionado)
     document.querySelectorAll('.opcao-frete-card').forEach(c => c.style.borderColor = '#eee');
-    elemento.style.borderColor = '#b89356';
+    if (elemento) elemento.style.borderColor = '#b89356';
 
-    // 1. Pegamos o subtotal atual dos produtos
+    // 2. Cálculo do Total Geral
     const subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
-    
-    // 2. Somamos com o frete que acabou de ser clicado
     const totalGeral = subtotal + valorFreteGlobal;
 
-    // 3. Atualizamos o valor na tela imediatamente
-    const totalCont = document.getElementById('cart-total');
+    // 3. Atualização do Total na Tela (CORRIGINDO O R$ DUPLICADO)
+    const totalCont = document.getElementById('total-cont'); // Usando o ID real do seu HTML
     if (totalCont) {
-        totalCont.innerText = `R$ ${formatarMoeda(totalGeral)}`;
+        let precoFinal = formatarMoeda(totalGeral);
+        let precoLimpo = precoFinal.replace("R$", "").trim();
+        totalCont.innerText = "R$ " + precoLimpo;
     }
 
-    // 4. Removemos o aviso de "Recalcule o frete" se ele existir
-    const resumoValores = document.getElementById('resumoValores');
+    // 4. Feedback Visual
+    const resumoValores = document.querySelector('.resumo-valores'); // Usando a classe correta
     if (resumoValores) {
-        resumoValores.innerHTML = `<p style="color:#2ecc71; font-size:13px; font-weight:bold;">✅ Frete ${nome} selecionado!</p>`;
+        // Limpa o aviso de "Recalcule" e confirma a seleção
+        resumoValores.innerHTML = `<p style="color:#b89356; font-size:13px; font-weight:bold; text-align:center; margin-top:10px;">✅ Frete ${nome} selecionado!</p>`;
     }
 }
 
@@ -1316,6 +1317,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
