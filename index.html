@@ -979,12 +979,12 @@ function atualizarSacola(veioDeAdicaoOuRemocao = false) {
         valorFreteGlobal = 0; 
         nomeFreteGlobal = ""; 
         
-        // Exibe o aviso visual para o cliente
+      // 2. Limpa a interface de frete para o cliente não achar que ainda vale
         if (resumoValores) {
             resumoValores.innerHTML = `
-                <div style="background: rgba(211, 47, 47, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed #d32f2f; margin-top: 10px;">
-                    <p style="color:#d32f2f; font-size:12px; margin:0; font-weight:bold;">
-                        ⚠️ Sacola alterada: Calcule o frete novamente.
+                <div style="background: rgba(211, 47, 47, 0.1); padding: 12px; border-radius: 8px; border: 1px solid #d32f2f; margin: 10px 0;">
+                    <p style="color:#d32f2f; font-size:13px; margin:0; font-weight:bold; text-align:center;">
+                        ⚠️ SACOLA ATUALIZADA: Calcule o frete novamente para prosseguir.
                     </p>
                 </div>`;
         }
@@ -1067,10 +1067,12 @@ function mostrarAvisoCarrinho() {
     setTimeout(() => { if(aviso) aviso.remove(); }, 5000);
 }
 
-// 3. CONFIRMAR ADIÇÃO (CORRIGIDA)
+// 3. CONFIRMAR ADIÇÃO (CORRIGIDA E SEGURA)
 function confirmarAdicao() { 
     if (typeof atualizarSacola === "function") {
-        atualizarSacola(); 
+        // Passamos 'true' para avisar que houve uma ADIÇÃO
+        // Isso vai disparar o reset do frete e o aviso em vermelho
+        atualizarSacola(true); 
     }
     mostrarAvisoCarrinho(); 
 }
@@ -1296,6 +1298,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
