@@ -972,26 +972,22 @@ function atualizarSacola(veioDeAdicaoOuRemocao = false) {
     const countCont = document.getElementById('cart-count');
     const resumoValores = document.getElementById('resumoValores');
     
-    // IMPORTANTE: Identifique o ID da div onde aparecem as opções de PAC/SEDEX
-    // Vamos supor que seja 'opcoes-frete-container'. Se for outro, mude aqui:
-    const opcoesFreteCont = document.getElementById('opcoes-frete-container');
+    // IMPORTANTE: Use o ID real da div onde aparecem os cards de frete (PAC/SEDEX)
+    const areaOpcoesFrete = document.getElementById('resultadoFrete'); 
 
-    // RESET OBRIGATÓRIO E LIMPEZA DE TELA
+    // RESET OBRIGATÓRIO: Limpa dados e interface se a sacola mudou
     if (veioDeAdicaoOuRemocao) {
-        valorFreteGlobal = 0; // Zera a variável matemática
-        nomeFreteGlobal = ""; // Limpa o nome do frete
+        valorFreteGlobal = 0;
+        nomeFreteGlobal = "";
         
-        // 1. Limpa os cards de frete (PAC/SEDEX) para ninguém clicar no antigo
-        if (opcoesFreteCont) {
-            opcoesFreteCont.innerHTML = ""; 
-        }
+        // APAGA os cards de frete antigos da tela para impedir seleção errada
+        if (areaOpcoesFrete) { areaOpcoesFrete.innerHTML = ""; }
 
-        // 2. Exibe o aviso visual de recalcular
         if (resumoValores) {
             resumoValores.innerHTML = `
                 <div style="background: rgba(211, 47, 47, 0.1); padding: 10px; border-radius: 8px; border: 1px solid #d32f2f; margin-top: 10px;">
                     <p style="color:#d32f2f; font-size:12px; margin:0; font-weight:bold; text-align:center;">
-                        ⚠️ SACOLA ALTERADA: Calcule o frete novamente.
+                        ⚠️ SACOLA ALTERADA: Recalcule o frete.
                     </p>
                 </div>`;
         }
@@ -1000,7 +996,7 @@ function atualizarSacola(veioDeAdicaoOuRemocao = false) {
     let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
     const totalGeral = subtotal + valorFreteGlobal;
 
-    // RENDERIZAÇÃO DOS ITENS
+    // Renderização dos Itens (Mantendo sua lógica de layout)
     if (sacola.length === 0) {
         itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
     } else {
@@ -1017,19 +1013,17 @@ function atualizarSacola(veioDeAdicaoOuRemocao = false) {
             </div>`).join('');
     }
 
-    // RESOLUÇÃO DOS "R$ R$"
-    // Se sua função formatarMoeda já retorna o prefixo "R$", não adicionamos nada antes.
-    let valorFinal = formatarMoeda(totalGeral);
+    // --- SOLUÇÃO DO "R$ R$" ---
+    // Removemos o "R$" manual e deixamos apenas o que vem da função formatarMoeda
+    let precoFinal = formatarMoeda(totalGeral);
     
-    // Garantimos que comece com R$ uma única vez
-    if (!valorFinal.startsWith('R$')) {
-        valorFinal = `R$ ${valorFinal}`;
-    }
+    // Se a sua função NÃO retornar o "R$", usamos precoFinal = `R$ ${precoFinal}`;
+    // Se ela JÁ RETORNA, usamos apenas precoFinal;
+    // Para garantir, limpamos duplicatas aqui:
+    totalCont.innerText = precoFinal.startsWith("R$") ? precoFinal : `R$ ${precoFinal}`;
     
-    totalCont.innerText = valorFinal;
     countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
 }
-
 
 // --- UTILITÁRIOS ---
 function formatarMoeda(valor) {
@@ -1304,6 +1298,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
