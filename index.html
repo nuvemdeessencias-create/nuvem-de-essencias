@@ -959,30 +959,30 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
 }
 
 function atualizarSacola(veioDeAdicaoOuRemocao = false) {
-    // IDs REAIS do seu HTML (index.html)
+    // 1. Captura de Elementos com IDs REAIS do seu HTML
     const itensCont = document.getElementById('sacola-conteudo'); 
     const totalCont = document.getElementById('total-cont');      
     const countCont = document.getElementById('cart-count');      
     const areaOpcoesFrete = document.getElementById('opcoes-frete'); 
     const resumoValores = document.querySelector('.resumo-valores');
 
-    // 1. Reset do frete (Executado ao adicionar/remover)
+    // 2. Reset do Frete
     if (veioDeAdicaoOuRemocao) {
-        valorFreteGlobal = 0; 
-        nomeFreteGlobal = ""; 
-        if (areaOpcoesFrete) areaOpcoesFrete.innerHTML = ""; 
+        valorFreteGlobal = 0;
+        nomeFreteGlobal = "";
+        if (areaOpcoesFrete) areaOpcoesFrete.innerHTML = "";
 
         const avisoAntigo = document.getElementById('aviso-recalculo');
         if (avisoAntigo) avisoAntigo.remove();
 
         const aviso = document.createElement('div');
         aviso.id = 'aviso-recalculo';
-        aviso.style = "background:rgba(184,147,86,0.1); padding:10px; border-radius:8px; border:1px solid #b89356; margin:10px 0;";
+        aviso.style = "background:rgba(184,147,86,0.1); padding:10px; border-radius:8px; border:1px solid #b89356; margin:10px 0; font-family:'Montserrat', sans-serif;";
         aviso.innerHTML = `<p style="color:#b89356; font-size:12px; margin:0; font-weight:bold; text-align:center;">⚠️ SACOLA ALTERADA: Recalcule o frete.</p>`;
         if (resumoValores) resumoValores.prepend(aviso);
     }
 
-    // 2. Se a sacola estiver vazia
+    // 3. Verificação de Sacola (Se estiver vazia, para aqui)
     if (!sacola || sacola.length === 0) {
         if (itensCont) itensCont.innerHTML = '<p style="text-align:center; color:#999; padding:20px;">Sua sacola está vazia.</p>';
         if (totalCont) totalCont.innerText = "R$ 0,00";
@@ -990,34 +990,53 @@ function atualizarSacola(veioDeAdicaoOuRemocao = false) {
         return;
     }
 
-    // 3. Renderização dos produtos (Blindada contra erros)
+    // 4. Renderização dos Itens (Usando um loop simples para evitar erros de map)
     let subtotal = 0;
-    let htmlFinal = "";
+    let htmlGerado = "";
 
-    sacola.forEach((item, index) => {
-        subtotal += (item.preco * item.qtd);
-        htmlFinal += `
-            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
+    for (let i = 0; i < sacola.length; i++) {
+        const item = sacola[i];
+        const valorItem = item.preco * item.qtd;
+        subtotal += valorItem;
+
+        // Tentamos formatar, se falhar, mostramos o número bruto
+        let precoFormatado;
+        try {
+            precoFormatado = formatarMoeda(valorItem).replace("R$", "").trim();
+        } catch (e) {
+            precoFormatado = valorItem.toFixed(2);
+        }
+
+        htmlGerado += `
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
                 <div style="text-align:left;">
-                    <b style="font-size:13px;">${item.nome.toUpperCase()}</b><br>
-                    <small>${item.ml} | Qtd: ${item.qtd}</small>
+                    <strong style="font-size:13px; color:#333; display:block;">${item.nome.toUpperCase()}</strong>
+                    <span style="font-size:11px; color:#666;">${item.ml} | Qtd: ${item.qtd}</span><br>
+                    <span style="font-size:11px; color:#b89356; font-weight:bold;">${item.tipoPagamento}</span>
                 </div>
                 <div style="text-align:right;">
-                    <div style="font-size:13px; font-weight:bold;">R$ ${formatarMoeda(item.preco * item.qtd).replace("R$", "").trim()}</div>
-                    <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:20px; cursor:pointer;">&times;</button>
+                    <span style="font-size:13px; font-weight:bold; color:#333;">R$ ${precoFormatado}</span>
+                    <div onclick="removerItem(${i})" style="color:red; cursor:pointer; font-size:18px; margin-top:5px; font-weight:bold;">&times;</div>
                 </div>
             </div>`;
-    });
+    }
 
-    if (itensCont) itensCont.innerHTML = htmlFinal;
+    if (itensCont) itensCont.innerHTML = htmlGerado;
 
-    // 4. Cálculo e correção do R$ R$
+    // 5. Cálculo Total e Fim do R$ R$
     const totalGeral = subtotal + valorFreteGlobal;
     if (totalCont) {
-        // Aqui limpamos o R$ que vem da função formatarMoeda para não duplicar
-        let valorFormatado = formatarMoeda(totalGeral).replace("R$", "").trim();
-        totalCont.innerText = "R$ " + valorFormatado;
+        let totalLimpo;
+        try {
+            totalLimpo = formatarMoeda(totalGeral).replace("R$", "").trim();
+        } catch (e) {
+            totalLimpo = totalGeral.toFixed(2);
+        }
+        totalCont.innerText = "R$ " + totalLimpo;
     }
+
+    if (countCont) countCont.innerText = sacola.length;
+}
 
     if (countCont) {
         countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
@@ -1294,6 +1313,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
