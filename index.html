@@ -405,6 +405,34 @@ header {
     font-weight: 700 !important;
     margin-bottom: 4px;2
 }
+
+  /* Aviso Profissional Deslizante */
+.aviso-nuvem {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #020b1f; /* Azul da sua marca */
+    color: white;
+    padding: 16px 24px;
+    border-radius: 12px;
+    border-left: 5px solid #b89356; /* Dourado */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-family: 'Segoe UI', sans-serif;
+    animation: deslizarEntrada 0.5s ease-out;
+}
+
+@keyframes deslizarEntrada {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+.aviso-nuvem.erro { border-left-color: #ff4444; } /* Vermelho para erros */
+.aviso-nuvem b { color: #b89356; }
+
         
 /* FILTROS */
 .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -1261,6 +1289,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
