@@ -88,19 +88,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
     const dadosCarrinho = prepararDadosParaAsaas();
     const nomeInput = document.getElementById('cliente_nome').value.trim();
 
-    // --- TRAVA DE SEGURANÇA: FRETE OBRIGATÓRIO ---
-    // Impede que o cliente finalize se a sacola mudou e o frete não foi recalculado
-    if (!valorFreteGlobal || valorFreteGlobal <= 0) {
-        alert("⚠️ ATENÇÃO: A sacola foi alterada. Por favor, calcule o frete novamente para atualizar o valor total antes de finalizar.");
-        
-        // Foca no campo de CEP para facilitar para o cliente
-        const campoCep = document.getElementById('inputCep');
-        if (campoCep) campoCep.focus();
-        
-        return; // INTERROMPE a função e impede o envio ao servidor
-    }
-
-    // VALIDAÇÕES INICIAIS (Mantidas conforme seu original)
+    // VALIDAÇÕES INICIAIS
     if (nomeInput.split(' ').length < 2) {
         alert("⚠️ Por favor, digite seu NOME COMPLETO.");
         return;
@@ -115,7 +103,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
     const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
     const valorTotalBase = (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal) + valorFreteGlobal;
 
-    // NOVO SISTEMA DE PARCELAMENTO PROFISSIONAL (Mantido conforme seu original)
+    // NOVO SISTEMA DE PARCELAMENTO PROFISSIONAL
     if (metodoPagamento === 'CREDIT_CARD' && !parcelaConfirmada) {
         const lista = document.getElementById('listaParcelas');
         lista.innerHTML = '';
@@ -156,13 +144,15 @@ function coletarDadosCheckout(metodoPagamento, event) {
         },
         pagamento: {
             metodo: metodoPagamento,
-            // AQUI USAMOS O valorTotalOriginal pois o desconto promocional já vem aplicado do botão de oferta
-            valor: dadosCarrinho.valorTotalOriginal + valorFreteGlobal, 
-            parcelas: (metodoPagamento === 'PIX' ? 1 : parcelasEscolhidasGlobal),
-            parcelasMaximas: limiteParcelas,
-            itens: dadosCarrinho.itensDetalhados
-        }
-    };
+            metodo: metodoPagamento,
+        // CORREÇÃO AQUI: Somamos apenas o que está na sacola + frete
+        // Não aplicamos desconto de novo porque ele já foi aplicado ao adicionar o item
+        valor: dadosCarrinho.valorTotalOriginal + valorFreteGlobal, 
+        parcelas: (metodoPagamento === 'PIX' ? 1 : parcelasEscolhidasGlobal),
+        parcelasMaximas: limiteParcelas,
+        itens: dadosCarrinho.itensDetalhados
+    }
+};
 
     // ATIVA O ESTADO DE CARREGAMENTO
     btnAcao.innerText = "PROCESSANDO...";
