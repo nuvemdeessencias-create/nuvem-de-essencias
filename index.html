@@ -971,6 +971,16 @@ function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
     const countCont = document.getElementById('cart-count');
+
+    // --- NOVO: RESET DE FRETE ---
+    // Toda vez que a sacola muda, o frete deve ser recalculado
+    valorFreteGlobal = 0; 
+    prazoFreteGlobal = "";
+    const resumoValores = document.getElementById('resumoValores');
+    if (resumoValores) {
+        resumoValores.innerHTML = '<p style="color:#d32f2f; font-size:12px; margin-top:5px;">⚠️ Adicione ou remova itens: Recalcule o frete.</p>';
+    }
+    // ----------------------------
     
     let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
 
@@ -1252,6 +1262,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
