@@ -967,25 +967,36 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
 }
    
 
-function atualizarSacola() {
+function atualizarSacola(veioDeAdicaoOuRemocao = false) {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
     const countCont = document.getElementById('cart-count');
-
-    // --- NOVO: RESET DE FRETE ---
-    // Toda vez que a sacola muda, o frete deve ser recalculado
-    valorFreteGlobal = 0; 
-    prazoFreteGlobal = "";
     const resumoValores = document.getElementById('resumoValores');
-    if (resumoValores) {
-        resumoValores.innerHTML = '<p style="color:#d32f2f; font-size:12px; margin-top:5px;">⚠️ Adicione ou remova itens: Recalcule o frete.</p>';
+
+    // 1. LÓGICA DE RESET DO FRETE
+    if (veioDeAdicaoOuRemocao) {
+        // Zera o valor matemático para o cálculo não ficar errado
+        valorFreteGlobal = 0; 
+        nomeFreteGlobal = ""; 
+        
+        // Exibe o aviso visual para o cliente
+        if (resumoValores) {
+            resumoValores.innerHTML = `
+                <div style="background: rgba(211, 47, 47, 0.1); padding: 10px; border-radius: 8px; border: 1px dashed #d32f2f; margin-top: 10px;">
+                    <p style="color:#d32f2f; font-size:12px; margin:0; font-weight:bold;">
+                        ⚠️ Sacola alterada: Calcule o frete novamente.
+                    </p>
+                </div>`;
+        }
     }
-    // ----------------------------
-    
+
+    // 2. CÁLCULO DO SUBTOTAL (Produtos)
     let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
 
+    // 3. RENDERIZAÇÃO DOS ITENS
     if (sacola.length === 0) {
         itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
+        if (resumoValores) resumoValores.innerHTML = ""; 
     } else {
         itensCont.innerHTML = sacola.map((item, index) => `
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
@@ -996,13 +1007,17 @@ function atualizarSacola() {
                 </div>
                 <div style="text-align:right;">
                     <div style="font-size:13px; font-weight:bold;">R$ ${formatarMoeda(item.preco * item.qtd)}</div>
-                    <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px;">×</button>
+                    <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px; cursor:pointer;">×</button>
                 </div>
             </div>`).join('');
     }
 
+    // 4. CÁLCULO E EXIBIÇÃO DO TOTAL GERAL
+    // Se veioDeAdicaoOuRemocao for true, valorFreteGlobal é 0.
+    // Se veio do botão CALCULAR, valorFreteGlobal terá o valor do frete escolhido.
     const totalGeral = subtotal + valorFreteGlobal;
-    totalCont.innerText = formatarMoeda(totalGeral);
+    
+    totalCont.innerText = `R$ ${formatarMoeda(totalGeral)}`;
     countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
 }
 
@@ -1115,9 +1130,28 @@ async function calcularFrete() {
 function selecionarFrete(nome, valor, elemento) {
     valorFreteGlobal = valor;
     nomeFreteGlobal = nome;
+
+    // Estilização visual (Borda dourada no selecionado)
     document.querySelectorAll('.opcao-frete-card').forEach(c => c.style.borderColor = '#eee');
     elemento.style.borderColor = '#b89356';
-    atualizarSacola();
+
+    // 1. Pegamos o subtotal atual dos produtos
+    const subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
+    
+    // 2. Somamos com o frete que acabou de ser clicado
+    const totalGeral = subtotal + valorFreteGlobal;
+
+    // 3. Atualizamos o valor na tela imediatamente
+    const totalCont = document.getElementById('cart-total');
+    if (totalCont) {
+        totalCont.innerText = `R$ ${formatarMoeda(totalGeral)}`;
+    }
+
+    // 4. Removemos o aviso de "Recalcule o frete" se ele existir
+    const resumoValores = document.getElementById('resumoValores');
+    if (resumoValores) {
+        resumoValores.innerHTML = `<p style="color:#2ecc71; font-size:13px; font-weight:bold;">✅ Frete ${nome} selecionado!</p>`;
+    }
 }
 
 function finalizarWhatsApp() {
@@ -1262,6 +1296,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
