@@ -144,12 +144,15 @@ function coletarDadosCheckout(metodoPagamento, event) {
         },
         pagamento: {
             metodo: metodoPagamento,
-            valor: (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix + valorFreteGlobal : valorTotalBase),
-            parcelas: parcelasEscolhidasGlobal, 
-            parcelasMaximas: limiteParcelas,
-            itens: dadosCarrinho.itensDetalhados
-        }
-    };
+            metodo: metodoPagamento,
+        // CORREÇÃO AQUI: Somamos apenas o que está na sacola + frete
+        // Não aplicamos desconto de novo porque ele já foi aplicado ao adicionar o item
+        valor: dadosCarrinho.valorTotalOriginal + valorFreteGlobal, 
+        parcelas: (metodoPagamento === 'PIX' ? 1 : parcelasEscolhidasGlobal),
+        parcelasMaximas: limiteParcelas,
+        itens: dadosCarrinho.itensDetalhados
+    }
+};
 
     // ATIVA O ESTADO DE CARREGAMENTO
     btnAcao.innerText = "PROCESSANDO...";
