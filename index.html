@@ -1010,7 +1010,7 @@ function atualizarSacola(veioDeAdicaoOuRemocao = false) {
 
     // CORREÇÃO DOS "R$ R$": Verifique se sua formatarMoeda já coloca o "R$". 
     // Se ela já coloca, use apenas: totalCont.innerText = formatarMoeda(totalGeral);
-    totalCont.innerText = `R$ ${formatarMoeda(totalGeral)}`.replace('R$ R$', 'R$');
+    totalCont.innerText = ` ${formatarMoeda(totalGeral)}`.replace('R$ R$', 'R$');
     countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
 }
 
@@ -1292,6 +1292,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
