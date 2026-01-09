@@ -84,6 +84,18 @@ function fecharModalParcelas() {
 }
 
 function coletarDadosCheckout(metodoPagamento, event) {
+   // VERIFICAÇÃO DE SEGURANÇA DO CEP
+    const cepNoCadastro = document.getElementById('end_cep').value.replace(/\D/g, '');
+    
+    if (cepCalculadoGlobal === "") {
+        alert("⚠️ Por favor, calcule o frete na sacola antes de finalizar o pagamento.");
+        return;
+    }
+
+    if (cepNoCadastro !== cepCalculadoGlobal) {
+        alert("⚠️ O CEP informado no cadastro (" + cepNoCadastro + ") é diferente do CEP usado no cálculo do frete (" + cepCalculadoGlobal + ").\n\nPor favor, volte à sacola e recalcule o frete para o CEP correto para evitar erros na cobrança.");
+        return; // Isso impede o código de seguir para o Asaas
+    }
     const btnAcao = event.target;
     const dadosCarrinho = prepararDadosParaAsaas();
     const nomeInput = document.getElementById('cliente_nome').value.trim();
