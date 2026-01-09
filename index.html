@@ -1039,7 +1039,7 @@ function removerItem(index) {
     if (resultadoFrete) {
         resultadoFrete.innerHTML = "<p style='color:#b89356; font-size:12px;'>Item removido. Recalcule o frete.</p>";
     }
-    atualizarSacola();
+    atualizarSacola(true);
 }
 
 // 2. MOSTRAR AVISO (CORRIGIDA COM SACOLA 🛍️)
@@ -1062,13 +1062,9 @@ function mostrarAvisoCarrinho() {
 }
 
 // 3. CONFIRMAR ADIÇÃO (CORRIGIDA E SEGURA)
-function confirmarAdicao() { 
-    if (typeof atualizarSacola === "function") {
-        // Passamos 'true' para avisar que houve uma ADIÇÃO
-        // Isso vai disparar o reset do frete e o aviso em vermelho
-        atualizarSacola(true); 
-    }
-    mostrarAvisoCarrinho(); 
+function confirmarAdicao() {
+    atualizarSacola(true); // O 'true' força o frete a virar 0
+    mostrarAvisoCarrinho();
 }
 
 // --- MODAL DE DETALHES ---
@@ -1292,6 +1288,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
