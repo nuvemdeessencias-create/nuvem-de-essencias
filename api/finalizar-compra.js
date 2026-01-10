@@ -35,21 +35,24 @@ export default async function handler(req, res) {
 
         const paymentBody = {
             customer: customerData.id,
-            // Se o método vindo do front for 'PIX', envia PIX. Caso contrário, CREDIT_CARD.
             billingType: ePix ? 'PIX' : 'CREDIT_CARD',
             dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
             description: "Pedido Nuvem de Essências",
             externalReference: `PED-${Date.now()}`,
             
-            // Lógica de valores e parcelas:
-            // Se for PIX ou 1x no cartão, enviamos apenas o 'value'.
-            // Se for parcelado, enviamos a contagem e o valor da parcela.
+            // Lógica de valores e parcelas
             ...(ePix || pagamento.parcelas <= 1 ? {
                 value: pagamento.valor 
             } : {
                 installmentCount: pagamento.parcelas,
                 installmentValue: (pagamento.valor / pagamento.parcelas).toFixed(2)
-            })
+            }),
+
+            // --- AQUI ENTRA O CÓDIGO DE REDIRECIONAMENTO ---
+            callback: {
+                url: "https://nuvem-de-essencias-dyu58pd7e-eduardos-projects-704ad1a5.vercel.app",
+                autoRedirect: false // O cliente decide quando clicar para voltar
+            }
         };
 
         // 3. CRIAR A COBRANÇA NO ASAAS
@@ -71,7 +74,6 @@ export default async function handler(req, res) {
             });
         }
 
-        // Retornamos a URL da fatura (que agora terá o QR Code se for PIX)
         return res.status(200).json({
             success: true,
             invoiceUrl: paymentData.invoiceUrl 
