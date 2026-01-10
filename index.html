@@ -662,7 +662,24 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
     
 <script>
+function exibirAviso(mensagem, tipo = 'info') {
+    const antigo = document.querySelector('.aviso-nuvem');
+    if (antigo) antigo.remove();
 
+    const div = document.createElement('div');
+    div.className = `aviso-nuvem ${tipo === 'erro' ? 'erro' : ''}`;
+    const icone = tipo === 'erro' ? '⚠️' : '✨';
+    
+    div.innerHTML = `
+        <span style="font-size: 20px;">${icone}</span>
+        <div style="font-size: 14px; line-height: 1.4;">${mensagem}</div>
+        <span onclick="this.parentElement.remove()" style="cursor:pointer; margin-left:10px; opacity:0.5;">✕</span>
+    `;
+
+    document.body.appendChild(div);
+    setTimeout(() => { if(div) div.remove(); }, 6000);
+}
+    
 window.toggleCart = function() {
     const modal = document.getElementById('cart-modal');
     if (modal) {
@@ -1289,6 +1306,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
