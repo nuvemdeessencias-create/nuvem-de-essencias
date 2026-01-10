@@ -1,19 +1,19 @@
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-   <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nuvem De Essências | Catálogo Oficial</title>
     <style>
-       /* 1. CONFIGURAÇÕES GERAIS E CORES */
+/* 1. CONFIGURAÇÕES GERAIS E CORES */
 :root {
     --azul-fundo: #020b1f; 
     --azul-card: #ffffff; 
     --dourado: #b89356;
     --texto-escuro: #333333;
     --verde-whats: #25d366;
-    --cinza-botao: #333333;
+    --cinza-botao: #000000;
 }
 
 body { 
@@ -72,25 +72,18 @@ header {
     box-shadow: -5px 0 20px rgba(0,0,0,0.5);
 }
 
-.cart-modal.active { right: 0; }
-
+/* 1. Ajuste do Modal para aceitar o aviso fixo no topo */
+.cart-modal.active { 
+    right: 0; 
+    display: flex;         /* Isso organiza os elementos em linha/coluna */
+    flex-direction: column; /* Isso empilha o título, o aviso e os itens */
+}
+/* 2. Ajuste da área de rolagem para respeitar o aviso */
 #cart-scroll-area {
-    flex: 1;
+    flex: 1;               /* ADICIONADO: Faz a lista ocupar o espaço que sobrar */
     overflow-y: auto;
     padding: 20px;
     -webkit-overflow-scrolling: touch;
-}
-
-#cart-items {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    padding-bottom: 20px;
-}
-
-#opcoes-frete {
-    margin-top: 15px;
-    padding-bottom: 80px; /* Garante que o último frete não suma atrás do botão */
 }
 
 .cart-footer {
@@ -101,15 +94,211 @@ header {
     z-index: 10;
 }
 
-/* 4. RODAPÉ PREMIUM (FONTES E ESTILO) */
+/* 4. RODAPÉ PROFISSIONAL NUVEM (CORRIGIDO) */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,600&family=Poppins:wght@300;400;600&display=swap');
 
-.rodape-premium {
-    background-color: #0a0c1a;
+.rodape-container {
+    background-color: var(--azul-fundo); 
     color: #ffffff;
-    padding: 50px 0 30px 0;
+    padding: 40px 5% 20px;
+    border-top: 1px solid rgba(184, 147, 86, 0.3);
     font-family: 'Poppins', sans-serif;
+}
+
+.rodape-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 30px;
+}
+
+.rodape-col { flex: 1; min-width: 250px; }
+
+.rodape-frase-dourada {
+    font-family: 'Playfair Display', serif;
+    color: var(--dourado);
+    font-style: italic;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+}
+
+.link-whats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #ffffff;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 16px;
+    margin: 15px 0;
+}
+
+.link-whats:hover { color: var(--verde-whats); }
+
+/* Estilo do botão de WhatsApp dentro do Ver Detalhes */
+.btn-whats-modal {
+    background-color: #25d366; /* Verde oficial do WhatsApp */
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    width: 100%;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px; /* Espaço para não colar na descrição */
+}
+
+.btn-whats-modal:hover {
+    background-color: #128c7e; /* Verde mais escuro ao passar o mouse */
+}
+
+.pagamento-titulo {
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-bottom: 15px;
+    color: var(--dourado);
+}
+
+.pagamento-icones {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* IMPORTANTE: Removido o filtro que deixava as imagens brancas */
+.pagamento-icones img {
+    height: 30px !important;
+    width: auto !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+    opacity: 1 !important;
+}
+
+.rodape-alert {
+    font-size: 11px;
+    color: #aaa;
+    line-height: 1.6;
+    margin-top: 20px;
+}
+
+.simbolo-perfume-footer {
+    width: 120px !important; /* Aumentado conforme solicitado */
+    height: auto;
+    margin-bottom: 10px;
+    display: block;
+    margin-left: auto;
+    filter: none !important;
+}
+
+.rodape-bottom {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.1);
     text-align: center;
+    font-size: 12px;
+    color: #888;
+}
+
+/* 5. GRID E CARDS DE PRODUTO */
+.container { 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); 
+    gap: 20px; 
+    padding: 20px; 
+    max-width: 1200px; 
+    margin: 0 auto; 
+}
+
+/* Redução da altura da imagem para economizar espaço no topo */
+
+/* 6. BOTÕES DE VARIAÇÃO (ML/KIT) */
+.variacao-container {
+    display: flex !important;
+    gap: 6px !important;            /* Espaço menor entre botões */
+    justify-content: center !important;
+    margin: 4px 0 !important;      /* Reduzido de 10px para 4px para encurtar o card */
+    flex-wrap: wrap !important;
+    width: 100%;
+}
+
+/* Estilo para o seletor de Batons e Velas */
+.seletor-estilo-aba {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.seletor-estilo-aba:focus {
+    border-color: var(--dourado);
+}
+
+.btn-ml-nuvem {
+    min-width: 45px !important;
+    height: 45px !important;
+    width: auto !important;
+    padding: 0 6px !important;
+    border: 1px solid #d1d9e6 !important;
+    background-color: #f0f4f8 !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    box-sizing: border-box !important;
+}
+
+.btn-ml-nuvem.active {
+    border: 2px solid #007bff !important;
+    background-color: #e1ecf7 !important;
+}
+
+.btn-ml-nuvem span {
+    font-size: 11px !important;
+    font-weight: bold !important;
+    color: #333 !important;
+}
+
+/* 7. BOTÃO ADICIONAR À SACOLA */
+.btn-add-sacola {
+    background: black !important;
+    color: white !important;
+    border: none;
+    padding: 12px;
+    width: 90%;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    margin-top: 10px;
+}
+
+/* RESPONSIVIDADE */
+@media (max-width: 768px) {
+    .rodape-content { flex-direction: column; text-align: center; }
+    .link-whats, .pagamento-icones { justify-content: center; }
+    .simbolo-perfume-footer { margin: 0 auto 10px auto; }
+    .rodape-col { text-align: center !important; }
 }
 
 .logo-text {
@@ -140,67 +329,217 @@ header {
     color: #333;
 }
 
-.btn-whats {
-    background: var(--verde-whats);
+
+/* Botão Base: Quadrado Pequeno */
+.btn-ml-nuvem {
+    min-width: 45px !important; /* Largura mínima para ser quadrado */
+    height: 45px !important;    /* Altura fixa menor para encurtar o card */
+    width: auto !important;     /* Deixa expandir se for Kit */
+    padding: 0 6px !important;
+    border: 1px solid #d1d9e6 !important;
+    background-color: #f0f4f8 !important;
+    border-radius: 6px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+}
+        
+
+/* Quando selecionado */
+.btn-ml-nuvem.active {
+    border: 2px solid #007bff !important;
+    background-color: #e1ecf7 !important;
+}
+
+/* Ajuste do texto */
+.btn-ml-nuvem span {
+    font-size: 11px !important;
+    font-weight: bold !important;
+    color: #333 !important;
+    line-height: 1.1 !important;
+    text-align: center;
+}
+
+/* NOVAS ETIQUETAS DE PREÇO NUVEM DE ESSÊNCIAS */
+.tag-promo-pix {
+    background: #e8f5e9 !important; /* Verde Suave */
+    color: #2e7d32 !important;      /* Verde Texto */
+    padding: 4px 12px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;     /* Aumentamos de 8px para 11px */
+    font-weight: 800 !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #c8e6c9 !important;
+    margin-top: 5px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.tag-promo-6x {
+    background: #fff3e0 !important; /* Laranja Suave */
+    color: #ef6c00 !important;      /* Laranja Texto */
+    padding: 4px 12px !important;
+    border-radius: 6px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    display: inline-flex !important;
+    align-items: center;
+    gap: 5px;
+    border: 1px solid #ffe0b2 !important;
+    margin-top: 3px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Ajuste do container de preço e do parcelamento solicitado */
+[id^="preco-container-"] {
+    min-height: auto !important; 
+    margin: 2px 0 !important;
+    padding: 2px 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+ /* Estilo solicitado: 10x sem juros em Azul Escuro e maior */
+.parcelamento-azul {
+    color: #002d72 !important; /* Azul escuro */
+    font-size: 12px !important; /* Aumentado */
+    font-weight: 700 !important;
+    margin-bottom: 4px;2
+}
+
+  /* Aviso Profissional Deslizante */
+.aviso-nuvem {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: #020b1f; /* Azul da sua marca */
     color: white;
-    border: none;
-    padding: 15px;
-    width: 100%;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
-    font-size: 16px;
+    padding: 16px 24px;
+    border-radius: 12px;
+    border-left: 5px solid #b89356; /* Dourado */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    z-index: 99999;
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: 0.3s;
+    gap: 15px;
+    font-family: 'Segoe UI', sans-serif;
+    animation: deslizarEntrada 0.5s ease-out;
 }
 
-.btn-whats:hover {
-    filter: brightness(0.9);
+@keyframes deslizarEntrada {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
 }
 
+.aviso-nuvem.erro { border-left-color: #ff4444; } /* Vermelho para erros */
+.aviso-nuvem b { color: #b89356; }
 
-        /* FILTROS */
-        .filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        .busca-grupo { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
-        select, .busca-input { padding: 12px; border: 1px solid var(--dourado); border-radius: 8px; width: 100%; max-width: 300px; }
+        
+/* FILTROS */
+.filtros-container { padding: 20px 15px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+.busca-grupo { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; width: 100%; }
+select, .busca-input { padding: 12px; border: 1px solid var(--dourado); border-radius: 8px; width: 100%; max-width: 300px; }
 
-        .categorias-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
-        .btn-categoria { background: transparent; border: 1px solid var(--dourado); color: white; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .btn-categoria.active { background: var(--dourado); }
+.categorias-nav { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
+.btn-categoria { background: transparent; border: 1px solid var(--dourado); color: white; padding: 6px 15px; border-radius: 20px; cursor: pointer; font-size: 11px; font-weight: bold; }
+.btn-categoria.active { background: var(--dourado); }
 
-        /* GRID E CARDS */
-        .container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
-        .card { background: var(--azul-card); color: var(--texto-escuro); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; align-items: center; padding-bottom: 20px; box-shadow: 0 8px 15px rgba(0,0,0,0.2); }
-        .card img { width: 100%; height: 180px; object-fit: contain; background: white; padding: 10px 0; }
-        .info { width: 90%; text-align: center; }
-        .marca-tag { color: var(--dourado); font-weight: bold; font-size: 11px; text-transform: uppercase; }
-        .nome-perfume { font-size: 15px; font-weight: bold; color: var(--azul-fundo); margin: 5px 0; min-height: 40px; display: flex; align-items: center; justify-content: center; line-height: 1.2; }
-        .estoque-label { font-size: 11px; color: #d9534f; font-weight: bold; margin-bottom: 8px; }
+/* GRID E CARDS */
+.container { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; padding: 20px; max-width: 1200px; margin: 0 auto; }
 
-        /* SELETOR QTD HORIZONTAL */
-        .qtd-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
-        .btn-qtd { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ccc; background: #f8f8f8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .input-qtd { width: 45px; height: 30px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
+.card {
+    background: var(--azul-card);
+    color: var(--texto-escuro);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Reduzi drasticamente o padding inferior de 20px para 8px */
+    padding-bottom: 8px !important; 
+    box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+    position: relative;
+    /* Adicionado para garantir que o card não estique além do necessário */
+    height: fit-content;
+}
+        
+/* Redução da altura da imagem para economizar espaço no topo */
+.card img { 
+    width: 100%; 
+    height: 130px !important; /* Reduzido de 140/180px para 130px */
+    object-fit: contain; 
+    background: white; 
+    padding: 5px 0 !important; 
+}
+.info { width: 90%; text-align: center; }
+.marca-tag { color: var(--dourado); font-weight: bold; font-size: 11px; text-transform: uppercase; }
+/* Ajuste do nome para ocupar menos espaço */
+.nome-perfume { 
+    font-size: 14px !important; /* Reduzido de 15px */
+    font-weight: bold; 
+    color: var(--azul-fundo); 
+    margin: 2px 0 !important; /* Margem mínima */
+    min-height: 34px !important; /* Reduzido de 40px */
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    line-height: 1.1; 
+}
 
-        /* SELECT ML */
-        .seletor-ml { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 13px; }
+/* Redução das margens das etiquetas de estoque e variações */
+.estoque-label { 
+    font-size: 10px !important; 
+    margin-bottom: 4px !important; 
+}
+/* Selo de Oferta que fica em cima da imagem */
+.selo-promo {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #d32f2f; /* Vermelho vibrante */
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 10;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
 
-        /* BOTÕES */
-        .btn-whats { background: var(--verde-whats); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; margin-bottom: 8px; font-size: 12px; }
-        .btn-add-cart { background: var(--cinza-botao); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 12px; }
+/* SELETOR QTD */
+.qtd-container { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
+.btn-qtd { width: 28px; height: 28px; border-radius: 50%; border: 1px solid #ccc; background: #f8f8f8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+.input-qtd { width: 45px; height: 30px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
 
-        footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid rgba(184, 147, 86, 0.2); }
-        .hidden { display: none !important; }
+.seletor-ml { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #ddd; margin-bottom: 12px; font-size: 13px; }
 
-        @media (max-width: 480px) {
-            .container { grid-template-columns: 1fr; padding: 15px; }
-            .logo-img { width: 130px; }
-        }
+.btn-whats { background: var(--verde-whats); color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 16px; }
+.btn-add-cart { background: var(--dourado); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: bold; text-transform: uppercase; }
+.btn-add-sacola { background: black !important; color: white !important; border: none; padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+
+footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border-top: 1px solid rgba(184, 147, 86, 0.2); }
+
+/* Esconde o select antigo se ele ainda estiver no código */
+.seletor-ml {
+    display: none !important;
+}
+
+/* Ajuste fino nos botões para garantir o formato quadrado */
+.btn-ml-nuvem {
+    box-sizing: border-box !important;
+}
+        
     </style>
 </head>
 <body>
+
 
 <header>
     <img src="img/logo.png" alt="NUVEM DE ESSÊNCIAS" class="logo-img">
@@ -210,49 +549,68 @@ header {
 </header>
 
 <div id="cart-modal" class="cart-modal">
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee; flex-shrink: 0;">
+    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee; background: white; flex-shrink: 0;">
         <h3 style="margin:0; color: #333;">Sua Sacola</h3>
         <span style="cursor:pointer; font-size: 28px; color: #333;" onclick="toggleCart()">×</span>
     </div>
 
-    <div id="cart-scroll-area" style="flex: 1; overflow-y: auto; padding: 20px;">
-        <div id="cart-items">
-            <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
+    <div id="container-trava-aviso" style="padding: 0 20px; background: white; flex-shrink: 0;">
+        <div id="aviso-interno-sacola" style="display:none; background: #fff9f0; border: 1px solid #b89356; color: #020b1f; padding: 12px; margin-top: 15px; border-radius: 8px; font-size: 13px; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+            <span style="font-size: 18px;">⚠️</span>
+            <span><b>Frete Pendente:</b> Recalcule o frete para atualizar o total.</span>
         </div>
+    </div>
+
+    <div id="cart-scroll-area" style="flex-grow: 1; overflow-y: auto;">
+        <div id="cart-items">
+            </div>
 
         <div style="font-family: 'Inter', sans-serif; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
             <h3 style="font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: #1a1a1a;">ENTREGA</h3>
             <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
             
             <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
-                <input type="text" id="cep-cliente" placeholder="Digite o CEP" style="flex:1; border:none; padding:0 15px; outline:none; color: #333;">
-                <button id="btn-calcular-frete" type="button" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase;">
+                <input type="text" id="cep-cliente" placeholder="Digite o CEP">
+                <button onclick="calcularFrete()" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase;">
                     CALCULAR
                 </button>
             </div>
+            <div style="margin-bottom: 15px;">
+    <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       style="font-size: 12px; color: #666; text-decoration: underline; font-family: sans-serif;">
+       Não sei o meu CEP
+    </a>
+</div>
             
-            <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" target="_blank" rel="noopener noreferrer" style="display: block; font-size: 12px; color: #1a1a1a; text-decoration: underline; font-style: italic; margin-bottom: 10px;">
-                Não sei meu CEP
-            </a>
-
             <div id="opcoes-frete"></div>
         </div>
-    </div> <div class="cart-footer" style="padding: 20px; border-top: 1px solid #eee; background: white;">
-        <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; font-size: 18px; color: #333;">
-            <span>Total:</span>
-            <span>R$ <span id="cart-total">0,00</span></span>
-        </div>
-
-        <button id="btn-enviar-pedido" class="btn-whats" style="background-color: #25d366; color: white; border: none; padding: 15px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" width="20" height="20" alt="WhatsApp">
-            FINALIZAR VIA WHATSAPP
-        </button>
     </div>
-</div> <div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; margin-top: 20px; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
+
+   <div class="cart-footer">
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333; font-size: 18px;">
+        <span>Total:</span>
+        <span>R$ <span id="cart-total">0,00</span></span>
+    </div>
+
+    <button class="btn-checkout-asaas" onclick="abrirCheckoutAsaas()" style="width: 100%; background: #2e7d32; color: white; padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 16px;">
+        💳 FINALIZAR PAGAMENTO
+    </button>
+
+    <button class="btn-whats-secundario" onclick="finalizarWhatsApp()" style="width: 100%; background: #25d366; color: white; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" width="16" height="16">
+        Pedir pelo WhatsApp
+    </button>
+</div>
+</div> 
+    
+    <div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; margin-bottom: 20px; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
     <p style="color: #ffffff; font-size: 14px; margin: 0; font-weight: bold; letter-spacing: 0.5px;">
-        ✨ Parcele suas fragrâncias favoritas em até 10x sem juros no cartão! ✨
+        ✨ Sinta o aroma dos sonhos e realce sua beleza! ✨
     </p>
 </div>
+    
 <div class="filtros-container">
     <div class="busca-grupo">
         <select id="filtroMarca" onchange="filtrar()">
@@ -300,6 +658,9 @@ header {
             <optgroup label="CASA">
                 <option value="VELAS AROMATICAS">VELAS AROMÁTICAS</option>
             </optgroup>
+             <optgroup label="MAQUIAGEM">
+                <option value="BATONS">BATONS</option>
+            </optgroup>
         </select>
         <input type="text" id="buscaInput" onkeyup="filtrar()" placeholder="PESQUISAR...">
     </div>
@@ -310,900 +671,765 @@ header {
         <button class="btn-categoria" onclick="filtrarCategoria('arabe', this)">PERFUMES ÁRABES</button>
         <button class="btn-categoria" onclick="filtrarCategoria('casa', this)">CASA & VELAS</button>
         <button class="btn-categoria" onclick="filtrarCategoria('kits', this)">KITS</button>
+         <button class="btn-categoria" onclick="filtrarCategoria('maquiagem', this)">MAQUIAGEM</button>
     </div>
 </div>
 
-<div class="container" id="listaProdutos">
-
-    <div class="card" data-marca="SHAKIRA" data-secao="alta">
-        <img src="img/shakira.avif">
-        <div class="info">
-            <span class="marca-tag">SHAKIRA</span>
-            <div class="nome-perfume">SHAKIRA FUCSIA EDP</div>
-            <div class="estoque-label"> 1 unidade</div>
-            <div class="qtd-container">
-                <button class="btn-qtd" onclick="alterarQtd('q-fucsia', -1, 1)">-</button>
-                <input type="text" id="q-fucsia" value="1" readonly class="input-qtd">
-                <button class="btn-qtd" onclick="alterarQtd('q-fucsia', 1, 1)">+</button>
-            </div>
-            <select class="seletor-ml" id="ml-fucsia">
-                <option value="80ml|239.00">80ML - R$ 239,00</option>
-            </select>
-            <button onclick="comprarAgora('SHAKIRA FUCSIA', 'ml-fucsia')" class="btn-whats">COMPRAR AGORA</button>
-            <button onclick="addCart('SHAKIRA FUCSIA', 'ml-fucsia', 'q-fucsia')" class="btn-add-cart">+ Adicionar à Sacola</button>
-        </div>
-    </div>
-
-
-<div class="card" data-marca="SHAKIRA" data-secao="alta">
-    <img src="img/rojo.jpeg" alt="rojo">
-    <div class="info">
-        <span class="marca-tag">SHAKIRA</span>
-        <div class="nome-perfume">SHAKIRA ROJO EDP</div>
-        <div class="estoque-label"> 5 unidades</div>
-        
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-rojo', -1, 5)">-</button>
-            <input type="text" id="q-rojo" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-rojo', 1, 5)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-rojo">
-            <option value="80ml|239.00">80ML - R$ 239,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('SHAKIRA ROJO', 'ml-rojo')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('SHAKIRA ROJO', 'ml-rojo', 'q-rojo')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-
-<div class="card" data-marca="SHAKIRA" data-secao="alta">
-    <img src="img/shakiraamarillo.avif" alt="shakira">
-    <div class="info">
-        <span class="marca-tag">SHAKIRA</span>
-        <div class="nome-perfume">SHAKIRA AMARILLO EDP</div>
-        
-        <div class="estoque-label" style="color: #888;">PRODUTO INDISPONÍVEL</div>
-
-        <div class="qtd-container" style="opacity: 0.5; pointer-events: none;">
-            <button class="btn-qtd">-</button>
-            <input type="text" id="q-ama" value="0" readonly class="input-qtd">
-            <button class="btn-qtd">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-shakira-ama" disabled style="background: #f0f0f0;">
-            <option value="80ml|0.00">80ML - INDISPONÍVEL</option>
-        </select>
-
-        <button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>
-        <button class="btn-add-cart" style="display: none;">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="CHLOE" data-secao="alta">
-    <img src="img/chloedp.avif" alt="Chloe">
-    <div class="info">
-        <span class="marca-tag">CHLOE</span>
-        <div class="nome-perfume">CHLOÉ EDP</div>
-        
-        <div class="estoque-label">Poucas unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-chloe', -1, 7)">-</button>
-            <input type="text" id="q-chloe" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-chloe', 1, 7)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-chloe">
-            <option value="50ml|809.00">50ML ( 2 unidades) - R$ 809,00</option>
-            <option value="75ml|939.00">75ML ( 5 unidades) - R$ 939,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('CHLOE', 'ml-chloe')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('CHLOE', 'ml-chloe', 'q-chloe')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-<div class="card" data-marca="GABRIELA SABATINI" data-secao="alta">
-    <img src="img/gabrielasabatini.webp" alt="gabriela sabatini">
-    <div class="info">
-        <span class="marca-tag">GABRIELA SABATINI</span>
-        <div class="nome-perfume">GABRIELA SABATINI EDT</div>
-        
-        <div class="estoque-label">2 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-gabriela', -1, 2)">-</button>
-            <input type="text" id="q-gabriela" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-gabriela', 1, 2)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-gabriela">
-            <option value="60ml|169.00">60ML - R$ 169,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('GABRIELA SABATINI', 'ml-gabriela')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('GABRIELA SABATINI', 'ml-gabriela', 'q-gabriela')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="PACO RABANNE" data-secao="alta">
-    <img src="img/ladymillion.avif" alt="Lady Million">
-    <div class="info">
-        <span class="marca-tag">PACO RABANNE</span>
-        <div class="nome-perfume">LADY MILLION EDP</div>
-        
-        <div class="estoque-label"> 4 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-lady', -1, 4)">-</button>
-            <input type="text" id="q-lady" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-lady', 1, 4)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-lady">
-            <option value="80ml|869.00">80ML - R$ 869,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('LADY MILLION', 'ml-lady')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('LADY MILLION', 'ml-lady', 'q-lady')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="PACO RABANNE" data-secao="alta">
-    <img src="img/invictus.jpg" alt="Invictus">
-    <div class="info">
-        <span class="marca-tag">PACO RABANNE</span>
-        <div class="nome-perfume">INVICTUS EDT</div>
-        
-        <div class="estoque-label" style="color: #888;">PRODUTO INDISPONÍVEL</div>
-
-        <div class="qtd-container" style="opacity: 0.5; pointer-events: none;">
-            <button class="btn-qtd">-</button>
-            <input type="text" id="q-invictus" value="0" readonly class="input-qtd">
-            <button class="btn-qtd">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-invictus" disabled style="background: #f0f0f0;">
-            <option value="100ml|0.00">100ML - ESGOTADO</option>
-        </select>
-        
-        <button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>
-        <button class="btn-add-cart" style="display: none;">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="MARINA DE BOURBON" data-secao="alta">
-    <img src="img/marinadiamond.webp" alt="marinadiamond">
-    <div class="info">
-        <span class="marca-tag">MARINA DE BOURBON</span>
-        <div class="nome-perfume">MARINA DIAMOND EDP</div>
-        
-        <div class="estoque-label" style="color: #888;">PRODUTO INDISPONÍVEL</div>
-
-        <div class="qtd-container" style="opacity: 0.5; pointer-events: none;">
-            <button class="btn-qtd">-</button>
-            <input type="text" id="q-diamond" value="0" readonly class="input-qtd">
-            <button class="btn-qtd">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-marinadiamond" disabled style="background: #f0f0f0;">
-            <option value="100ml|0.00">100ML - INDISPONÍVEL</option>
-            <option value="30ml|0.00">30ML - INDISPONÍVEL</option>
-        </select>
-        
-        <button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>
-        
-        <button class="btn-add-cart" style="display: none;">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ANIMALE" data-secao="alta">
-    <img src="img/anamalefem.webp" alt="animale">
-    <div class="info">
-        <span class="marca-tag">ANIMALE</span>
-        <div class="nome-perfume">ANIMALE FEM EDP</div>
-        
-        <div class="estoque-label"> 5 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-animale-f', -1, 5)">-</button>
-            <input type="text" id="q-animale-f" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-animale-f', 1, 5)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-animale-fem">
-            <option value="100ml|598.00">100ML - R$ 598,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('ANIMALE FEM', 'ml-animale-fem')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('ANIMALE FEM', 'ml-animale-fem', 'q-animale-f')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-
-<div class="card" data-marca="ANIMALE" data-secao="alta">
-    <img src="img/animalemasc.webp" alt="animale">
-    <div class="info">
-        <span class="marca-tag">ANIMALE</span>
-        <div class="nome-perfume">ANIMALE FOR MEN EDT</div>
-        
-        <div class="estoque-label"> 4 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-animale-m', -1, 4)">-</button>
-            <input type="text" id="q-animale-m" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-animale-m', 1, 4)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-animalemasc">
-            <option value="100ml|478.00">100ML - R$ 478,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('ANIMALE FOR MEN', 'ml-animalemasc')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('ANIMALE FOR MEN', 'ml-animalemasc', 'q-animale-m')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="JACQUES BOGART" data-secao="alta">
-    <img src="img/silverscent.webp" alt="silverscent">
-    <div class="info">
-        <span class="marca-tag">JACQUES BOGART</span>
-        <div class="nome-perfume">SILVER SCENT INTENSE EDT</div>
-        
-        <div class="estoque-label"> 6 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-silver', -1, 6)">-</button>
-            <input type="text" id="q-silver" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-silver', 1, 6)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-silverscent">
-            <option value="100ml|399.00">100ML - R$ 399,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('SILVER SCENT INTENSE', 'ml-silverscent')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('SILVER SCENT INTENSE', 'ml-silverscent', 'q-silver')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="CALVIN KLEIN" data-secao="alta">
-    <img src="img/ckoneessence.avif" alt="ckoneessence">
-    <div class="info">
-        <span class="marca-tag">CALVIN KLEIN</span>
-        <div class="nome-perfume">CK ONE ESSENCE PARFUM INTENSE</div>
-        
-        <div class="estoque-label"> 6 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-ckone', -1, 6)">-</button>
-            <input type="text" id="q-ckone" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-ckone', 1, 6)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-ckoneessence">
-            <option value="100ml|589.00">100ML - R$ 589,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('CK ONE ESSENCE', 'ml-ckoneessence')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('CK ONE ESSENCE', 'ml-ckoneessence', 'q-ckone')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ADOLFO DOMINGUEZ" data-secao="alta">
-    <img src="img/azahar.webp" alt="azahar">
-    <div class="info">
-        <span class="marca-tag">ADOLFO DOMINGUEZ</span>
-        <div class="nome-perfume">ÁGUA FRESCA DE AZAHAR</div>
-        
-        <div class="estoque-label"> 4 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-azahar', -1, 4)">-</button>
-            <input type="text" id="q-azahar" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-azahar', 1, 4)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-azahar">
-            <option value="120ml|369.00">120ML - R$ 369,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('ÁGUA FRESCA DE AZAHAR', 'ml-azahar')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('ÁGUA FRESCA DE AZAHAR', 'ml-azahar', 'q-azahar')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="HUGO BOSS" data-secao="alta">
-    <img src="img/hugomen.avif" alt="hugomen">
-    <div class="info">
-        <span class="marca-tag">HUGO BOSS</span>
-        <div class="nome-perfume">HUGO MEN EDT</div>
-        
-        <div class="estoque-label"> 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-hugomen', -1, 1)">-</button>
-            <input type="text" id="q-hugomen" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-hugomen', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-hugomen">
-            <option value="75ml|479.00">75ML - R$ 479,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('HUGO MEN EDT', 'ml-hugomen')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('HUGO MEN EDT', 'ml-hugomen', 'q-hugomen')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ANTONIO BANDEIRAS" data-secao="alta">
-    <img src="img/blueseduction.avif" alt="blueseduction">
-    <div class="info">
-        <span class="marca-tag">ANTONIO BANDEIRAS</span>
-        <div class="nome-perfume">BLUE SEDUCTION EDT</div>
-        
-        <div class="estoque-label"> 3 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-blue', -1, 3)">-</button>
-            <input type="text" id="q-blue" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-blue', 1, 3)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-blue">
-            <option value="80ml|249.00">80ML - R$ 249,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('BLUE SEDUCTION', 'ml-blue')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('BLUE SEDUCTION', 'ml-blue', 'q-blue')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ANTONIO BANDEIRAS" data-secao="alta">
-    <img src="img/theicon.webp" alt="theicon">
-    <div class="info">
-        <span class="marca-tag">ANTONIO BANDEIRAS</span>
-        <div class="nome-perfume">THE ICON EDP</div>
-        
-        <div class="estoque-label">2 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-icon', -1, 2)">-</button>
-            <input type="text" id="q-icon" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-icon', 1, 2)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-theicon">
-            <option value="200ml|379.00">200ML - R$ 379,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('THE ICON EDP', 'ml-theicon')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('THE ICON EDP', 'ml-theicon', 'q-icon')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ANTONIO BANDEIRAS" data-secao="alta">
-    <img src="img/powerseduction.avif" alt="powerseduction">
-    <div class="info">
-        <span class="marca-tag">ANTONIO BANDEIRAS</span>
-        <div class="nome-perfume">POWER OF SEDUCTION</div>
-        
-        <div class="estoque-label" style="color: #888;">PRODUTO INDISPONÍVEL</div>
-
-        <div class="qtd-container" style="opacity: 0.5; pointer-events: none;">
-            <button class="btn-qtd">-</button>
-            <input type="text" id="q-power" value="0" readonly class="input-qtd">
-            <button class="btn-qtd">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-powerseduction" disabled style="background: #f0f0f0;">
-            <option value="100ml|0.00">100ML - ESGOTADO</option>
-        </select>
-        
-        <button class="btn-whats" style="background: #ccc; cursor: not-allowed;" disabled>ESGOTADO</button>
-        
-        <button class="btn-add-cart" style="display: none;">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="AZZARO" data-secao="alta">
-    <img src="img/azzaropourhomme.avif" alt="azzaropourhomme">
-    <div class="info">
-        <span class="marca-tag">AZZARO</span>
-        <div class="nome-perfume">AZZARO POUR HOMME EDT</div>
-        
-        <div class="estoque-label"> 7 unidades (50ml)</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-azzaro', -1, 7)">-</button>
-            <input type="text" id="q-azzaro" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-azzaro', 1, 7)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-azzaropourhomme">
-            <option value="50ml|249.00">50ML - R$ 249,00</option>
-            <option value="100ml|0.00" disabled style="color: #ccc;">100ML - (ESGOTADO)</option>
-        </select>
-        
-        <button onclick="comprarAgora('AZZARO POUR HOMME', 'ml-azzaropourhomme')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('AZZARO POUR HOMME', 'ml-azzaropourhomme', 'q-azzaro')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="MERCEDES BENZ" data-secao="alta">
-    <img src="img/clubblack.avif" alt="clubblack">
-    <div class="info">
-        <span class="marca-tag">MERCEDES BENZ</span>
-        <div class="nome-perfume">MERCEDES BENZ CLUB BLACK EDT</div>
-        
-        <div class="estoque-label"> Poucas unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-clubblack', -1, 3)">-</button>
-            <input type="text" id="q-clubblack" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-clubblack', 1, 3)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-clubblack">
-            <option value="100ml|578.00">100ML - R$ 578,00 (2 unid.)</option>
-            <option value="50ml|470.00">50ML - R$ 470,00 (1 unid.)</option>
-        </select>
-        
-        <button onclick="comprarAgora('MERCEDES BENZ CLUB BLACK', 'ml-clubblack')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('MERCEDES BENZ CLUB BLACK', 'ml-clubblack', 'q-clubblack')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="DAVIDOFF" data-secao="alta">
-    <img src="img/coolwater.webp" alt="coolwater">
-    <div class="info">
-        <span class="marca-tag">DAVIDOFF</span>
-        <div class="nome-perfume">COOL WATER DAVIDOFF EDT</div>
-        
-        <div class="estoque-label"> 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-cool', -1, 1)">-</button>
-            <input type="text" id="q-cool" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-cool', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-coolwater">
-            <option value="125ml|289.00">125ML - R$ 289,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('COOL WATER DAVIDOFF', 'ml-coolwater')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('COOL WATER DAVIDOFF', 'ml-coolwater', 'q-cool')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-
-
-<div class="card" data-marca="NAUTICA" data-secao="alta">
-    <img src="img/nauticavoyage.webp" alt="nauticavoyage">
-    <div class="info">
-        <span class="marca-tag">NAUTICA</span>
-        <div class="nome-perfume">NAUTICA VOYAGE EDT</div>
-        
-        <div class="estoque-label"> 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-nautica', -1, 1)">-</button>
-            <input type="text" id="q-nautica" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-nautica', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-nauticavoyage">
-            <option value="100ml|199.00">100ML - R$ 199,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('NAUTICA VOYAGE', 'ml-nauticavoyage')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('NAUTICA VOYAGE', 'ml-nauticavoyage', 'q-nautica')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="AL WATANIAH" data-secao="arabe">
-    <img src="img/SabahAlWard.jpg" alt="SABAH AL WARD">
-    <div class="info">
-        <span class="marca-tag">AL WATANIAH</span>
-        <div class="nome-perfume">SABAH AL WARD EDP</div>
-        
-        <div class="estoque-label"> 5 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-sabah', -1, 5)">-</button>
-            <input type="text" id="q-sabah" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-sabah', 1, 5)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-sabah">
-            <option value="100ml|359.00">100ML - R$ 359,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('SABAH AL WARD', 'ml-sabah')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('SABAH AL WARD', 'ml-sabah', 'q-sabah')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="AL WATANIAH" data-secao="arabe">
-    <img src="img/bareeq.jpg" alt="bareeq">
-    <div class="info">
-        <span class="marca-tag">AL WATANIAH</span>
-        <div class="nome-perfume">BAREEQ AL DHAHAB EDP</div>
-        
-        <div class="estoque-label"> 3 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-bareeq', -1, 3)">-</button>
-            <input type="text" id="q-bareeq" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-bareeq', 1, 3)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-bareeq">
-            <option value="100ml|359.00">100ML - R$ 359,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('BAREEQ AL DHAHAB', 'ml-bareeq')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('BAREEQ AL DHAHAB', 'ml-bareeq', 'q-bareeq')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="LATTAFA" data-secao="arabe">
-    <img src="img/fakharrose.webp" alt="FAKHAR ROSE">
-    <div class="info">
-        <span class="marca-tag">LATTAFA</span>
-        <div class="nome-perfume">FAKHAR ROSE EDP</div>
-        
-        <div class="estoque-label"> 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-fakhar', -1, 1)">-</button>
-            <input type="text" id="q-fakhar" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-fakhar', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-fakhar">
-            <option value="100ml|439.00">100ML - R$ 439,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('FAKHAR ROSE', 'ml-fakhar')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('FAKHAR ROSE', 'ml-fakhar', 'q-fakhar')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="LATTAFA" data-secao="arabe">
-    <img src="img/asadlattafa.webp" alt="asadlattafa">
-    <div class="info">
-        <span class="marca-tag">LATTAFA</span>
-        <div class="nome-perfume">ASAD DA LATTAFA EDP</div>
-        
-        <div class="estoque-label"> 3 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-asad', -1, 3)">-</button>
-            <input type="text" id="q-asad" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-asad', 1, 3)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-asadlattafa">
-            <option value="100ml|369.00">100ML - R$ 369,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('ASAD LATTAFA', 'ml-asadlattafa')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('ASAD LATTAFA', 'ml-asadlattafa', 'q-asad')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="SHAKIRA" data-secao="kits">
-    <img src="img/kitshakiraamarillo.avif" alt="amarillo">
-    <div class="info">
-        <span class="marca-tag">SHAKIRA</span>
-        <div class="nome-perfume">KIT COFFRET SHAKIRA AMARILLO</div>
-        
-        <div class="estoque-label"> 6 unidades</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-kitamarillo', -1, 6)">-</button>
-            <input type="text" id="q-kitamarillo" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-kitamarillo', 1, 6)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-kitamarillo">
-            <option value="80ml+10ml|259.00">80ML+10ML - R$ 259,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('KIT SHAKIRA AMARILLO', 'ml-kitamarillo')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('KIT SHAKIRA AMARILLO', 'ml-kitamarillo', 'q-kitamarillo')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="SHAKIRA" data-secao="kits">
-    <img src="img/coffretfucsia.webp" alt="coffretfucsia">
-    <div class="info">
-        <span class="marca-tag">SHAKIRA</span>
-        <div class="nome-perfume">KIT COFFRET SHAKIRA FUCSIA</div>
-        
-        <div class="estoque-label"> 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-fucsia', -1, 1)">-</button>
-            <input type="text" id="q-fucsia" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-fucsia', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-coffretfucsia">
-            <option value="80ml+Creme|259.00">80ML + CREME - R$ 259,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('KIT SHAKIRA FUCSIA', 'ml-coffretfucsia')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('KIT SHAKIRA FUCSIA', 'ml-coffretfucsia', 'q-fucsia')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-
-<div class="card" data-marca="ANTONIO BANDEIRAS" data-secao="kits">
-    <img src="img/bandeirasblueseduction.webp" alt="bandeirasblueseduction">
-    <div class="info">
-        <span class="marca-tag">ANTONIO BANDEIRAS</span>
-        <div class="nome-perfume">KIT BLUE SEDUCTION WOMEN</div>
-        
-        <div class="estoque-label"> 1 unidade</div>
-
-        <div class="qtd-container">
-            <button class="btn-qtd" onclick="alterarQtd('q-kitblue', -1, 1)">-</button>
-            <input type="text" id="q-kitblue" value="1" readonly class="input-qtd">
-            <button class="btn-qtd" onclick="alterarQtd('q-kitblue', 1, 1)">+</button>
-        </div>
-
-        <select class="seletor-ml" id="ml-kitblue">
-            <option value="80ml+DES|259.00">80ML + DESOD. - R$ 259,00</option>
-        </select>
-        
-        <button onclick="comprarAgora('KIT BLUE SEDUCTION WOMEN', 'ml-kitblue')" class="btn-whats">COMPRAR AGORA</button>
-        <button onclick="addCart('KIT BLUE SEDUCTION WOMEN', 'ml-kitblue', 'q-kitblue')" class="btn-add-cart">+ Adicionar à Sacola</button>
-    </div>
-</div>
-</div>
-
-   <script>
-    // 1. Atualiza o ano no rodapé
-    if(document.getElementById("ano-real")) {
-        document.getElementById("ano-real").textContent = new Date().getFullYear();
+<div class="container" id="listaProdutos"></div>
+
+<script src="promocoes.js"></script>
+<script src="produtos.js"></script>
+<script src="checkout.js"></script>
+
+    
+<script>
+function exibirAviso(mensagem, tipo = 'info') {
+    const antigo = document.querySelector('.aviso-nuvem');
+    if (antigo) antigo.remove();
+
+    const div = document.createElement('div');
+    div.className = `aviso-nuvem ${tipo === 'erro' ? 'erro' : ''}`;
+    const icone = tipo === 'erro' ? '⚠️' : '✨';
+    
+    div.innerHTML = `
+        <span style="font-size: 20px;">${icone}</span>
+        <div style="font-size: 14px; line-height: 1.4;">${mensagem}</div>
+        <span onclick="this.parentElement.remove()" style="cursor:pointer; margin-left:10px; opacity:0.5;">✕</span>
+    `;
+
+    document.body.appendChild(div);
+    setTimeout(() => { if(div) div.remove(); }, 6000);
+}
+    
+window.toggleCart = function() {
+    const modal = document.getElementById('cart-modal');
+    if (modal) {
+        modal.classList.toggle('active');
+    } else {
+        console.error("Erro: cart-modal não encontrado");
     }
+};
 
-  // 1. Variáveis Globais
+// --- VARIÁVEIS GLOBAIS ---
 let sacola = []; 
 let valorFreteGlobal = 0;
 let nomeFreteGlobal = "";
-let categoriaAtual = 'todos';
+let cepCalculadoGlobal = ""; // Guarda o CEP que foi usado para calcular o frete
+// --- INICIALIZAÇÃO ---
+window.onload = function() {
+    if (typeof meusProdutos !== 'undefined') {
+        carregarProdutos(meusProdutos);
+    }
+    const anoReal = document.getElementById("ano-real");
+    if(anoReal) anoReal.textContent = new Date().getFullYear();
+};
 
-// 2. Event Listeners (Garante que tudo funcione sem travar)
-document.addEventListener('DOMContentLoaded', function() {
-    // Ativa o cálculo de frete
-    const btnFrete = document.getElementById('btn-calcular-frete');
-    if (btnFrete) btnFrete.addEventListener('click', calcularFrete);
-
-    // Ativa o botão de Enviar Pedido (Preto)
-    const btnEnviar = document.getElementById('btn-enviar-pedido');
-    if (btnEnviar) btnEnviar.addEventListener('click', finalizarWhatsApp);
-});
-
-// 3. Funções de Interface
-function toggleCart() { 
-    document.getElementById('cart-modal').classList.toggle('active'); 
+// --- FUNÇÕES DE FILTRO ---
+function filtrarCategoria(categoria, elemento) {
+    document.querySelectorAll('.btn-categoria').forEach(btn => btn.classList.remove('active'));
+    if (elemento) elemento.classList.add('active');
+    filtrar(); 
 }
 
-function alterarQtd(id, val, max) {
-    let input = document.getElementById(id);
-    let n = parseInt(input.value) + val;
-    if (n >= 1 && n <= max) input.value = n;
-}
-
-// 4. Filtros
 function filtrar() {
-    let busca = document.getElementById('buscaInput').value.toLowerCase();
-    let marcaSel = document.getElementById('filtroMarca').value;
-    let cards = document.querySelectorAll('.card');
-    cards.forEach(card => {
-        let nome = card.querySelector('.nome-perfume').innerText.toLowerCase();
-        let marca = card.getAttribute('data-marca');
-        let secao = card.getAttribute('data-secao');
-        let match = nome.includes(busca) && 
-                    (marcaSel === 'todos' || marca === marcaSel) && 
-                    (categoriaAtual === 'todos' || secao === categoriaAtual);
-        card.classList.toggle('hidden', !match);
+    const marcaSelecionada = document.getElementById('filtroMarca').value.toUpperCase();
+    const termoBusca = document.getElementById('buscaInput').value.toUpperCase();
+    
+    // Identifica qual categoria está ativa via botão
+    const btnAtivo = document.querySelector('.btn-categoria.active');
+    let categoriaAtiva = "todos";
+    if(btnAtivo) {
+        // Extrai a categoria do texto ou do atributo de clique
+        const clickAttr = btnAtivo.getAttribute('onclick');
+        if(clickAttr.includes('alta')) categoriaAtiva = 'alta';
+        else if(clickAttr.includes('arabe')) categoriaAtiva = 'arabe';
+        else if(clickAttr.includes('casa')) categoriaAtiva = 'casa';
+        else if(clickAttr.includes('kits')) categoriaAtiva = 'kits';
+        else if(clickAttr.includes('maquiagem')) categoriaAtiva = 'maquiagem';
+    }
+
+    const filtrados = meusProdutos.filter(p => {
+        const bateMarca = (marcaSelecionada === 'TODOS' || p.marca.toUpperCase() === marcaSelecionada);
+        const bateBusca = p.nome.toUpperCase().includes(termoBusca);
+        
+        // Verifica se o produto pertence à categoria (checa p.categoria ou p.secao)
+        const catProduto = (p.categoria || p.secao || "").toLowerCase();
+        const bateCategoria = (categoriaAtiva === 'todos' || catProduto.includes(categoriaAtiva));
+        
+        return bateMarca && bateBusca && bateCategoria;
+    });
+
+    carregarProdutos(filtrados);
+}
+
+ function carregarProdutos(lista = meusProdutos) {
+    const container = document.getElementById('listaProdutos');
+    if (!container) return;
+    container.innerHTML = ""; 
+
+    lista.forEach(p => {
+        try {
+            // Verificação de segurança: se não houver opções, pula para o próximo produto
+            if (!p.opcoes || p.opcoes.length === 0) return;
+
+            const primeiraOpcao = p.opcoes[0];
+            const valorSplit = primeiraOpcao.valor.split('|');
+            const mlInicial = valorSplit[0];
+            const precoOriginal = parseFloat(valorSplit[1]) || 0;
+            
+            // Chama a função do seu arquivo promocoes.js
+            const promo = processarPrecoProduto({ id: p.id, marca: p.marca, preco: precoOriginal, ml: mlInicial });
+            const pDados = JSON.stringify(p).replace(/"/g, '&quot;');
+
+            const secaoProduto = (p.secao || "").toLowerCase().trim();
+            const ehPerfume = secaoProduto === "alta" || secaoProduto === "arabe" || secaoProduto === "kits";
+
+            let seletorHtml = "";
+            if (ehPerfume) {
+                seletorHtml = `
+                    <div class="variacao-container" style="margin-bottom: 10px;">
+                        ${p.opcoes.map((opt, idx) => `
+                            <button class="btn-ml-nuvem ${idx === 0 ? 'active' : ''}" 
+                                    onclick="selecionarVariacaoManual('${p.id}', '${opt.valor}', '${p.marca}', this)">
+                                ${opt.valor.split('|')[0]}
+                            </button>`).join('')}
+                    </div>`;
+            } else {
+                seletorHtml = `
+                    <div style="width: 100%; display: flex; justify-content: center; margin-bottom: 10px;">
+                        <select class="seletor-estilo-aba" style="width: 90%; padding: 8px; border-radius: 8px; border: 1px solid #ccc; background: #fff;" 
+                                onchange="selecionarVariacaoSelect('${p.id}', this.value, '${p.marca}')">
+                            ${p.opcoes.map((opt) => `
+                                <option value="${opt.valor}">${opt.texto || opt.valor.split('|')[0]}</option>
+                            `).join('')}
+                        </select>
+                    </div>`;
+            }
+
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+                ${promo.emPromocao ? `<div class="selo-promo">OFERTA</div>` : ''}
+                <img src="${p.imagem}" class="img-principal" alt="${p.nome}" onclick="abrirDetalhes(${pDados})" style="cursor:pointer;">
+                <div class="info-container" style="padding: 0 10px; width: 100%; box-sizing: border-box; display: flex; flex-direction: column; align-items: center;">
+                    <span class="marca-tag">${p.marca}</span>
+                    <div class="nome-perfume">${p.nome}</div>
+                    <div id="preco-container-${p.id}" style="margin: 5px 0; min-height: 80px; display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%;"></div>
+                    <div class="estoque-label" id="estoque-${p.id}" style="font-size:12px; font-weight:bold; margin-bottom: 8px; color: ${primeiraOpcao.disponivel ? '#d32f2f' : 'red'}">
+                        ${primeiraOpcao.disponivel ? primeiraOpcao.estoque + ' unidades' : 'INDISPONÍVEL'}
+                    </div>
+                    ${seletorHtml}
+                    <div class="qtd-container" style="margin-bottom: 15px;">
+                        <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', -1, '${p.id}')">-</button>
+                        <input type="text" id="q-${p.id}" value="${primeiraOpcao.disponivel ? 1 : 0}" readonly class="input-qtd">
+                        <button class="btn-qtd" onclick="alterarQtd('q-${p.id}', 1, '${p.id}')">+</button>
+                    </div>
+                    <input type="hidden" id="ml-${p.id}" value="${primeiraOpcao.valor}">
+                    <div class="btn-container-acoes" style="display:flex; flex-direction:column; gap:8px; width:100%; align-items:center;">
+                        <button class="btn-add-cart" onclick='abrirDetalhes(${pDados})' style="width:100% !important;">VER DETALHES</button>
+                        <div id="btn-container-${p.id}" style="width:100%; display:flex; justify-content:center;">
+                            ${primeiraOpcao.disponivel ? 
+                                `<button class="btn-add-sacola" onclick="adicionarComPromocao('${p.id}', '${p.nome}', 'ml-${p.id}', 'q-${p.id}')" style="width:100% !important;">+ ADICIONAR À SACOLA</button>` : 
+                                `<button class="btn-add-sacola" style="background:#000; color:#fff; width:100% !important;" disabled>ESGOTADO</button>`}
+                        </div>
+                    </div>
+                </div>`; 
+            container.appendChild(card);
+            atualizarPrecoCard(p.id, primeiraOpcao.valor, p.marca);
+        } catch (err) {
+            console.error("Erro ao carregar produto:", p.nome, err);
+        }
     });
 }
+// --- MANIPULAÇÃO DE VARIAÇÕES (BOTÕES QUADRADOS - PERFUMES) ---
+function selecionarVariacaoManual(id, valorSelt, marca, elemento) {
+    const card = elemento.closest('.card');
+    card.querySelectorAll('.btn-ml-nuvem').forEach(b => b.classList.remove('active'));
+    elemento.classList.add('active');
 
-function filtrarCategoria(cat, btn) {
-    categoriaAtual = cat;
-    document.querySelectorAll('.btn-categoria').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    filtrar();
+    // Executa a lógica comum de atualização
+    processarTrocaDeVariacao(id, valorSelt, marca, card);
 }
 
-// 5. Gestão da Sacola
-function addCart(nome, mlId, qtdId) {
-    const selectMl = document.getElementById(mlId);
-    const qtdInput = document.getElementById(qtdId);
-    if (!selectMl || !qtdInput) return;
-    
-    const [ml, preco] = selectMl.value.split('|');
-    const precoNum = parseFloat(preco);
-    const qtd = parseInt(qtdInput.value);
+// --- MANIPULAÇÃO DE VARIAÇÕES (ABA/SELECT - BATONS E VELAS) ---
+function selecionarVariacaoSelect(id, valorSelt, marca) {
+    const containerPreco = document.getElementById(`preco-container-${id}`);
+    const card = containerPreco.closest('.card');
 
-    if (precoNum > 0) {
-        sacola.push({ nome, ml, preco: precoNum, qtd });
-        atualizarSacola();
-        if (!document.getElementById('cart-modal').classList.contains('active')) toggleCart();
+    // Executa a lógica comum de atualização
+    processarTrocaDeVariacao(id, valorSelt, marca, card);
+}
+
+// --- FUNÇÃO MESTRE (PROCESSA TUDO: PREÇO, ESTOQUE E IMAGEM) ---
+function processarTrocaDeVariacao(id, valorSelt, marca, card) {
+    // 1. Atualiza o valor no input oculto para a sacola
+    document.getElementById(`ml-${id}`).value = valorSelt;
+
+    const produto = meusProdutos.find(p => p.id === id);
+    const opcao = produto.opcoes.find(o => o.valor === valorSelt);
+
+    // 2. Atualiza Preço e Parcelamento (em azul)
+    atualizarPrecoCard(id, valorSelt, marca);
+
+    // 3. Troca a Imagem se houver uma imagem específica para a cor/fragrância
+    // Ela verifica tanto 'imagemCor' quanto 'img' para ser compatível
+    const novaImg = opcao.imagemCor || opcao.img;
+    if (novaImg) {
+        card.querySelector('.img-principal').src = novaImg;
+    }
+
+    // 4. Atualiza Estoque e Botão de Compra
+    const labelEstoque = document.getElementById(`estoque-${id}`);
+    const containerBotao = document.getElementById(`btn-container-${id}`);
+    const inputQtd = document.getElementById(`q-${id}`);
+
+    if (opcao.estoque > 0 && opcao.disponivel) {
+        labelEstoque.innerText = `${opcao.estoque} unidades`;
+        labelEstoque.style.color = "#d32f2f";
+        containerBotao.innerHTML = `<button class="btn-add-sacola" onclick="adicionarComPromocao('${id}', '${produto.nome}', 'ml-${id}', 'q-${id}')">+ ADICIONAR À SACOLA</button>`;
+        inputQtd.value = 1;
+    } else {
+        labelEstoque.innerText = `INDISPONÍVEL`;
+        labelEstoque.style.color = "red";
+        containerBotao.innerHTML = `<button class="btn-add-sacola" style="background:#000; color:#fff; cursor:not-allowed;" disabled>ESGOTADO</button>`;
+        inputQtd.value = 0;
     }
 }
 
-function removerItem(index) {
-    sacola.splice(index, 1);
-    valorFreteGlobal = 0; // Reseta o frete ao remover itens
-    nomeFreteGlobal = "";
-    const opcoesFrete = document.getElementById('opcoes-frete');
-    if (opcoesFrete) opcoesFrete.innerHTML = "";
-    atualizarSacola();
+    function atualizarPrecoCard(id, valorSelt, marca) {
+    const [ml, precoTexto] = valorSelt.split('|');
+    const precoBase = parseFloat(precoTexto);
+    const container = document.getElementById(`preco-container-${id}`);
+    
+    if (!container) return;
+
+    const promo = processarPrecoProduto({ id: id, marca: marca, preco: precoBase, ml: ml });
+
+    let html = `
+        <div style="color:#333; font-weight:bold; font-size:18px; line-height: 1;">R$ ${formatarMoeda(precoBase)}</div>
+        <div class="parcelamento-azul">
+            até 10x de R$ ${formatarMoeda(precoBase/10)} sem juros
+        </div>
+    `;
+
+    if (promo.emPromocao) {
+        html += `<div style="display:flex; flex-direction:column; gap:3px; align-items:center; width: 100%; margin-top: 2px;">`;
+        html += `<span class="tag-promo-pix">💰 PIX: R$ ${formatarMoeda(promo.pixValor)}</span>`;
+
+        if (promo.tem6x) {
+            html += `<span class="tag-promo-6x">💳 6x de R$ ${formatarMoeda(promo.parcela6x)} (-${promo.percentual6x}%)</span>`;
+        }
+        html += `</div>`;
+    } else {
+        html += `<div style="height: 10px;"></div>`;
+    }
+    container.innerHTML = html;
 }
+
+ function adicionarComPromocao(id, nome, mlId, qtdId) {
+    // 1. RESETAR DADOS DE FRETE (Zera tudo para não cobrar valor errado)
+    valorFreteGlobal = 0;
+    nomeFreteGlobal = "";
+    cepCalculadoGlobal = ""; 
+
+    // 2. MOSTRAR AVISO APENAS DENTRO DA SACOLA
+    // Isso ativa aquela barrinha amarela que você colocou acima do 'cart-scroll-area'
+    const avisoInterno = document.getElementById('aviso-interno-sacola');
+    if (avisoInterno) {
+        avisoInterno.style.display = 'flex'; 
+    }
+
+    // 3. LIMPA A LISTA DE OPÇÕES DE FRETE ANTERIORES
+    const resultadoFreteHTML = document.getElementById('opcoes-frete');
+    if (resultadoFreteHTML) {
+        resultadoFreteHTML.innerHTML = ""; 
+    }
+       const selectMl = document.getElementById(mlId);
+    if (!selectMl) return; // Segurança caso o elemento não exista
+
+    const [ml, precoBruto] = selectMl.value.split('|');
+    const precoBase = parseFloat(precoBruto);
+    const qtdInput = document.getElementById(qtdId);
+    const qtd = qtdInput ? parseInt(qtdInput.value) : 1;
+    
+    const pOriginal = meusProdutos.find(item => item.id === id);
+    if (!pOriginal) return;
+
+    const promo = processarPrecoProduto({ id: id, marca: pOriginal.marca, preco: precoBase, ml: ml });
+
+    // --- CASO 1: NÃO ESTÁ EM PROMOÇÃO ---
+    if (!promo.emPromocao) {
+        sacola.push({ 
+            id, nome, ml, 
+            preco: precoBase, 
+            qtd, 
+            emPromocao: false,
+            tipoPagamento: "Cartão até 10x",
+            maxParcelas: 10 
+        });
+
+        // Verificação de segurança que você pediu
+        if (typeof confirmarAdicao === "function") {
+            confirmarAdicao();
+        }
+        
+        if (typeof atualizarSacola === "function") {
+            atualizarSacola();
+        }
+        return;
+    }
+
+    // --- CASO 2: ESTÁ EM PROMOÇÃO (ABRIR MODAL) ---
+    const container = document.getElementById('containerOpcoesPromo');
+    if (!container) {
+        console.error("Erro: Elemento 'containerOpcoesPromo' não encontrado no HTML.");
+        return;
+    }
+    
+    container.innerHTML = ''; // Limpa botões antigos
+
+    const opcoes = [
+        { texto: "À VISTA NO PIX", valor: promo.pixValor, desc: "Melhor desconto", parcelas: 1, promo: true, mostrar: true },
+        { texto: "CARTÃO ATÉ 6X", valor: promo.valor6x, desc: "Parcelamento exclusivo", parcelas: 6, promo: true, mostrar: promo.tem6x },
+        { texto: "CARTÃO ATÉ 10X", valor: promo.valor10x, desc: "Preço original", parcelas: 10, promo: false, mostrar: true }
+    ];
+
+    opcoes.forEach(opt => {
+        if (!opt.mostrar) return;
+
+        const btn = document.createElement('button');
+        const valorFormatado = opt.valor.toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
+        
+        btn.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; pointer-events: none; width: 100%;">
+                <div style="text-align:left;">
+                    <strong style="display:block; font-size:13px; color:#fff; margin:0;">${opt.texto}</strong>
+                    <span style="font-size:11px; color:#b89356;">${opt.desc}</span>
+                </div>
+                <div style="font-size:16px; font-weight:bold; color:#fff;">${valorFormatado}</div>
+            </div>
+        `;
+        
+        btn.style = "background:#041236; border:1px solid #1a2a4d; padding:15px; border-radius:12px; cursor:pointer; transition:0.3s; width:100%; margin-bottom:10px; display:block;";
+        
+        btn.onmouseover = () => btn.style.border = "1px solid #b89356";
+        btn.onmouseout = () => btn.style.border = "1px solid #1a2a4d";
+
+        btn.onclick = () => {
+            sacola.push({ 
+                id, nome, ml, 
+                preco: opt.valor, 
+                qtd, 
+                emPromocao: opt.promo,
+                tipoPagamento: opt.texto,
+                maxParcelas: opt.parcelas 
+            });
+            
+            // Fecha o modal azul
+            const modalPromo = document.getElementById('modalPromocaoOpcoes');
+            if (modalPromo) modalPromo.style.display = 'none';
+
+            // Chamadas seguras das funções de feedback
+            if (typeof confirmarAdicao === "function") {
+                confirmarAdicao();
+            }
+            if (typeof atualizarSacola === "function") {
+                atualizarSacola();
+            }
+        };
+        
+        container.appendChild(btn);
+    });
+
+    const modalFinal = document.getElementById('modalPromocaoOpcoes');
+    if (modalFinal) {
+        modalFinal.style.display = 'flex';
+    } else {
+        alert("Erro visual: O modal de promoção não foi encontrado no seu index.html");
+    }
+}
+   
 
 function atualizarSacola() {
     const itensCont = document.getElementById('cart-items');
     const totalCont = document.getElementById('cart-total');
     const countCont = document.getElementById('cart-count');
-    let subtotal = 0;
     
-    if (!itensCont) return;
+    let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
 
     if (sacola.length === 0) {
         itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
     } else {
-        itensCont.innerHTML = sacola.map((item, index) => {
-            const valorItem = item.preco * item.qtd;
-            subtotal += valorItem;
-            return `<div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
-                        <div style="text-align:left;">
-                            <b style="font-size:13px;">${item.nome}</b><br>
-                            <small>${item.ml} | Qtd: ${item.qtd}</small>
-                        </div>
-                        <button class="btn-remover-item" data-index="${index}" style="background:none; border:none; color:red; font-size:22px; cursor:pointer; font-weight:bold;">&times;</button>
-                    </div>`;
-        }).join('');
-
-        document.querySelectorAll('.btn-remover-item').forEach(btn => {
-            btn.addEventListener('click', function() {
-                removerItem(parseInt(this.getAttribute('data-index')));
-            });
-        });
+        itensCont.innerHTML = sacola.map((item, index) => `
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
+                <div style="text-align:left;">
+                    <b style="font-size:13px;">${item.nome}</b><br>
+                    <small>${item.ml} | Qtd: ${item.qtd}</small><br>
+                    <small style="color:${item.emPromocao ? '#2e7d32' : '#666'}; font-weight:bold;">${item.tipoPagamento}</small>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-size:13px; font-weight:bold;">R$ ${formatarMoeda(item.preco * item.qtd)}</div>
+                    <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px;">×</button>
+                </div>
+            </div>`).join('');
     }
 
-    // Regra de Frete Grátis Automática
-    if (subtotal >= 700) {
-        valorFreteGlobal = 0;
-        nomeFreteGlobal = "FRETE GRÁTIS";
-    }
-
-    const totalFinal = subtotal + valorFreteGlobal;
-    if (totalCont) totalCont.innerText = totalFinal.toLocaleString('pt-br', { minimumFractionDigits: 2 });
-    if (countCont) countCont.innerText = sacola.length;
+    const totalGeral = subtotal + valorFreteGlobal;
+    totalCont.innerText = formatarMoeda(totalGeral);
+    countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
 }
 
+// --- UTILITÁRIOS ---
+function formatarMoeda(valor) {
+    return valor.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function alterarQtd(idInput, delta, produtoId) {
+    const input = document.getElementById(idInput);
+    const valorSelt = document.getElementById(`ml-${produtoId}`).value;
+    const produto = meusProdutos.find(p => p.id === produtoId);
+    const opcao = produto.opcoes.find(o => o.valor === valorSelt);
+    let max = opcao ? opcao.estoque : 0;
+    let novo = parseInt(input.value) + delta;
+    if (novo >= 1 && novo <= max) input.value = novo;
+}
+
+// 1. REMOVER ITEM (CORRIGIDA)
+function removerItem(index) {
+    sacola.splice(index, 1); 
+    valorFreteGlobal = 0;
+    nomeFreteGlobal = "";
+    const resultadoFrete = document.getElementById('opcoes-frete');
+    if (resultadoFrete) {
+        resultadoFrete.innerHTML = "<p style='color:#b89356; font-size:12px;'>Item removido. Recalcule o frete.</p>";
+    }
+    atualizarSacola();
+}
+
+// 2. MOSTRAR AVISO (CORRIGIDA COM SACOLA 🛍️)
+function mostrarAvisoCarrinho() {
+    const antigo = document.getElementById("aviso-sacola-toast");
+    if(antigo) antigo.remove();
+
+    const aviso = document.createElement('div');
+    aviso.id = "aviso-sacola-toast";
+    aviso.style = "position: fixed; top: 100px; right: 20px; background: #2e7d32; color: white; padding: 15px 20px; border-radius: 8px; z-index: 99999; box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: flex; align-items: center; gap: 15px; font-family: sans-serif;";
+    
+    aviso.innerHTML = `
+        <span style="font-weight: bold;">🛍️ Adicionado com sucesso!</span>
+        <button onclick="window.toggleCart(); this.parentElement.remove();" style="background: white; color: #2e7d32; border: none; padding: 8px 12px; cursor: pointer; border-radius: 4px; font-weight: bold; font-size: 12px; text-transform: uppercase;">VER AGORA</button>
+        <b onclick="this.parentElement.remove()" style="cursor: pointer; font-size: 20px; padding-left: 5px;">✕</b>
+    `;
+
+    document.body.appendChild(aviso);
+    setTimeout(() => { if(aviso) aviso.remove(); }, 5000);
+}
+
+// 3. CONFIRMAR ADIÇÃO (CORRIGIDA)
+function confirmarAdicao() { 
+    if (typeof atualizarSacola === "function") {
+        atualizarSacola(); 
+    }
+    mostrarAvisoCarrinho(); 
+}
+
+// --- MODAL DE DETALHES ---
+function abrirDetalhes(p) {
+    document.getElementById('detalhe-img').src = p.imagem;
+    document.getElementById('detalhe-nome').innerText = p.nome;
+    document.getElementById('detalhe-marca').innerText = p.marca;
+    document.getElementById('detalhe-descricao').innerText = p.descricao || "Fragrância exclusiva.";
+    
+    const msg = encodeURIComponent(`Olá! Gostaria de saber mais sobre: *${p.nome}* (${p.marca})`);
+    const btn = document.getElementById('btn-whats-detalhe');
+    if(btn) btn.onclick = () => window.open(`https://wa.me/5563992576211?text=${msg}`, '_blank');
+
+    document.getElementById('modal-detalhes').style.display = 'flex';
+}
+
+function fecharDetalhes() { document.getElementById('modal-detalhes').style.display = 'none'; }
+
+// --- FRETE E WHATSAPP ---
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
-    const div = document.getElementById('opcoes-frete');
-    
-    // IMPORTANTE: Pegamos os valores que o arquivo .js na Vercel exige
-    const subtotal = sacola.reduce((acc, item) => acc + (item.preco * item.qtd), 0);
-    const qtdTotal = sacola.reduce((acc, item) => acc + item.qtd, 0);
+    cepCalculadoGlobal = cep; // Salva o CEP atual para conferir no final
+    const resultadoDiv = document.getElementById('opcoes-frete');
+    if (sacola.length === 0) return alert("Adicione produtos primeiro.");
+    if (cep.length !== 8) return alert("CEP inválido.");
 
-    if (cep.length !== 8) {
-        alert("CEP Inválido. Digite os 8 números.");
-        return;
-    }
-    
-    div.innerHTML = "<p style='color: #666; font-size: 13px;'>Calculando opções...</p>";
+    resultadoDiv.innerHTML = "<p style='color:#666'>Calculando...</p>";
+    const subtotal = sacola.reduce((sum, i) => sum + (i.preco * i.qtd), 0);
+    const qtdTotal = sacola.reduce((sum, i) => sum + i.qtd, 0);
 
     try {
         const response = await fetch('/api/calcular-frete', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-                cep_destino: cep,
-                quantidade: qtdTotal, 
-                valor_total: subtotal 
-            })
+            body: JSON.stringify({ cep_destino: cep, valor_total: subtotal, qtd_total: qtdTotal })
         });
-
         const data = await response.json();
-        div.innerHTML = "";
-
-        if (!Array.isArray(data) || data.length === 0) {
-            div.innerHTML = "<p style='color:orange; font-size:12px;'>Nenhum frete disponível.</p>";
+        if(!data || data.length === 0) {
+            resultadoDiv.innerHTML = "<p style='color:orange'>CEP não atendido.</p>";
             return;
         }
-
-        data.forEach(op => {
-            if (op.error) return;
-
-            const preco = parseFloat(op.price || 0);
-            const nome = op.name;
-            const btnOpcao = document.createElement('div');
-            
-            btnOpcao.style = "background:#fff; padding:12px; margin-top:8px; border:1px solid #ddd; cursor:pointer; border-radius:8px; color:#333; transition: 0.2s;";
-            btnOpcao.innerHTML = `
-                <div style="display:flex; justify-content:space-between;">
-                    <span>${nome}</span>
-                    <b>${preco === 0 ? 'GRÁTIS' : 'R$ ' + preco.toFixed(2).replace('.', ',')}</b>
+        resultadoDiv.innerHTML = data.map(op => `
+            <div class="opcao-frete-card" onclick="selecionarFrete('${op.name}', ${op.price}, this)" 
+                 style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; margin-top:8px; cursor:pointer; background:white; border-radius:8px;">
+                <div style="text-align:left;">
+                    <strong style="font-size:12px; color:#333;">${op.name}</strong><br>
+                    <small style="color: #666;">Prazo: ${op.delivery_time} dias</small> 
                 </div>
-                <small style="color: #888;">Prazo: ${op.delivery_time || '6-13'} dias úteis</small>
-            `;
-
-            btnOpcao.addEventListener('click', () => aplicarFrete(preco, nome));
-            div.appendChild(btnOpcao);
-        });
-    } catch (e) { 
-        div.innerHTML = "<p style='color:red; font-size:12px;'>Erro ao calcular. Verifique sua conexão.</p>"; 
+                <strong style="color:#b89356;">${op.price == 0 ? 'GRÁTIS' : 'R$ ' + formatarMoeda(op.price)}</strong>
+            </div>`).join('');
+    } catch (e) {
+        resultadoDiv.innerHTML = "<p style='color:red;'>Erro ao calcular.</p>";
     }
 }
 
+function selecionarFrete(nome, valor, elemento) {
+    valorFreteGlobal = valor;
+    nomeFreteGlobal = nome;
+    
+    // ESCONDER O AVISO POIS O FRETE FOI RESOLVIDO
+    const avisoInterno = document.getElementById('aviso-interno-sacola');
+    if (avisoInterno) {
+        avisoInterno.style.display = 'none';
+    }
+
+    document.querySelectorAll('.opcao-frete-card').forEach(c => c.style.borderColor = '#eee');
+    elemento.style.borderColor = '#b89356';
+    atualizarSacola();
+}
 function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
-    let texto = "Olá! Gostaria de fazer o seguinte pedido:\n\n";
-    sacola.forEach(item => texto += `- ${item.nome} (${item.ml}) x${item.qtd}: R$ ${(item.preco * item.qtd).toFixed(2).replace('.', ',')}\n`);
-    
-    if (nomeFreteGlobal) {
-        texto += `\nFrete: *${nomeFreteGlobal}* ${valorFreteGlobal > 0 ? '(R$ '+valorFreteGlobal.toFixed(2).replace('.', ',')+')' : ''}\nPrazo: 6 a 13 dias úteis`;
-    }
-    
-    texto += `\n\n*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
+    let texto = "*PEDIDO NUVEM DE ESSÊNCIAS*\n\n";
+    sacola.forEach(i => {
+        texto += `• *${i.nome}* (${i.ml})\n  Qtd: ${i.qtd} | ${i.tipoPagamento}\n  Valor: R$ ${formatarMoeda(i.preco * i.qtd)}\n\n`;
+    });
+    texto += valorFreteGlobal > 0 ? `*Frete:* ${nomeFreteGlobal} (R$ ${formatarMoeda(valorFreteGlobal)})\n` : `*Frete:* A combinar\n`;
+    texto += `*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
     window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
-function comprarAgora(nome, mlId) {
-    const selectMl = document.getElementById(mlId);
-    if (!selectMl) return;
-    const [ml, preco] = selectMl.value.split('|');
-    const msg = `Olá! Gostaria de comprar o perfume *${nome}* (${ml}) por R$ ${preco.replace('.', ',')}. Está disponível?`;
-    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(msg)}`, '_blank');
-}
-       
 </script>
-<footer class="rodape-premium">
-    <div class="container">
-        <div class="secao-marca">
-            <p class="slogan no-break">"Sinta o aroma dos sonhos e realce sua beleza!"</p>
-            <h1 class="logo-text no-break">NUVEM DE ESSÊNCIAS PERFUMARIA</h1>
+<div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; position:relative; color:#333; text-align:center;">
+        <span onclick="fecharDetalhes()" style="position:absolute; top:10px; right:15px; font-size:25px; cursor:pointer;">&times;</span>
+        <img id="detalhe-img" src="" style="width:100%; height:200px; object-fit:contain; margin-bottom:15px;">
+        <h2 id="detalhe-nome" style="margin:5px 0; color:#020b1f; font-size:18px;"></h2>
+        <p id="detalhe-marca" style="color:#b89356; font-weight:bold; text-transform:uppercase; font-size:12px;"></p>
+        <p id="detalhe-descricao" style="font-size:14px; line-height:1.5; color:#666; text-align:left;"></p>
+        
+        <button id="btn-whats-detalhe" class="btn-whats-modal">
+            COMPRAR PELO WHATSAPP
+        </button>
+    </div>
+</div>
+
+<div id="modalCheckout" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:11000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:25px; border-radius:12px; max-width:450px; width:90%; color:#333;">
+        <h2 style="margin-top:0; color:#020b1f;">Finalizar Compra</h2>
+        
+        <div style="display:grid; gap:10px;">
+            <input type="text" id="cliente_nome" placeholder="Nome Completo" style="padding:10px; border:1px solid #ddd; border-radius:4px;">
+            <input type="email" id="cliente_email" placeholder="E-mail" style="padding:10px; border:1px solid #ddd; border-radius:4px;">
+            <input type="text" id="cliente_cpf" placeholder="CPF (apenas números)" style="padding:10px; border:1px solid #ddd; border-radius:4px;">
+            <input type="text" id="cliente_celular" placeholder="WhatsApp (com DDD)" style="padding:10px; border:1px solid #ddd; border-radius:4px;">
+            
+            <div style="display:flex; gap:5px;">
+                <input type="text" id="end_cep" placeholder="CEP" onblur="buscarCEP(this.value)" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:4px;">
+            </div>
+            
+            <input type="text" id="end_rua" placeholder="Rua" style="padding:10px; border:1px solid #ddd; border-radius:4px;">
+            <div style="display:flex; gap:5px;">
+                <input type="text" id="end_numero" placeholder="Nº" style="width:70px; padding:10px; border:1px solid #ddd; border-radius:4px;">
+                <input type="text" id="end_bairro" placeholder="Bairro" style="flex:1; padding:10px; border:1px solid #ddd; border-radius:4px;">
+            </div>
+            <input type="hidden" id="end_cidade">
+            <input type="hidden" id="end_estado">
         </div>
 
-        <hr class="divisor">
+        <div id="resumoValores" style="background:#f9f9f9; padding:10px; border-radius:8px; margin-top:15px; font-size:13px;"></div>
 
-        <div class="grid-conteudo">
-            <div class="coluna">
-                <h3>ATENDIMENTO</h3>
-                <p>Rua dos Motoristas, nº 341 - Jardim Paulista</p>
-                <div class="whatsapp-link">
-                    <img src="https://img.icons8.com/color/24/whatsapp.png" alt="WhatsApp">
-                    <a href="https://wa.me/5563992576211" target="_blank">Fale conosco: (63) 99257-6211</a>
-                </div>
+        <div style="display:flex; gap:10px; margin-top:20px;">
+            <button type="button" onclick="coletarDadosCheckout('PIX', event)" style="flex:1; background:#00bfa5; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">PAGAR PIX</button>
+            <button type="button" onclick="coletarDadosCheckout('CREDIT_CARD', event)" style="flex:1; background:#007bff; color:white; border:none; padding:12px; border-radius:6px; font-weight:bold; cursor:pointer;">CARTÃO</button>
+        </div>
+        
+        <button onclick="document.getElementById('modalCheckout').style.display='none'" style="width:100%; margin-top:10px; background:none; border:none; color:gray; cursor:pointer;">Cancelar</button>
+    </div>
+</div>
+
+    <div id="modalParcelas" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:30000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+    <div style="background:#fff; padding:25px; border-radius:15px; width:90%; max-width:380px; text-align:center; box-shadow:0 15px 35px rgba(0,0,0,0.5);">
+        <div style="font-size: 35px; margin-bottom: 10px;">💳</div>
+        <h3 style="margin:0 0 5px 0; color:#020b1f; font-family:sans-serif;">Parcelamento</h3>
+        <p style="color:#666; font-size:14px; margin-bottom:20px;">Escolha a quantidade de parcelas:</p>
+        
+        <div id="listaParcelas" style="display:grid; grid-template-columns: 1fr; gap:8px; max-height:300px; overflow-y:auto; padding:5px;">
             </div>
 
-            <div class="coluna">
-                <h3>FORMAS DE PAGAMENTO</h3>
-                <div class="icones-pagamento">
-                    <img src="https://img.icons8.com/color/38/mastercard.png" alt="Mastercard">
-                    <img src="https://img.icons8.com/color/38/visa.png" alt="Visa">
-                    <img src="https://img.icons8.com/color/38/elo.png" alt="Elo">
-                    <img src="https://img.icons8.com/color/38/pix.png" alt="Pix">
-                </div>
+        <button onclick="fecharModalParcelas()" style="margin-top:20px; background:none; border:none; color:#999; cursor:pointer; font-weight:bold; font-size:13px;">
+            CANCELAR
+        </button>
+    </div>
+</div>
+
+<div id="modalPromocaoOpcoes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:40000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+    <div style="background:#020b1f; padding:30px; border-radius:20px; width:95%; max-width:420px; text-align:center; border: 1px solid #b89356; box-shadow:0 20px 50px rgba(0,0,0,0.6);">
+        <div style="font-size: 40px; margin-bottom: 10px;">✨</div>
+        <h3 style="margin:0 0 10px 0; color:#fff; font-family:sans-serif; letter-spacing:1px;">Oferta Especial</h3>
+        <p style="color:#b89356; font-size:14px; margin-bottom:25px; font-weight:bold;">Como você prefere pagar este item?</p>
+        
+        <div id="containerOpcoesPromo" style="display:grid; grid-template-columns: 1fr; gap:12px;">
+            </div>
+
+        <button onclick="document.getElementById('modalPromocaoOpcoes').style.display='none'" style="margin-top:20px; background:none; border:none; color:#777; cursor:pointer; font-size:12px; text-transform:uppercase;">
+            Cancelar
+        </button>
+    </div>
+</div>
+    
+<footer class="rodape-container">
+    <div class="rodape-content">
+        
+        <div class="rodape-col">
+            <div class="rodape-frase-dourada">"Sinta o aroma dos sonhos e realce sua beleza!"</div>
+            
+            <a href="https://wa.me/5563992576211" target="_blank" class="link-contato">
+                <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" width="22" height="22" alt="WhatsApp">
+                (63) 99257-6211
+            </a>
+
+            <a href="https://www.instagram.com/nuvemdeessenciasperfumaria/" target="_blank" class="link-contato" style="margin-top: 10px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/174/174855.png" width="22" height="22" alt="Instagram">
+                @nuvemdeessenciasperfumaria
+            </a>
+
+            <div class="rodape-alert">
+                O único site oficial da Nuvem de Essências é o <br>
+                <strong style="color:#fff;">www.nuvemdeessencias.com.br</strong>.<br> 
+                Não preencha ou forneça dados pessoais para links não oficiais.
             </div>
         </div>
 
-        <div class="rodape-legal">
-            <p>Nuvem de Essências Perfumaria LTDA | CNPJ: 58.620.682/0001-15</p>
-            <p>© 2025 Nuvem de Essências - Todos os direitos reservados.</p>
+        <div class="rodape-col" style="text-align: center;">
+            <div class="pagamento-titulo">Formas de Pagamento</div>
+            <div class="pagamento-icones" style="justify-content: center;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/d/d6/Visa_2021.svg" alt="Visa">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/2/2a/Mastercard-logo.svg" alt="Mastercard">
+                <img src="https://logo.svgcdn.com/logos/elo.svg" alt="Logo Elo">
+                <img src="https://img.icons8.com/color/48/pix.png" alt="Pix">
+            </div>
+        </div>
+
+        <div class="rodape-col" style="text-align: right;">
+            <img src="img/simboloperfume.png" class="simbolo-perfume-footer" alt="Perfume">
+            <div style="font-size: 14px; font-weight: bold; color: #87CEEB; letter-spacing: 1px; margin-bottom: 8px;">NUVEM DE ESSÊNCIAS PERFUMARIA</div>
+            
+            <div style="font-size: 12px; color: #bbb; line-height: 1.6;">
+                Rua dos Motoristas, 341<br>
+                Bairro Jardim Paulista<br>
+                Araguaína - TO
+                <a href="http://maps.google.com/?q=Rua+dos+Motoristas+341+Araguaína" target="_blank" style="display: inline-block; vertical-align: middle; margin-left: 5px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/2991/2991231.png" width="18" height="18" alt="Google Maps" title="Ver no Maps">
+                </a>
+            </div>
         </div>
     </div>
-</footer></body>
-</html>
+
+    <div class="rodape-bottom">
+        CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
+    </div>
+</footer>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
