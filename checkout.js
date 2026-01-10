@@ -75,18 +75,21 @@ function fecharModalParcelas() {
 }
 
 function coletarDadosCheckout(metodoPagamento, event) {
-    // 1. Validação de CEP
+    // 1. Previne comportamento padrão e identifica o botão clicado
+    if (event) event.preventDefault();
+    const btnAcao = event.currentTarget || event.target;
+
+    // 2. Validação de CEP
     const cepNoCadastro = document.getElementById('end_cep').value.replace(/\D/g, '');
     if (cepCalculadoGlobal === "" || cepNoCadastro !== cepCalculadoGlobal) {
         alert("⚠️ O CEP não confere com o frete calculado. Recalcule na sacola.");
         return;
     }
 
-    const btnAcao = event.currentTarget || event.target;
     const dadosCarrinho = prepararDadosParaAsaas();
     const nomeInput = document.getElementById('cliente_nome').value.trim();
 
-    // 2. Validações Básicas
+    // 3. Validações de Nome e CPF
     if (nomeInput.split(' ').length < 2) return alert("⚠️ Digite seu nome completo.");
     const cpfLimpo = document.getElementById('cliente_cpf').value.replace(/\D/g, '');
     if (cpfLimpo.length < 11) return alert("⚠️ CPF inválido.");
@@ -94,28 +97,33 @@ function coletarDadosCheckout(metodoPagamento, event) {
     const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
     const valorTotalBase = (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal) + valorFreteGlobal;
 
-    // 3. Lógica de Parcelas
+    // 4. Lógica de Parcelamento (Apenas para Cartão)
     if (metodoPagamento === 'CREDIT_CARD' && !parcelaConfirmada) {
         const lista = document.getElementById('listaParcelas');
+        if (!lista) return alert("Erro: Container de parcelas não encontrado.");
+        
         lista.innerHTML = '';
         for (let i = 1; i <= limiteParcelas; i++) {
             const valorParcela = (valorTotalBase / i).toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
-            const btn = document.createElement('button');
-            btn.className = "btn-parcela";
-            btn.innerHTML = `<span>${i}x</span> de <b>${valorParcela}</b>`;
-            btn.onclick = () => {
+            const btnP = document.createElement('button');
+            btnP.type = "button";
+            btnP.style = "display:block; width:100%; padding:12px; margin-bottom:8px; border:1px solid #ddd; border-radius:6px; cursor:pointer; text-align:left; background:#fff; color:#333;";
+            btnP.innerHTML = `<span>${i}x</span> de <b>${valorParcela}</b>`;
+            btnP.onclick = () => {
                 parcelasEscolhidasGlobal = i;
                 parcelaConfirmada = true;
                 document.getElementById('modalParcelas').style.display = 'none';
-                coletarDadosCheckout('CREDIT_CARD', { target: document.getElementById('btn-pagar-cartao') });
+                // RECHAMA A FUNÇÃO USANDO O BOTÃO ORIGINAL
+                coletarDadosCheckout('CREDIT_CARD', { currentTarget: btnAcao });
             };
-            lista.appendChild(btn);
+            lista.appendChild(btnP);
         }
         document.getElementById('modalParcelas').style.display = 'flex';
         return;
     }
 
-    // 4. Envio para API
+    // 5. Estado de Carregamento (Aqui ele mudará o texto do botão que você clicou)
+    const textoOriginal = btnAcao.innerText;
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
@@ -149,27 +157,28 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
+            // ABRE O ASAAS EM NOVA ABA
             window.open(data.invoiceUrl, "_blank");
             
-            // SUBSTITUI O CONTEÚDO DO MODAL DE CHECKOUT
-            const modalContent = document.querySelector('#modalCheckout .modal-content');
-            if (modalContent) {
-                modalContent.innerHTML = `
-                    <div style="text-align: center; color: white; padding: 20px;">
-                        <div style="font-size: 60px; margin-bottom: 15px;">✔️</div>
-                        <h2 style="color: #b89356; margin-bottom: 15px;">Pedido Gerado!</h2>
-                        <p style="color: #ccc; margin-bottom: 25px;">Finalize o pagamento na aba aberta para baixar seu comprovante.</p>
-                        <button onclick="voltarParaLoja()" style="background:#b89356; color:white; border:none; padding:15px; width:100%; border-radius:5px; cursor:pointer; font-weight:bold;">VOLTAR PARA A LOJA</button>
+            // BUSCA O MODAL PARA EXIBIR A MENSAGEM DE SUCESSO
+            const modalPrincipal = document.getElementById('modalCheckout');
+            if (modalPrincipal) {
+                modalPrincipal.innerHTML = `
+                    <div style="background:#020b1f; color:white; padding:40px 20px; border-radius:15px; border:1px solid #b89356; max-width:400px; margin:auto; text-align:center; position:relative; top:50%; transform:translateY(-50%);">
+                        <div style="font-size:50px; margin-bottom:20px;">✔️</div>
+                        <h2 style="color:#b89356; margin-bottom:15px; font-family:serif;">Pedido Enviado!</h2>
+                        <p style="font-size:14px; color:#ccc; margin-bottom:30px;">Pagamento aberto em nova aba.<br>Baixe seu comprovante por lá.</p>
+                        <button onclick="voltarParaLoja()" style="background:#b89356; color:white; border:none; padding:15px; width:100%; border-radius:8px; font-weight:bold; cursor:pointer;">LIMPAR E VOLTAR À LOJA</button>
                     </div>
                 `;
             }
         } else {
-            throw new Error(data.error || "Erro ao processar");
+            throw new Error(data.error || "Erro no processamento");
         }
     })
     .catch(err => {
         alert("Erro: " + err.message);
-        btnAcao.innerText = (metodoPagamento === 'PIX' ? "PAGAR PIX" : "CARTÃO");
+        btnAcao.innerText = textoOriginal;
         btnAcao.disabled = false;
         parcelaConfirmada = false;
     });
