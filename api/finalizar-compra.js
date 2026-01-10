@@ -27,23 +27,23 @@ export default async function handler(req, res) {
         if (customerData.errors) return res.status(400).json({ error: customerData.errors[0].description });
 
         // 2. CRIAR PAGAMENTO COM A URL CORRETA
-        const paymentBody = {
-            customer: customerData.id,
-            billingType: pagamento.metodo === 'PIX' ? 'PIX' : 'CREDIT_CARD',
-            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-            value: pagamento.valor,
-            description: "Pedido Nuvem de Essências",
-            externalReference: `PED-${Date.now()}`,
-            
-            // AQUI ESTÁ A CORREÇÃO:
-            // O Asaas as vezes pede successUrl fora do callback em algumas requisições v3
-            // E dentro do callback para outras. Vamos enviar nos dois para garantir!
-            
-            callback: {
-                url: "https://nuvem-de-essencias.vercel.app",
-                autoRedirect: false
-            }
-        };
+const paymentBody = {
+    customer: customerData.id,
+    billingType: pagamento.metodo === 'PIX' ? 'PIX' : 'CREDIT_CARD',
+    dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Amanhã
+    value: pagamento.valor,
+    description: "Pedido Nuvem de Essências",
+    externalReference: `PED-${Date.now()}`,
+    
+    // 1. URL de Sucesso direta (exigida por algumas versões da API)
+    successUrl: "https://nuvem-de-essencias.vercel.app", 
+    
+    // 2. Bloco de Callback completo
+    callback: {
+        url: "https://nuvem-de-essencias.vercel.app",
+        autoRedirect: false
+    }
+};
 
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
