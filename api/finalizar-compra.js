@@ -1,15 +1,17 @@
 export default async function handler(req, res) {
+    // Bloqueia métodos que não sejam POST
     if (req.method !== 'POST') return res.status(405).send('Método não permitido');
 
     // 1. CONFIGURAÇÃO DE AMBIENTE (DINÂMICA)
-    // Verifica se estamos no ambiente de produção oficial da Vercel
+    // O VERCEL_ENV identifica se o site é o oficial ou um link de teste/preview
     const isProduction = process.env.VERCEL_ENV === 'production';
-    
-    // Seleciona a chave e a URL com base no ambiente
+
+    // Puxa as chaves renomeadas conforme sua configuração na Vercel
     const ASAAS_API_KEY = isProduction 
         ? process.env.ASAAS_API_KEY_PROD  
         : process.env.ASAAS_API_KEY_SANDBOX;
 
+    // Define a URL do Asaas (Real ou Sandbox)
     const ASAAS_URL = isProduction 
         ? 'https://www.asaas.com/api/v3'       
         : 'https://sandbox.asaas.com/api/v3';
@@ -17,12 +19,12 @@ export default async function handler(req, res) {
     const { cliente, endereco, pagamento } = req.body;
 
     try {
-        // 2. LOGICA DE URL PARA O BOTÃO "IR PARA O SITE"
-        // Captura o link de onde o usuário está acessando no momento
+        // 2. LÓGICA DE URL PARA O BOTÃO "IR PARA O SITE"
+        // Captura dinamicamente o link atual para evitar erro de "URL válida"
         const referer = req.headers.referer || "https://nuvem-de-essencias.vercel.app";
         const urlDinamica = referer.split('?')[0];
 
-        // 3. CRIAR OU LOCALIZAR CLIENTE
+        // 3. CRIAR OU LOCALIZAR CLIENTE NO ASAAS
         const customerRes = await fetch(`${ASAAS_URL}/customers`, {
             method: 'POST',
             headers: { 
@@ -39,6 +41,8 @@ export default async function handler(req, res) {
         });
 
         const customerData = await customerRes.json();
+        
+        // Se o Asaas retornar erro na criação do cliente (ex: CPF inválido)
         if (customerData.errors) {
             return res.status(400).json({ error: customerData.errors[0].description });
         }
@@ -47,19 +51,19 @@ export default async function handler(req, res) {
         const paymentBody = {
             customer: customerData.id,
             billingType: pagamento.metodo === 'PIX' ? 'PIX' : 'CREDIT_CARD',
-            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Vencimento amanhã
+            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Vencimento em 24h
             value: pagamento.valor,
             description: "Pedido Nuvem de Essências",
             externalReference: `PED-${Date.now()}`,
             
-            // Objeto de callback para habilitar o botão de retorno
+            // Configura o retorno para a sua loja após o pagamento
             callback: {
                 successUrl: urlDinamica, 
-                autoRedirect: false      // Exibe o botão "Ir para o site" após pagar
+                autoRedirect: false      // Exibe o botão "Ir para o site" no checkout do Asaas
             }
         };
 
-        // 5. ENVIAR REQUISIÇÃO DE PAGAMENTO
+        // 5. ENVIAR REQUISIÇÃO DE PAGAMENTO PARA O ASAAS
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
             headers: { 
@@ -71,18 +75,19 @@ export default async function handler(req, res) {
 
         const paymentData = await paymentRes.json();
 
+        // Se o Asaas retornar erro no pagamento
         if (paymentData.errors) {
             return res.status(400).json({ error: paymentData.errors[0].description });
         }
 
-        // 6. RETORNO DE SUCESSO
+        // 6. RETORNO DE SUCESSO PARA O CHECKOUT.JS
         return res.status(200).json({
             success: true,
-            invoiceUrl: paymentData.invoiceUrl 
+            invoiceUrl: paymentData.invoiceUrl // URL da fatura que será aberta em nova aba
         });
 
     } catch (error) {
-        console.error("Erro interno:", error);
+        console.error("Erro crítico na API:", error);
         return res.status(500).json({ error: "Erro interno no servidor ao processar o pagamento." });
     }
 }
