@@ -43,7 +43,7 @@ function prepararDadosParaAsaas() {
         dados.valorTotalOriginal += precoOriginal * item.qtd;
         
         dados.itensDetalhados.push({ 
-            nome: p.nome, 
+            nome: p ? p.nome : "Produto", 
             quantidade: item.qtd, 
             precoUnitario: precoOriginal 
         });
@@ -56,7 +56,6 @@ function abrirCheckoutAsaas() {
     if (typeof sacola === 'undefined' || sacola.length === 0) return alert("Sua sacola está vazia!");
     if (!nomeFreteGlobal) return alert("⚠️ Selecione o frete antes de finalizar!");
 
-    // Reset visual dos botões de pagamento
     const btnPix = document.getElementById('btn-pagar-pix');
     const btnCartao = document.getElementById('btn-pagar-cartao');
     if(btnPix) { btnPix.innerText = "PAGAR PIX"; btnPix.disabled = false; }
@@ -75,11 +74,9 @@ function fecharModalParcelas() {
 }
 
 function coletarDadosCheckout(metodoPagamento, event) {
-    // 1. Previne comportamento padrão e identifica o botão clicado
     if (event) event.preventDefault();
     const btnAcao = event.currentTarget || event.target;
 
-    // 2. Validação de CEP
     const cepNoCadastro = document.getElementById('end_cep').value.replace(/\D/g, '');
     if (cepCalculadoGlobal === "" || cepNoCadastro !== cepCalculadoGlobal) {
         alert("⚠️ O CEP não confere com o frete calculado. Recalcule na sacola.");
@@ -89,15 +86,15 @@ function coletarDadosCheckout(metodoPagamento, event) {
     const dadosCarrinho = prepararDadosParaAsaas();
     const nomeInput = document.getElementById('cliente_nome').value.trim();
 
-    // 3. Validações de Nome e CPF
     if (nomeInput.split(' ').length < 2) return alert("⚠️ Digite seu nome completo.");
     const cpfLimpo = document.getElementById('cliente_cpf').value.replace(/\D/g, '');
     if (cpfLimpo.length < 11) return alert("⚠️ CPF inválido.");
 
     const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
-    const valorTotalBase = (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal) + valorFreteGlobal;
+    // Proteção para garantir que valorFreteGlobal seja número
+    const freteSeguro = typeof valorFreteGlobal === 'number' ? valorFreteGlobal : 0;
+    const valorTotalBase = (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal) + freteSeguro;
 
-    // 4. Lógica de Parcelamento (Apenas para Cartão)
     if (metodoPagamento === 'CREDIT_CARD' && !parcelaConfirmada) {
         const lista = document.getElementById('listaParcelas');
         if (!lista) return alert("Erro: Container de parcelas não encontrado.");
@@ -113,7 +110,6 @@ function coletarDadosCheckout(metodoPagamento, event) {
                 parcelasEscolhidasGlobal = i;
                 parcelaConfirmada = true;
                 document.getElementById('modalParcelas').style.display = 'none';
-                // RECHAMA A FUNÇÃO USANDO O BOTÃO ORIGINAL
                 coletarDadosCheckout('CREDIT_CARD', { currentTarget: btnAcao });
             };
             lista.appendChild(btnP);
@@ -122,7 +118,6 @@ function coletarDadosCheckout(metodoPagamento, event) {
         return;
     }
 
-    // 5. Estado de Carregamento (Aqui ele mudará o texto do botão que você clicou)
     const textoOriginal = btnAcao.innerText;
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
@@ -157,13 +152,10 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
-            // 1. Abre o Asaas em nova aba
             window.open(data.invoiceUrl, "_blank");
             
-            // 2. Aplica o layout elegante no modal de checkout
             const modalPrincipal = document.getElementById('modalCheckout');
             if (modalPrincipal) {
-                // Removemos o conteúdo antigo e inserimos o design premium
                 modalPrincipal.innerHTML = `
                     <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100vh; background: rgba(2, 11, 31, 0.95); position: fixed; top: 0; left: 0; z-index: 9999;">
                         <div style="background: #020b1f; color: white; padding: 40px 30px; border-radius: 15px; border: 1px solid #b89356; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
@@ -173,10 +165,9 @@ function coletarDadosCheckout(metodoPagamento, event) {
                                 A página de pagamento foi aberta em uma nova guia.<br>
                                 <span style="color: #b89356;">Pague e baixe seu comprovante por lá.</span>
                             </p>
-                            
                             <div style="border-top: 1px solid #b8935633; padding-top: 25px;">
                                 <p style="font-size: 13px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px;">JÁ FINALIZOU O PAGAMENTO?</p>
-                                <button onclick="voltarParaLoja()" 
+                                <button onclick="voltarParaLoja()"  
                                         style="background: #b89356; color: white; border: none; padding: 16px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;">
                                     LIMPAR SACOLA E VOLTAR
                                 </button>
