@@ -906,13 +906,16 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
 }
 
    function adicionarComPromocao(id, nome, mlId, qtdId) {
-       // RESETAR FRETE SEMPRE QUE ADICIONAR ALGO NOVO
+    // --- RESETAR FRETE E EXIBIR AVISO PROFISSIONAL ---
     valorFreteGlobal = 0;
     nomeFreteGlobal = "";
     cepCalculadoGlobal = ""; 
+    
+    // Aqui está a troca que você perguntou:
+    exibirAviso("<b>Sacola atualizada!</b> Por segurança, recalcule o frete para o novo peso total.");
     const resultadoFreteHTML = document.getElementById('opcoes-frete');
     if (resultadoFreteHTML) {
-        resultadoFreteHTML.innerHTML = "<p style='color:#b89356; font-size:12px;'>Novo item adicionado. Recalcule o frete para atualizar o total.</p>";
+      resultadoFreteHTML.innerHTML = "<p style='color:#b89356; font-size:12px;'>Recalcule o frete.</p>";
     }
        const selectMl = document.getElementById(mlId);
     if (!selectMl) return; // Segurança caso o elemento não exista
@@ -1306,6 +1309,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
