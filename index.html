@@ -1174,11 +1174,17 @@ async function calcularFrete() {
 function selecionarFrete(nome, valor, elemento) {
     valorFreteGlobal = valor;
     nomeFreteGlobal = nome;
+    
+    // ESCONDER O AVISO POIS O FRETE FOI RESOLVIDO
+    const avisoInterno = document.getElementById('aviso-interno-sacola');
+    if (avisoInterno) {
+        avisoInterno.style.display = 'none';
+    }
+
     document.querySelectorAll('.opcao-frete-card').forEach(c => c.style.borderColor = '#eee');
     elemento.style.borderColor = '#b89356';
     atualizarSacola();
 }
-
 function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
     let texto = "*PEDIDO NUVEM DE ESSÊNCIAS*\n\n";
@@ -1321,6 +1327,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
