@@ -7,7 +7,13 @@ export default async function handler(req, res) {
     const { cliente, endereco, pagamento } = req.body;
 
     try {
-        // 1. CRIAR CLIENTE
+        // 1. CAPTURA A URL DINÂMICA (Para aceitar os links de Preview da Vercel)
+        // O cabeçalho 'referer' nos diz exatamente em qual link de desenvolvimento você está.
+        const referer = req.headers.referer || "https://nuvem-de-essencias.vercel.app";
+        // Limpa a URL para remover barras ou parâmetros extras
+        const urlFinal = referer.split('?')[0]; 
+
+        // 2. CRIAR OU LOCALIZAR CLIENTE
         const customerRes = await fetch(`${ASAAS_URL}/customers`, {
             method: 'POST',
             headers: { 
@@ -24,27 +30,30 @@ export default async function handler(req, res) {
         });
 
         const customerData = await customerRes.json();
-        if (customerData.errors) return res.status(400).json({ error: customerData.errors[0].description });
+        if (customerData.errors) {
+            return res.status(400).json({ error: customerData.errors[0].description });
+        }
 
-        // 2. CRIAR PAGAMENTO COM A URL CORRETA
-const paymentBody = {
-    customer: customerData.id,
-    billingType: pagamento.metodo === 'PIX' ? 'PIX' : 'CREDIT_CARD',
-    dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Amanhã
-    value: pagamento.valor,
-    description: "Pedido Nuvem de Essências",
-    externalReference: `PED-${Date.now()}`,
-    
-    // 1. URL de Sucesso direta (exigida por algumas versões da API)
-    successUrl: "https://nuvem-de-essencias.vercel.app", 
-    
-    // 2. Bloco de Callback completo
-    callback: {
-        url: "https://nuvem-de-essencias.vercel.app",
-        autoRedirect: false
-    }
-};
+        // 3. MONTAR O CORPO DO PAGAMENTO COM URL DINÂMICA
+        const paymentBody = {
+            customer: customerData.id,
+            billingType: pagamento.metodo === 'PIX' ? 'PIX' : 'CREDIT_CARD',
+            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Amanhã
+            value: pagamento.valor,
+            description: "Pedido Nuvem de Essências",
+            externalReference: `PED-${Date.now()}`,
+            
+            // O Asaas usa successUrl para criar o botão "Voltar para o site"
+            successUrl: urlFinal, 
+            
+            // O callback garante que o Asaas aceite o redirecionamento
+            callback: {
+                url: urlFinal,
+                autoRedirect: false // Mantém falso para o cliente ver o comprovante
+            }
+        };
 
+        // 4. CRIAR O PAGAMENTO NO ASAAS
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
             headers: { 
@@ -57,18 +66,19 @@ const paymentBody = {
         const paymentData = await paymentRes.json();
 
         if (paymentData.errors) {
-            // Se o erro de successUrl persistir, o Asaas retornará aqui
             return res.status(400).json({ 
                 error: paymentData.errors[0].description 
             });
         }
 
+        // 5. RETORNA A URL PARA O FRONTEND ABRIR
         return res.status(200).json({
             success: true,
             invoiceUrl: paymentData.invoiceUrl 
         });
 
     } catch (error) {
-        return res.status(500).json({ error: "Erro interno no servidor" });
+        console.error("Erro na API Asaas:", error);
+        return res.status(500).json({ error: "Erro interno no servidor ao processar pagamento" });
     }
 }
