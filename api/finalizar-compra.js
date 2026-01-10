@@ -49,10 +49,11 @@ export default async function handler(req, res) {
             }),
 
             // --- AQUI ENTRA O CÓDIGO DE REDIRECIONAMENTO ---
-            callback: {
-                url: "https://nuvem-de-essencias-dyu58pd7e-eduardos-projects-704ad1a5.vercel.app",
-                autoRedirect: false // O cliente decide quando clicar para voltar
-            }
+           callback: {
+    // USE SEMPRE O SEU DOMÍNIO PRINCIPAL (ELE NÃO MUDA NOS DEPLOYS)
+    url: "https://nuvem-de-essencias.vercel.app", 
+    autoRedirect: false
+}
         };
 
         // 3. CRIAR A COBRANÇA NO ASAAS
