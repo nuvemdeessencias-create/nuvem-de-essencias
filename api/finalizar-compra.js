@@ -7,13 +7,11 @@ export default async function handler(req, res) {
     const { cliente, endereco, pagamento } = req.body;
 
     try {
-        // 1. CAPTURA A URL DINÂMICA (Para aceitar os links de Preview da Vercel)
-        // O cabeçalho 'referer' nos diz exatamente em qual link de desenvolvimento você está.
+        // 1. Captura o link de preview atual para o botão "Voltar" funcionar agora
         const referer = req.headers.referer || "https://nuvem-de-essencias.vercel.app";
-        // Limpa a URL para remover barras ou parâmetros extras
-        const urlFinal = referer.split('?')[0]; 
+        const urlDinamica = referer.split('?')[0];
 
-        // 2. CRIAR OU LOCALIZAR CLIENTE
+        // 2. Criar Cliente
         const customerRes = await fetch(`${ASAAS_URL}/customers`, {
             method: 'POST',
             headers: { 
@@ -30,30 +28,24 @@ export default async function handler(req, res) {
         });
 
         const customerData = await customerRes.json();
-        if (customerData.errors) {
-            return res.status(400).json({ error: customerData.errors[0].description });
-        }
+        if (customerData.errors) return res.status(400).json({ error: customerData.errors[0].description });
 
-        // 3. MONTAR O CORPO DO PAGAMENTO COM URL DINÂMICA
+        // 3. Criar Pagamento (Ajustado conforme a imagem da documentação)
         const paymentBody = {
             customer: customerData.id,
             billingType: pagamento.metodo === 'PIX' ? 'PIX' : 'CREDIT_CARD',
-            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Amanhã
+            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
             value: pagamento.valor,
             description: "Pedido Nuvem de Essências",
             externalReference: `PED-${Date.now()}`,
             
-            // O Asaas usa successUrl para criar o botão "Voltar para o site"
-            successUrl: urlFinal, 
-            
-            // O callback garante que o Asaas aceite o redirecionamento
+            // ESTA É A PARTE DA IMAGEM QUE VOCÊ ENVIOU:
             callback: {
-                url: urlFinal,
-                autoRedirect: false // Mantém falso para o cliente ver o comprovante
+                successUrl: urlDinamica, // A URL onde o botão "Ir para o site" vai levar
+                autoRedirect: false      // Exibe o botão "Ir para o site" após o pagamento
             }
         };
 
-        // 4. CRIAR O PAGAMENTO NO ASAAS
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
             headers: { 
@@ -66,19 +58,15 @@ export default async function handler(req, res) {
         const paymentData = await paymentRes.json();
 
         if (paymentData.errors) {
-            return res.status(400).json({ 
-                error: paymentData.errors[0].description 
-            });
+            return res.status(400).json({ error: paymentData.errors[0].description });
         }
 
-        // 5. RETORNA A URL PARA O FRONTEND ABRIR
         return res.status(200).json({
             success: true,
             invoiceUrl: paymentData.invoiceUrl 
         });
 
     } catch (error) {
-        console.error("Erro na API Asaas:", error);
-        return res.status(500).json({ error: "Erro interno no servidor ao processar pagamento" });
+        return res.status(500).json({ error: "Erro interno no servidor" });
     }
 }
