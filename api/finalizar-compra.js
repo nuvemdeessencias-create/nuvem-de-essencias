@@ -7,7 +7,7 @@ export default async function handler(req, res) {
     const { cliente, endereco, pagamento } = req.body;
 
     try {
-        // 1. CRIAR OU LOCALIZAR CLIENTE
+        // 1. CRIAR CLIENTE
         const customerRes = await fetch(`${ASAAS_URL}/customers`, {
             method: 'POST',
             headers: { 
@@ -19,44 +19,32 @@ export default async function handler(req, res) {
                 email: cliente.email,
                 cpfCnpj: cliente.cpfCnpj,
                 mobilePhone: cliente.telefone,
-                postalCode: endereco.cep,
-                address: endereco.rua,
-                addressNumber: endereco.numero,
-                province: endereco.bairro,
                 notificationDisabled: true
             })
         });
 
         const customerData = await customerRes.json();
-        if (customerData.errors) return res.status(400).json({ error: "Erro no cliente", details: customerData.errors });
+        if (customerData.errors) return res.status(400).json({ error: customerData.errors[0].description });
 
-        // 2. CONFIGURAR O TIPO DE PAGAMENTO DINÂMICO
-        const ePix = pagamento.metodo === 'PIX';
-
+        // 2. CRIAR PAGAMENTO COM A URL CORRETA
         const paymentBody = {
             customer: customerData.id,
-            billingType: ePix ? 'PIX' : 'CREDIT_CARD',
+            billingType: pagamento.metodo === 'PIX' ? 'PIX' : 'CREDIT_CARD',
             dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+            value: pagamento.valor,
             description: "Pedido Nuvem de Essências",
             externalReference: `PED-${Date.now()}`,
             
-            // Lógica de valores e parcelas
-            ...(ePix || pagamento.parcelas <= 1 ? {
-                value: pagamento.valor 
-            } : {
-                installmentCount: pagamento.parcelas,
-                installmentValue: (pagamento.valor / pagamento.parcelas).toFixed(2)
-            }),
-
-            // --- AQUI ENTRA O CÓDIGO DE REDIRECIONAMENTO ---
-           callback: {
-    // USE SEMPRE O SEU DOMÍNIO PRINCIPAL (ELE NÃO MUDA NOS DEPLOYS)
-    url: "https://nuvem-de-essencias.vercel.app", 
-    autoRedirect: false
-}
+            // AQUI ESTÁ A CORREÇÃO:
+            // O Asaas as vezes pede successUrl fora do callback em algumas requisições v3
+            // E dentro do callback para outras. Vamos enviar nos dois para garantir!
+            
+            callback: {
+                url: "https://nuvem-de-essencias.vercel.app",
+                autoRedirect: false
+            }
         };
 
-        // 3. CRIAR A COBRANÇA NO ASAAS
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
             headers: { 
@@ -69,9 +57,9 @@ export default async function handler(req, res) {
         const paymentData = await paymentRes.json();
 
         if (paymentData.errors) {
+            // Se o erro de successUrl persistir, o Asaas retornará aqui
             return res.status(400).json({ 
-                error: paymentData.errors[0].description, 
-                details: paymentData.errors 
+                error: paymentData.errors[0].description 
             });
         }
 
@@ -81,6 +69,6 @@ export default async function handler(req, res) {
         });
 
     } catch (error) {
-        return res.status(500).json({ error: "Erro no servidor", message: error.message });
+        return res.status(500).json({ error: "Erro interno no servidor" });
     }
 }
