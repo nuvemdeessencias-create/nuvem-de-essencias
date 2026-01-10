@@ -548,16 +548,16 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         <span style="cursor:pointer; font-size: 28px; color: #333;" onclick="toggleCart()">×</span>
     </div>
     
-    <div id="aviso-interno-sacola" style="display:none; background: #fff9f0; border: 1px solid #b89356; color: #020b1f; padding: 12px; margin: 10px 20px; border-radius: 8px; font-size: 13px; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+   <div id="cart-scroll-area">
+    <div id="aviso-interno-sacola" style="display:none; background: #fff9f0; border: 1px solid #b89356; color: #020b1f; padding: 12px; margin: 10px 0; border-radius: 8px; font-size: 13px; align-items: center; gap: 10px;">
         <span style="font-size: 18px;">⚠️</span>
-        <span><b>Frete Pendente:</b> Novos itens foram adicionados. Por favor, recalcule o frete para atualizar o total.</span>
+        <span><b>Frete Pendente:</b> Como você adicionou itens, recalcule o frete abaixo.</span>
     </div>
 
-    <div id="cart-scroll-area">
-        <div id="cart-items">
-            <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
-        </div>
+    <div id="cart-items">
+        <p style="text-align:center; color:#999; margin-top: 20px;">Sacola vazia</p>
     </div>
+</div>
 
         <div style="font-family: 'Inter', sans-serif; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
             <h3 style="font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: #1a1a1a;">ENTREGA</h3>
@@ -1327,6 +1327,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
