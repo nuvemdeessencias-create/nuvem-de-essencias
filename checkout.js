@@ -1,171 +1,4 @@
-/* --- checkout.js TOTALMENTE CORRIGIDO E PROFISSIONAL --- */
-
-// Variáveis de controle global para o novo modal
-let parcelasEscolhidasGlobal = 1;
-let parcelaConfirmada = false;
-
-function buscarCEP(cep) {
-    const valor = cep.replace(/\D/g, '');
-    if (valor.length !== 8) return;
-
-    fetch(`https://viacep.com.br/ws/${valor}/json/`)
-        .then(res => res.json())
-        .then(dados => {
-            if (!dados.erro) {
-                document.getElementById('end_rua').value = dados.logradouro || "";
-                document.getElementById('end_bairro').value = dados.bairro || "";
-                document.getElementById('end_cidade').value = dados.localidade || "";
-                document.getElementById('end_estado').value = dados.uf || "";
-                document.getElementById('end_numero').focus();
-            } else {
-                alert("CEP não encontrado.");
-            }
-        })
-        .catch(err => console.error("Erro ao buscar CEP:", err));
-}
-
-function prepararDadosParaAsaas() {
-    if (typeof sacola === 'undefined' || sacola.length === 0) return null;
-    
-    let dados = {
-        valorTotalPix: 0,
-        valorTotalCartao6x: 0,
-        valorTotalOriginal: 0,
-        itensDetalhados: []
-    };
-
-    sacola.forEach(item => {
-        const p = meusProdutos.find(prod => prod.id === item.id);
-        const precoOriginal = item.preco; 
-        const infoPromo = processarPrecoProduto({ id: item.id, ml: item.ml, preco: precoOriginal });
-
-        dados.valorTotalPix += infoPromo.pixValor * item.qtd;
-
-        if (infoPromo.tem6x) {
-            dados.valorTotalCartao6x += infoPromo.valor6x * item.qtd;
-        } else {
-            dados.valorTotalCartao6x += precoOriginal * item.qtd;
-        }
-
-        dados.valorTotalOriginal += precoOriginal * item.qtd;
-        
-        dados.itensDetalhados.push({ 
-            nome: p.nome, 
-            quantidade: item.qtd, 
-            precoUnitario: precoOriginal 
-        });
-    });
-
-    return dados;
-}
-
-function abrirCheckoutAsaas() {
-    if (typeof sacola === 'undefined' || sacola.length === 0) return alert("Sua sacola está vazia!");
-    if (!nomeFreteGlobal) return alert("⚠️ Selecione o frete antes de finalizar!");
-
-    // Reset de segurança dos botões
-    const btnPix = document.querySelector("button[onclick*='PIX']");
-    const btnCartao = document.querySelector("button[onclick*='CREDIT_CARD']");
-    if(btnPix) { btnPix.innerText = "PAGAR PIX"; btnPix.disabled = false; }
-    if(btnCartao) { btnCartao.innerText = "CARTÃO"; btnCartao.disabled = false; }
-
-    parcelaConfirmada = false; // Reseta trava de parcelas ao abrir
-
-    const modalCheckout = document.getElementById('modalCheckout');
-    if (modalCheckout) modalCheckout.style.display = 'flex';
-}
-
-function fecharModalParcelas() {
-    document.getElementById('modalParcelas').style.display = 'none';
-    parcelaConfirmada = false;
-    // Destrava o botão do cartão caso o usuário desista de escolher as parcelas
-    const btnCartao = document.querySelector("button[onclick*='CREDIT_CARD']");
-    if (btnCartao) { btnCartao.innerText = "CARTÃO"; btnCartao.disabled = false; }
-}
-
-function coletarDadosCheckout(metodoPagamento, event) {
-   // VERIFICAÇÃO DE SEGURANÇA DO CEP
-    const cepNoCadastro = document.getElementById('end_cep').value.replace(/\D/g, '');
-    
-    if (cepCalculadoGlobal === "") {
-        ("⚠️ Por favor, calcule o frete na sacola antes de finalizar o pagamento.");
-        return;
-    }
-
-   if (cepNoCadastro !== cepCalculadoGlobal) {
-    // Agora usando o aviso profissional que você instalou
-    exibirAviso("<b>CEP Divergente!</b> O CEP de entrega não confere com o frete calculado. Recalcule na sacola.", "erro");
-    return; // Mantemos o return para bloquear o pagamento
-}
-    const btnAcao = event.target;
-    const dadosCarrinho = prepararDadosParaAsaas();
-    const nomeInput = document.getElementById('cliente_nome').value.trim();
-
-    // VALIDAÇÕES INICIAIS
-    if (nomeInput.split(' ').length < 2) {
-        alert("⚠️ Por favor, digite seu NOME COMPLETO.");
-        return;
-    }
-
-    const cpfLimpo = document.getElementById('cliente_cpf').value.replace(/\D/g, '');
-    if (cpfLimpo.length < 11) {
-        alert("⚠️ CPF inválido.");
-        return;
-    }
-
-    const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
-    const valorTotalBase = (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal) + valorFreteGlobal;
-
-    // NOVO SISTEMA DE PARCELAMENTO PROFISSIONAL
-    if (metodoPagamento === 'CREDIT_CARD' && !parcelaConfirmada) {
-        const lista = document.getElementById('listaParcelas');
-        lista.innerHTML = '';
-        
-        for (let i = 1; i <= limiteParcelas; i++) {
-            const valorParcela = (valorTotalBase / i).toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
-            const btn = document.createElement('button');
-            btn.innerHTML = `<span style="color:#020b1f">${i}x</span> de <span style="color:#2ecc71; font-weight:bold">${valorParcela}</span>`;
-            btn.style = "padding:15px; border:1px solid #eee; border-radius:10px; background:#fcfcfc; cursor:pointer; text-align:left; font-size:15px; transition:0.2s;";
-            
-            btn.onclick = () => {
-                parcelasEscolhidasGlobal = i;
-                parcelaConfirmada = true;
-                document.getElementById('modalParcelas').style.display = 'none';
-                coletarDadosCheckout('CREDIT_CARD', { target: document.querySelector("button[onclick*='CREDIT_CARD']") });
-            };
-            lista.appendChild(btn);
-        }
-        document.getElementById('modalParcelas').style.display = 'flex';
-        return;
-    }
-
-    // MONTAGEM DO OBJETO DE CHECKOUT
-    const checkout = {
-        cliente: {
-            nome: nomeInput,
-            email: document.getElementById('cliente_email').value,
-            cpfCnpj: cpfLimpo,
-            telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
-        },
-        endereco: {
-            cep: document.getElementById('end_cep').value.replace(/\D/g, ''),
-            rua: document.getElementById('end_rua').value,
-            numero: document.getElementById('end_numero').value,
-            bairro: document.getElementById('end_bairro').value,
-            cidade: document.getElementById('end_cidade').value,
-            estado: document.getElementById('end_estado').value
-        },
-        pagamento: {
-            metodo: metodoPagamento,
-            metodo: metodoPagamento,
-        // CORREÇÃO AQUI: Somamos apenas o que está na sacola + frete
-        // Não aplicamos desconto de novo porque ele já foi aplicado ao adicionar o item
-        valor: dadosCarrinho.valorTotalOriginal + valorFreteGlobal, 
-        parcelas: (metodoPagamento === 'PIX' ? 1 : parcelasEscolhidasGlobal),
-        parcelasMaximas: limiteParcelas,
-        itens: dadosCarrinho.itensDetalhados
-    }
-};
+// ... (mantenha todo o código anterior de validações, CEP e montagem do objeto checkout)
 
     // ATIVA O ESTADO DE CARREGAMENTO
     btnAcao.innerText = "PROCESSANDO...";
@@ -179,7 +12,31 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
-            window.location.href = data.invoiceUrl;
+            // 1. Abre o checkout em nova aba para preservar o comprovante lá
+            window.open(data.invoiceUrl, "_blank");
+
+            // 2. Localiza o container da sacola/checkout para mostrar o sucesso
+            // Note: Usei 'modalCheckout' que é o ID que vi no seu código anterior
+            const containerSacola = document.getElementById('modalCheckout'); 
+            
+            if (containerSacola) {
+                containerSacola.innerHTML = `
+                    <div style="padding: 40px 20px; text-align: center; background: #020b1f; color: white; border-radius: 12px; border: 1px solid #b89356; max-width: 450px; margin: auto;">
+                        <div style="font-size: 50px; margin-bottom: 20px;">✔️</div>
+                        <h2 style="color: #b89356; font-family: serif; margin-bottom: 15px;">Pedido Gerado!</h2>
+                        <p style="font-size: 14px; line-height: 1.6; color: #d1d1d1; margin-bottom: 25px;">
+                            O link de pagamento foi aberto em outra aba.<br>
+                            Lá você poderá pagar e <b>baixar seu comprovante</b>.
+                        </p>
+                        <hr style="width: 80%; border: 0; border-top: 1px solid #b8935633; margin-bottom: 25px;">
+                        <p style="font-weight: bold; margin-bottom: 15px;">Já finalizou o pagamento?</p>
+                        <button onclick="voltarParaLoja()" 
+                                style="background: #b89356; color: white; border: none; padding: 15px 30px; border-radius: 5px; font-weight: bold; cursor: pointer; width: 100%; text-transform: uppercase;">
+                            LIMPAR SACOLA E VOLTAR
+                        </button>
+                    </div>
+                `;
+            }
         } else {
             throw new Error(data.error || "Erro no processamento");
         }
@@ -190,4 +47,10 @@ function coletarDadosCheckout(metodoPagamento, event) {
         btnAcao.innerText = (metodoPagamento === 'PIX' ? "PAGAR PIX" : "CARTÃO");
         btnAcao.disabled = false;
     });
+}
+
+// FUNÇÃO DE RESET (Adicione ao final do checkout.js)
+function voltarParaLoja() {
+    localStorage.removeItem('sacola'); // Certifique-se que o nome da chave é 'sacola'
+    window.location.reload(); // Recarrega para limpar o estado do site
 }
