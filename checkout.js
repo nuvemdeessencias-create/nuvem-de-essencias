@@ -157,19 +157,35 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
-            // ABRE O ASAAS EM NOVA ABA
+            // 1. Abre o Asaas em nova aba
             window.open(data.invoiceUrl, "_blank");
             
-            // BUSCA O MODAL PARA EXIBIR A MENSAGEM DE SUCESSO
+            // 2. Aplica o layout elegante no modal de checkout
             const modalPrincipal = document.getElementById('modalCheckout');
             if (modalPrincipal) {
+                // Removemos o conteúdo antigo e inserimos o design premium
                 modalPrincipal.innerHTML = `
-                    <div style="background:#020b1f; color:white; padding:40px 20px; border-radius:15px; border:1px solid #b89356; max-width:400px; margin:auto; text-align:center; position:relative; top:50%; transform:translateY(-50%);">
-                        <div style="font-size:50px; margin-bottom:20px;">✔️</div>
-                        <h2 style="color:#b89356; margin-bottom:15px; font-family:serif;">Pedido Enviado!</h2>
-                        <p style="font-size:14px; color:#ccc; margin-bottom:30px;">Pagamento aberto em nova aba.<br>Baixe seu comprovante por lá.</p>
-                        <button onclick="voltarParaLoja()" style="background:#b89356; color:white; border:none; padding:15px; width:100%; border-radius:8px; font-weight:bold; cursor:pointer;">LIMPAR E VOLTAR À LOJA</button>
+                    <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100vh; background: rgba(2, 11, 31, 0.95); position: fixed; top: 0; left: 0; z-index: 9999;">
+                        <div style="background: #020b1f; color: white; padding: 40px 30px; border-radius: 15px; border: 1px solid #b89356; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                            <div style="font-size: 60px; color: #b89356; margin-bottom: 20px; animation: scaleUp 0.5s ease-out;">✔️</div>
+                            <h2 style="color: #b89356; font-family: serif; margin-bottom: 15px; font-size: 24px; letter-spacing: 1px;">PEDIDO GERADO</h2>
+                            <p style="font-size: 15px; color: #d1d1d1; line-height: 1.6; margin-bottom: 30px;">
+                                A página de pagamento foi aberta em uma nova guia.<br>
+                                <span style="color: #b89356;">Pague e baixe seu comprovante por lá.</span>
+                            </p>
+                            
+                            <div style="border-top: 1px solid #b8935633; padding-top: 25px;">
+                                <p style="font-size: 13px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px;">JÁ FINALIZOU O PAGAMENTO?</p>
+                                <button onclick="voltarParaLoja()" 
+                                        style="background: #b89356; color: white; border: none; padding: 16px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;">
+                                    LIMPAR SACOLA E VOLTAR
+                                </button>
+                            </div>
+                        </div>
                     </div>
+                    <style>
+                        @keyframes scaleUp { from { transform: scale(0); } to { transform: scale(1); } }
+                    </style>
                 `;
             }
         } else {
