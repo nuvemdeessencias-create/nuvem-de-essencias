@@ -878,12 +878,15 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
     }
 
     // 4. Atualiza Estoque e Botão de Compra
-    const labelEstoque = document.getElementById(`estoque-${id}`);
+   const labelEstoque = document.getElementById(`estoque-${id}`);
     const containerBotao = document.getElementById(`btn-container-${id}`);
     const inputQtd = document.getElementById(`q-${id}`);
 
     if (opcao.estoque > 0 && opcao.disponivel) {
-        labelEstoque.innerText = `${opcao.estoque} unidades`;
+        // CORREÇÃO: Verifica se é 1 ou mais para usar o plural/singular
+        const textoEstoque = opcao.estoque === 1 ? "unidade" : "unidades";
+        labelEstoque.innerText = `${opcao.estoque} ${textoEstoque}`;
+        
         labelEstoque.style.color = "#d32f2f";
         containerBotao.innerHTML = `<button class="btn-add-sacola" onclick="adicionarComPromocao('${id}', '${produto.nome}', 'ml-${id}', 'q-${id}')">+ ADICIONAR À SACOLA</button>`;
         inputQtd.value = 1;
@@ -893,7 +896,6 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
         containerBotao.innerHTML = `<button class="btn-add-sacola" style="background:#000; color:#fff; cursor:not-allowed;" disabled>ESGOTADO</button>`;
         inputQtd.value = 0;
     }
-}
 
     function atualizarPrecoCard(id, valorSelt, marca) {
     const [ml, precoTexto] = valorSelt.split('|');
@@ -1366,6 +1368,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
