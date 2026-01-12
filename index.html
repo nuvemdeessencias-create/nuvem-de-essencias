@@ -1049,29 +1049,58 @@ function processarTrocaDeVariacao(id, valorSelt, marca, card) {
 }
    
 
-function atualizarSacola() {
-    const itensCont = document.getElementById('cart-items');
-    const totalCont = document.getElementById('cart-total');
+function atualizarSacola(veioDeAdicaoOuRemocao = false) {
+    const itensCont = document.getElementById('sacola-conteudo'); // ID corrigido conforme seu HTML
+    const totalCont = document.getElementById('total-cont');      // ID corrigido conforme seu HTML
     const countCont = document.getElementById('cart-count');
-    
+    const areaOpcoesFrete = document.getElementById('opcoes-frete');
+    const resumoValores = document.querySelector('.resumo-valores');
+
+    // 1. Lógica de Reset de Frete (mantida)
+    if (veioDeAdicaoOuRemocao) {
+        valorFreteGlobal = 0;
+        nomeFreteGlobal = "";
+        if (areaOpcoesFrete) areaOpcoesFrete.innerHTML = "";
+        const avisoAntigo = document.getElementById('aviso-recalculo');
+        if (avisoAntigo) avisoAntigo.remove();
+        const aviso = document.createElement('div');
+        aviso.id = 'aviso-recalculo';
+        aviso.style = "background:rgba(184,147,86,0.1); padding:10px; border-radius:8px; border:1px solid #b89356; margin:10px 0;";
+        aviso.innerHTML = `<p style="color:#b89356; font-size:12px; margin:0; font-weight:bold; text-align:center;">⚠️ SACOLA ALTERADA: Recalcule o frete.</p>`;
+        if (resumoValores) resumoValores.prepend(aviso);
+    }
+
     let subtotal = sacola.reduce((sum, item) => sum + (item.preco * item.qtd), 0);
 
     if (sacola.length === 0) {
         itensCont.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Sacola vazia</p>';
+        totalCont.innerText = "R$ 0,00";
+        countCont.innerText = "0";
     } else {
         itensCont.innerHTML = sacola.map((item, index) => `
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #eee; padding:10px 0; color:#333;">
                 <div style="text-align:left;">
-                    <b style="font-size:13px;">${item.nome}</b><br>
-                    <small>${item.ml} | Qtd: ${item.qtd}</small><br>
-                    <small style="color:${item.emPromocao ? '#2e7d32' : '#666'}; font-weight:bold;">${item.tipoPagamento}</small>
+                    <b style="font-size:13px;">${item.nome.toUpperCase()}</b><br>
+                    
+                    <small>${item.ml} | ${item.qtd} ${item.qtd > 1 ? 'unidades' : 'unidade'}</small><br>
+                    
+                    <small style="color:${item.emPromocao ? '#2e7d32' : '#b89356'}; font-weight:bold;">${item.tipoPagamento}</small>
                 </div>
                 <div style="text-align:right;">
-                    <div style="font-size:13px; font-weight:bold;">R$ ${formatarMoeda(item.preco * item.qtd)}</div>
-                    <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px;">×</button>
+                    <div style="font-size:13px; font-weight:bold;">R$ ${formatarMoeda(item.preco * item.qtd).replace("R$", "").trim()}</div>
+                    <button onclick="removerItem(${index})" style="background:none; border:none; color:red; font-size:18px; cursor:pointer;">×</button>
                 </div>
             </div>`).join('');
+
+        // 2. CORREÇÃO R$ DUPLICADO NO TOTAL GERAL
+        const totalGeral = subtotal + valorFreteGlobal;
+        let precoFinal = formatarMoeda(totalGeral).replace("R$", "").trim();
+        totalCont.innerText = "R$ " + precoFinal;
+
+        // 3. Atualiza contador da bolinha
+        countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
     }
+}
 
     const totalGeral = subtotal + valorFreteGlobal;
     totalCont.innerText = formatarMoeda(totalGeral);
@@ -1341,6 +1370,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
