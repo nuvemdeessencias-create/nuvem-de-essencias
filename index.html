@@ -1102,11 +1102,7 @@ function atualizarSacola(veioDeAdicaoOuRemocao = false) {
     }
 }
 
-    const totalGeral = subtotal + valorFreteGlobal;
-    totalCont.innerText = formatarMoeda(totalGeral);
-    countCont.innerText = sacola.reduce((t, i) => t + i.qtd, 0);
-}
-
+ 
 // --- UTILITÁRIOS ---
 function formatarMoeda(valor) {
     return valor.toLocaleString('pt-br', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1370,6 +1366,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
