@@ -678,8 +678,46 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 <div class="container" id="listaProdutos"></div>
 
 <script src="promocoes.js"></script>
-<script src="produtos.js"></script>
 <script src="checkout.js"></script>
+
+    <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // Suas chaves de acesso
+    const firebaseConfig = {
+        apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
+        authDomain: "nuvem-de-essencias.firebaseapp.com",
+        projectId: "nuvem-de-essencias",
+        storageBucket: "nuvem-de-essencias.firebasestorage.app",
+        messagingSenderId: "929136751660",
+        appId: "1:929136751660:web:408079a808e0918ede0d89"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Variável global que seu checkout já usa, agora alimentada pelo Firebase
+    window.meusProdutos = [];
+
+    // Escuta o banco de dados em tempo real
+    const q = query(collection(db, "produtos"), orderBy("dataCriacao", "desc"));
+    
+    onSnapshot(q, (snapshot) => {
+        // Converte os dados do Firebase para o formato que seu site já entende
+        window.meusProdutos = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+
+        console.log("Produtos carregados do Firebase:", window.meusProdutos.length);
+        
+        // Chama a sua função de carregar a vitrine (aquela que você postou acima)
+        if (typeof carregarProdutos === "function") {
+            carregarProdutos(window.meusProdutos);
+        }
+    });
+</script>
 
     
 <script>
@@ -717,11 +755,14 @@ let nomeFreteGlobal = "";
 let cepCalculadoGlobal = ""; // Guarda o CEP que foi usado para calcular o frete
 // --- INICIALIZAÇÃO ---
 window.onload = function() {
-    if (typeof meusProdutos !== 'undefined') {
-        carregarProdutos(meusProdutos);
-    }
+    // A carga de produtos foi removida daqui pois o Firebase 
+    // agora cuida disso automaticamente via onSnapshot.
+
+    // MANTEMOS ESTA PARTE:
     const anoReal = document.getElementById("ano-real");
-    if(anoReal) anoReal.textContent = new Date().getFullYear();
+    if(anoReal) {
+        anoReal.textContent = new Date().getFullYear();
+    }
 };
 
 // --- FUNÇÕES DE FILTRO ---
@@ -1345,6 +1386,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
