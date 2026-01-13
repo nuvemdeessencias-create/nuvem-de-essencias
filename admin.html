@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Admin - Nuvem de Essências</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --azul: #020b1f; --ouro: #b89356; --branco: #ffffff; }
         body { background: #010614; color: var(--branco); font-family: 'Poppins', sans-serif; padding: 20px; }
@@ -19,7 +20,19 @@
         .btn-add { background: #2e7d32; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-weight: bold; width: 100%; }
         .btn-remover { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; position: absolute; top: 10px; right: 10px; }
         
-        .promo-box { background: rgba(184, 147, 86, 0.1); padding: 15px; border: 1px dashed var(--ouro); border-radius: 8px; margin-top: 10px; }
+        /* ESTILO DOS CAMPOS DE PROMOÇÃO INDEPENDENTES */
+        .promo-container { 
+            background: rgba(184, 147, 86, 0.05); 
+            padding: 20px; 
+            border: 1px dashed var(--ouro); 
+            border-radius: 8px; 
+            margin: 20px 0;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .desc-aviso { font-size: 11px; color: #aaa; margin-top: 5px; line-height: 1.2; }
+
         .btn-salvar { width: 100%; padding: 18px; background: var(--ouro); color: var(--azul); border: none; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 16px; margin-top: 20px; transition: 0.3s; text-transform: uppercase; }
         .btn-salvar:hover { background: #d4af37; transform: translateY(-2px); }
     </style>
@@ -36,14 +49,14 @@
                 <input type="text" id="nome" placeholder="Ex: Khamrah Lattafa" required>
             </div>
             <div class="grupo">
-                <label>MARCA (Exatamente como no filtro)</label>
-                <input type="text" id="marca" placeholder="Ex: CHLOE, SHAKIRA, LATTAFA..." required style="text-transform: uppercase;">
+                <label>MARCA (Filtro do Site)</label>
+                <input type="text" id="marca" placeholder="Ex: CHLOE, LATTAFA..." required style="text-transform: uppercase;">
             </div>
         </div>
 
         <div class="row">
             <div class="grupo">
-                <label>SEÇÃO (Filtro do Site)</label>
+                <label>SEÇÃO</label>
                 <select id="secao" required>
                     <option value="alta">ALTA PERFUMARIA</option>
                     <option value="arabe">PERFUMES ÁRABES</option>
@@ -58,24 +71,29 @@
             </div>
         </div>
 
-        <h3 style="color:var(--ouro); font-size:16px; margin-top:20px;">VARIAÇÕES (ML/CORES)</h3>
+        <h3 style="color:var(--ouro); font-size:16px; margin-top:20px;">VARIAÇÕES DE TAMANHO / PREÇO</h3>
         <div id="containerVariacoes"></div>
-        <button type="button" class="btn-add" onclick="addVariacao()">+ ADICIONAR VARIAÇÃO</button>
+        <button type="button" class="btn-add" onclick="addVariacao()">+ ADICIONAR NOVA OPÇÃO</button>
 
-        <div class="promo-box">
-            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
-                <input type="checkbox" id="emPromocao"> 
-                <strong>ATIVAR REGRAS DE PROMOÇÃO?</strong>
-            </label>
-            <p style="font-size:11px; color:#aaa; margin: 5px 0 0 30px;">(Isso travará o parcelamento em 6x e habilitará descontos PIX)</p>
+        <div class="promo-container">
+            <div class="grupo">
+                <label>DESC. NO PIX (%)</label>
+                <input type="number" id="descPix" value="0" min="0" max="100">
+                <span class="desc-aviso">Ex: Digite 10 para 10% de desconto.</span>
+            </div>
+            <div class="grupo">
+                <label>DESC. CARTÃO ATÉ 6X (%)</label>
+                <input type="number" id="desc6x" value="0" min="0" max="100">
+                <span class="desc-aviso">Dará desconto apenas para quem parcelar em até 6x.</span>
+            </div>
         </div>
 
-        <div class="grupo" style="margin-top:20px;">
-            <label>DESCRIÇÃO</label>
-            <textarea id="descricao" rows="4" placeholder="Detalhes do produto..."></textarea>
+        <div class="grupo">
+            <label>DESCRIÇÃO DO PERFUME</label>
+            <textarea id="descricao" rows="3" placeholder="Notas de topo, coração e fundo..."></textarea>
         </div>
 
-        <button type="submit" class="btn-salvar" id="btnSalvar">Salvar no Sistema</button>
+        <button type="submit" class="btn-salvar" id="btnSalvar">Salvar Produto no Firebase</button>
     </form>
 </div>
 
@@ -83,7 +101,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
- // --- CONFIGURAÇÃO DO SEU FIREBASE (ATUALIZADO) ---
     const firebaseConfig = {
         apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
         authDomain: "nuvem-de-essencias.firebaseapp.com",
@@ -96,7 +113,6 @@
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    // Função para adicionar campos de variação
     window.addVariacao = function() {
         const container = document.getElementById('containerVariacoes');
         const div = document.createElement('div');
@@ -104,43 +120,23 @@
         div.innerHTML = `
             <button type="button" class="btn-remover" onclick="this.parentElement.remove()">✕</button>
             <div class="row">
-                <div class="grupo">
-                    <label>TAMANHO/COR (Ex: 100ml)</label>
-                    <input type="text" class="v-ml" placeholder="Ex: 100ml" required>
-                </div>
-                <div class="grupo">
-                    <label>PREÇO BASE (R$)</label>
-                    <input type="number" class="v-preco" step="0.01" placeholder="0.00" required>
-                </div>
+                <div class="grupo"><label>TAMANHO</label><input type="text" class="v-ml" placeholder="100ml" required></div>
+                <div class="grupo"><label>PREÇO BASE (10x)</label><input type="number" class="v-preco" step="0.01" required></div>
             </div>
             <div class="row">
-                <div class="grupo">
-                    <label>ESTOQUE</label>
-                    <input type="number" class="v-estoque" value="1" required>
-                </div>
-                <div class="grupo">
-                    <label>DISPONÍVEL?</label>
-                    <select class="v-disp">
-                        <option value="true">SIM</option>
-                        <option value="false">ESGOTADO</option>
-                    </select>
-                </div>
-            </div>
-        `;
+                <div class="grupo"><label>ESTOQUE</label><input type="number" class="v-estoque" value="1"></div>
+                <div class="grupo"><label>STATUS</label><select class="v-disp"><option value="true">DISPONÍVEL</option><option value="false">ESGOTADO</option></select></div>
+            </div>`;
         container.appendChild(div);
     }
+    addVariacao();
 
-    addVariacao(); // Inicia com uma variação
-
-    // Lógica para Salvar
     document.getElementById('formProduto').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSalvar');
-        btn.innerText = "SALVANDO...";
-        btn.disabled = true;
+        btn.innerText = "PROCESSANDO..."; btn.disabled = true;
 
-        const variacoesNodes = document.querySelectorAll('.variacao-item');
-        const opcoes = Array.from(variacoesNodes).map(node => ({
+        const opcoes = Array.from(document.querySelectorAll('.variacao-item')).map(node => ({
             valor: `${node.querySelector('.v-ml').value}|${node.querySelector('.v-preco').value}`,
             estoque: parseInt(node.querySelector('.v-estoque').value),
             disponivel: node.querySelector('.v-disp').value === "true"
@@ -153,24 +149,24 @@
             secao: document.getElementById('secao').value,
             imagem: document.getElementById('imagem').value,
             descricao: document.getElementById('descricao').value,
-            emPromocao: document.getElementById('emPromocao').checked,
-            opcoes: opcoes
+            // GRAVANDO AS PORCENTAGENS NO BANCO
+            descPix: parseFloat(document.getElementById('descPix').value) || 0,
+            desc6x: parseFloat(document.getElementById('desc6x').value) || 0,
+            opcoes: opcoes,
+            dataCriacao: new Date()
         };
 
         try {
             await addDoc(collection(db, "produtos"), novoProduto);
             alert("Sucesso! Produto cadastrado.");
-            document.getElementById('formProduto').reset();
             location.reload();
         } catch (error) {
-            console.error("Erro:", error);
-            alert("Erro ao salvar. Verifique as chaves do Firebase.");
+            console.error(error);
+            alert("Erro ao salvar.");
         } finally {
-            btn.innerText = "Salvar no Sistema";
-            btn.disabled = false;
+            btn.innerText = "Salvar Produto no Firebase"; btn.disabled = false;
         }
     });
 </script>
-
 </body>
 </html>
