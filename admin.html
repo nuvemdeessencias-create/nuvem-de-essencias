@@ -174,26 +174,34 @@
         container.appendChild(div);
     }
 
-    async function carregarProdutos() {
-        const querySnapshot = await getDocs(collection(db, "produtos"));
-        const tabela = document.getElementById('lista-produtos-admin');
-        tabela.innerHTML = "";
-        querySnapshot.forEach((docSnap) => {
-            const p = docSnap.data();
-            const id = docSnap.id;
-            const estoqueTotal = p.opcoes ? p.opcoes.reduce((acc, opt) => acc + (parseInt(opt.estoque) || 0), 0) : 0;
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${p.nome}</td>
-                <td style="text-align: center;">${p.marca}</td>
-                <td style="text-align: center;">${estoqueTotal} un</td>
-                <td style="text-align: center;">
-                    <button class="btn-editar" onclick="prepararEdicao('${id}')">Editar</button>
-                    <button class="btn-excluir" onclick="excluirProduto('${id}')">Excluir</button>
-                </td>`;
-            tabela.appendChild(tr);
-        });
-    }
+   async function carregarProdutos() {
+    // Busca os produtos ordenados para a tabela também ficar organizada
+    const q = query(collection(db, "produtos"), orderBy("ordem", "asc"));
+    const querySnapshot = await getDocs(q);
+    
+    const tabela = document.getElementById('lista-produtos-admin');
+    tabela.innerHTML = "";
+    
+    querySnapshot.forEach((docSnap) => {
+        const p = docSnap.data();
+        const id = docSnap.id;
+        
+        // Calcula o estoque total somando as variações
+        const estoqueTotal = p.opcoes ? p.opcoes.reduce((acc, opt) => acc + (parseInt(opt.estoque) || 0), 0) : 0;
+        
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td style="text-align: center; font-weight: bold; color: var(--ouro);">${p.ordem || '-'}</td>
+            <td>${p.nome}</td>
+            <td style="text-align: center;">${p.marca}</td>
+            <td style="text-align: center;">${estoqueTotal} un</td>
+            <td style="text-align: center;">
+                <button class="btn-editar" onclick="prepararEdicao('${id}')">Editar</button>
+                <button class="btn-excluir" onclick="excluirProduto('${id}')">Excluir</button>
+            </td>`;
+        tabela.appendChild(tr);
+    });
+}
 
     window.prepararEdicao = async function(id) {
         const docRef = doc(db, "produtos", id);
