@@ -59,6 +59,11 @@
             </div>
         </div>
 
+<div class="grupo">
+    <label>ORDEM DE EXIBIÇÃO (Ex: 1 para aparecer primeiro)</label>
+    <input type="number" id="ordem" value="1" min="1">
+</div>
+        
         <div class="row">
             <div class="grupo">
                 <label>SEÇÃO</label>
@@ -228,8 +233,9 @@
 
         const dadosProduto = {
             nome: document.getElementById('nome').value,
-            marca: document.getElementById('marca').value.toUpperCase(),
-            secao: document.getElementById('secao').value,
+    marca: document.getElementById('marca').value.toUpperCase(),
+    ordem: parseInt(document.getElementById('ordem').value) || 99, // Adiciona a ordem aqui
+    secao: document.getElementById('secao').value,
             imagem: document.getElementById('imagem').value,
             descricao: document.getElementById('descricao').value,
             descPix: parseFloat(document.getElementById('descPix').value) || 0,
