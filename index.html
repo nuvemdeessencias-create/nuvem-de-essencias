@@ -574,21 +574,41 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     margin-bottom: -10px; /* Compensa o espaço para não empurrar a imagem */
 }
 
-/* Ajuste das imagens dentro do modal */
-.modal-detalhes-content img {
-    max-width: 100%;
-    height: auto;
-    border-radius: 10px;
-    margin: 10px 0;
+/* --- CORREÇÃO DE ROLAGEM E BOTÃO FIXO --- */
+.modal-detalhes-content {
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 450px;
+    max-height: 80vh; /* Faz o modal ter no máximo 80% da altura da tela */
+    overflow-y: auto;  /* Ativa a rolagem se o texto for muito grande */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    color: #333;
 }
 
-/* Estilo do texto da Pirâmide Olfativa */
+.btn-fechar-modal {
+    position: sticky; /* O X fica preso no topo enquanto você rola o texto */
+    top: 0;
+    right: 0;
+    align-self: flex-end;
+    background: #eee;
+    border: none;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+}
+
 .modal-descricao-texto {
     font-size: 14px;
-    line-height: 1.6;
-    color: #555;
-    margin-top: 15px;
-    white-space: pre-line; /* Respeita as quebras de linha que você colocar no Admin */
+    line-height: 1.5;
+    white-space: pre-wrap; /* Mantém os parágrafos que você digitar no Admin */
+    margin: 15px 0;
 }
         
     </style>
@@ -1246,8 +1266,19 @@ function abrirDetalhes(p) {
     document.getElementById('modal-detalhes').style.display = 'flex';
 }
 
-function fecharDetalhes() { document.getElementById('modal-detalhes').style.display = 'none'; }
+// Fecha o modal ao clicar na parte escura (fundo)
+window.onclick = function(event) {
+    const modal = document.getElementById('modal-detalhes');
+    // Se o clique for exatamente no fundo escuro e não na caixa branca:
+    if (event.target == modal) {
+        fecharDetalhes();
+    }
+}
 
+// Garante que a função fecharDetalhes exista
+function fecharDetalhes() {
+    document.getElementById('modal-detalhes').style.display = 'none';
+}
 // --- FRETE E WHATSAPP ---
 async function calcularFrete() {
     const cep = document.getElementById('cep-cliente').value.replace(/\D/g, '');
@@ -1312,14 +1343,19 @@ function finalizarWhatsApp() {
 
 </script>
 <div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
-    <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; position:relative; color:#333; text-align:center;">
-        <span onclick="fecharDetalhes()" style="position:absolute; top:10px; right:15px; font-size:25px; cursor:pointer;">&times;</span>
-        <img id="detalhe-img" src="" style="width:100%; height:200px; object-fit:contain; margin-bottom:15px;">
-        <h2 id="detalhe-nome" style="margin:5px 0; color:#020b1f; font-size:18px;"></h2>
-        <p id="detalhe-marca" style="color:#b89356; font-weight:bold; text-transform:uppercase; font-size:12px;"></p>
-        <p id="detalhe-descricao" style="font-size:14px; line-height:1.5; color:#666; text-align:left;"></p>
+    <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; max-height: 85vh; overflow-y: auto; position:relative; color:#333; text-align:center; display: flex; flex-direction: column;">
         
-        <button id="btn-whats-detalhe" class="btn-whats-modal">
+        <span onclick="fecharDetalhes()" style="position: sticky; top: -10px; right: 0; align-self: flex-end; font-size:30px; cursor:pointer; background: white; width: 40px; height: 40px; line-height: 40px; border-radius: 50%; z-index: 11000; color: #333;">&times;</span>
+
+        <img id="detalhe-img" src="" style="width:100%; height:200px; object-fit:contain; margin-bottom:15px; flex-shrink: 0;">
+        
+        <h2 id="detalhe-nome" style="margin:5px 0; color:#020b1f; font-size:18px; flex-shrink: 0;"></h2>
+        
+        <p id="detalhe-marca" style="color:#b89356; font-weight:bold; text-transform:uppercase; font-size:12px; margin-bottom: 10px; flex-shrink: 0;"></p>
+        
+        <p id="detalhe-descricao" style="font-size:14px; line-height:1.5; color:#666; text-align:left; white-space: pre-wrap; margin-bottom: 20px;"></p>
+        
+        <button id="btn-whats-detalhe" class="btn-whats-modal" style="flex-shrink: 0;">
             COMPRAR PELO WHATSAPP
         </button>
     </div>
@@ -1441,6 +1477,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
