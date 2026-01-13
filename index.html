@@ -535,6 +535,61 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 .btn-ml-nuvem {
     box-sizing: border-box !important;
 }
+
+/* --- AJUSTE DO MODAL DE DETALHES (FIX PARA DESCRICÕES LONGAS) --- */
+
+/* Estilização da janela branca que abre com os detalhes */
+.modal-detalhes-content {
+    background: white;
+    color: #333;
+    width: 90%;
+    max-width: 500px;
+    max-height: 85vh; /* Impede que o modal passe da altura da tela */
+    border-radius: 15px;
+    position: relative;
+    padding: 20px;
+    overflow-y: auto; /* Adiciona a barra de rolagem interna se o texto for grande */
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+}
+
+/* Fixar o botão de fechar no topo para ele nunca sumir */
+.btn-fechar-modal {
+    position: sticky; /* Ele fica "preso" no topo mesmo ao rolar o texto */
+    top: 0;
+    align-self: flex-end; /* Alinha à direita */
+    background: #f0f0f0;
+    border: none;
+    font-size: 20px;
+    font-weight: bold;
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: -10px; /* Compensa o espaço para não empurrar a imagem */
+}
+
+/* Ajuste das imagens dentro do modal */
+.modal-detalhes-content img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin: 10px 0;
+}
+
+/* Estilo do texto da Pirâmide Olfativa */
+.modal-descricao-texto {
+    font-size: 14px;
+    line-height: 1.6;
+    color: #555;
+    margin-top: 15px;
+    white-space: pre-line; /* Respeita as quebras de linha que você colocar no Admin */
+}
         
     </style>
 </head>
@@ -1386,6 +1441,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
