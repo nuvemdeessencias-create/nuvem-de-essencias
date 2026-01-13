@@ -20,7 +20,6 @@
         .btn-add { background: #2e7d32; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-weight: bold; width: 100%; }
         .btn-remover { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; position: absolute; top: 10px; right: 10px; }
         
-        /* ESTILO DOS CAMPOS DE PROMOÇÃO INDEPENDENTES */
         .promo-container { 
             background: rgba(184, 147, 86, 0.05); 
             padding: 20px; 
@@ -31,26 +30,32 @@
             grid-template-columns: 1fr 1fr;
             gap: 20px;
         }
-        .desc-aviso { font-size: 11px; color: #aaa; margin-top: 5px; line-height: 1.2; }
 
         .btn-salvar { width: 100%; padding: 18px; background: var(--ouro); color: var(--azul); border: none; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 16px; margin-top: 20px; transition: 0.3s; text-transform: uppercase; }
         .btn-salvar:hover { background: #d4af37; transform: translateY(-2px); }
+
+        table { width: 100%; border-collapse: collapse; background: #041233; color: white; font-size: 13px; border-radius: 8px; overflow: hidden; margin-top: 20px; }
+        th { background: var(--ouro); color: var(--azul); padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #1a2a4a; }
+        .btn-excluir { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; margin-left: 5px; }
+        .btn-editar { background: #1976d2; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Painel Nuvem - Cadastro</h1>
+    <h1 id="titulo-painel">Painel Nuvem - Cadastro</h1>
     <form id="formProduto">
+        <input type="hidden" id="edit-id"> 
         
         <div class="row">
             <div class="grupo">
                 <label>NOME DO PRODUTO</label>
-                <input type="text" id="nome" placeholder="Ex: Khamrah Lattafa" required>
+                <input type="text" id="nome" placeholder="Ex: Batom Matte Red" required>
             </div>
             <div class="grupo">
-                <label>MARCA (Filtro do Site)</label>
-                <input type="text" id="marca" placeholder="Ex: CHLOE, LATTAFA..." required style="text-transform: uppercase;">
+                <label>MARCA / LINHA</label>
+                <input type="text" id="marca" placeholder="Ex: EUDORA" required style="text-transform: uppercase;">
             </div>
         </div>
 
@@ -66,47 +71,61 @@
                 </select>
             </div>
             <div class="grupo">
-                <label>CAMINHO DA IMAGEM</label>
-                <input type="text" id="imagem" placeholder="img/produtos/perfume.png" required>
+                <label>CAMINHO DA IMAGEM PRINCIPAL</label>
+                <input type="text" id="imagem" placeholder="img/produtos/capa.png" required>
             </div>
         </div>
 
-        <h3 style="color:var(--ouro); font-size:16px; margin-top:20px;">VARIAÇÕES DE TAMANHO / PREÇO</h3>
+        <h3 style="color:var(--ouro); font-size:16px; margin-top:20px;">VARIAÇÕES (CORES OU TAMANHOS)</h3>
         <div id="containerVariacoes"></div>
-        <button type="button" class="btn-add" onclick="addVariacao()">+ ADICIONAR NOVA OPÇÃO</button>
+        <button type="button" class="btn-add" onclick="addVariacao()">+ ADICIONAR NOVA VARIAÇÃO</button>
 
         <div class="promo-container">
             <div class="grupo">
                 <label>DESC. NO PIX (%)</label>
                 <input type="number" id="descPix" value="0" min="0" max="100">
-                <span class="desc-aviso">Ex: Digite 10 para 10% de desconto.</span>
             </div>
             <div class="grupo">
                 <label>DESC. CARTÃO ATÉ 6X (%)</label>
                 <input type="number" id="desc6x" value="0" min="0" max="100">
-                <span class="desc-aviso">Dará desconto apenas para quem parcelar em até 6x.</span>
             </div>
         </div>
 
         <div class="grupo">
-            <label>DESCRIÇÃO DO PERFUME</label>
-            <textarea id="descricao" rows="3" placeholder="Notas de topo, coração e fundo..."></textarea>
+            <label>DESCRIÇÃO DETALHADA</label>
+            <textarea id="descricao" rows="4" placeholder="Notas, textura, modo de uso..."></textarea>
         </div>
 
         <button type="submit" class="btn-salvar" id="btnSalvar">Salvar Produto no Firebase</button>
+        <button type="button" id="btnCancelarEdit" style="display:none; width:100%; background:#666; color:white; border:none; padding:10px; margin-top:10px; border-radius:8px; cursor:pointer;" onclick="cancelarEdicao()">Cancelar Edição</button>
     </form>
+
+    <hr style="margin: 40px 0; border: 0; border-top: 1px solid var(--ouro); opacity: 0.3;">
+    <h2 style="color: var(--ouro); text-align: center; font-size: 18px;">GERENCIAR PRODUTOS</h2>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Produto</th>
+                    <th style="text-align: center;">Marca</th>
+                    <th style="text-align: center;">Estoque</th>
+                    <th style="text-align: center;">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="lista-produtos-admin"></tbody>
+        </table>
+    </div>
 </div>
 
 <script type="module">
-
     const senhaAcesso = prompt("Digite a senha de administrador:");
-if (senhaAcesso !== "Ea152024") {
-    alert("Acesso negado!");
-    window.location.href = "index.html"; // Manda o invasor de volta pro site
-}
+    if (senhaAcesso !== "Ea152024") {
+        alert("Acesso negado!");
+        window.location.href = "index.html";
+    }
     
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
@@ -120,60 +139,122 @@ if (senhaAcesso !== "Ea152024") {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
-    window.addVariacao = function() {
+    window.addVariacao = function(dados = null) {
         const container = document.getElementById('containerVariacoes');
         const div = document.createElement('div');
         div.className = 'variacao-item';
         div.innerHTML = `
             <button type="button" class="btn-remover" onclick="this.parentElement.remove()">✕</button>
             <div class="row">
-                <div class="grupo"><label>TAMANHO</label><input type="text" class="v-ml" placeholder="100ml" required></div>
-                <div class="grupo"><label>PREÇO BASE (10x)</label><input type="number" class="v-preco" step="0.01" required></div>
+                <div class="grupo"><label>COR OU TAMANHO</label><input type="text" class="v-ml" value="${dados ? dados.valor.split('|')[0] : ''}" placeholder="Ex: Vermelho" required></div>
+                <div class="grupo"><label>PREÇO BASE</label><input type="number" class="v-preco" step="0.01" value="${dados ? dados.valor.split('|')[1] : ''}" required></div>
             </div>
             <div class="row">
-                <div class="grupo"><label>ESTOQUE</label><input type="number" class="v-estoque" value="1"></div>
-                <div class="grupo"><label>STATUS</label><select class="v-disp"><option value="true">DISPONÍVEL</option><option value="false">ESGOTADO</option></select></div>
+                <div class="grupo"><label>ESTOQUE</label><input type="number" class="v-estoque" value="${dados ? dados.estoque : '1'}"></div>
+                <div class="grupo"><label>FOTO DESTA OPÇÃO</label><input type="text" class="v-img-cor" value="${dados && dados.imagemCor ? dados.imagemCor : ''}" placeholder="img/produtos/batom-vermelho.png"></div>
+            </div>
+            <div class="row">
+                <div class="grupo"><label>STATUS</label><select class="v-disp"><option value="true" ${dados && dados.disponivel ? 'selected' : ''}>DISPONÍVEL</option><option value="false" ${dados && !dados.disponivel ? 'selected' : ''}>ESGOTADO</option></select></div>
             </div>`;
         container.appendChild(div);
     }
-    addVariacao();
+
+    async function carregarProdutos() {
+        const querySnapshot = await getDocs(collection(db, "produtos"));
+        const tabela = document.getElementById('lista-produtos-admin');
+        tabela.innerHTML = "";
+        querySnapshot.forEach((docSnap) => {
+            const p = docSnap.data();
+            const id = docSnap.id;
+            const estoqueTotal = p.opcoes ? p.opcoes.reduce((acc, opt) => acc + (parseInt(opt.estoque) || 0), 0) : 0;
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${p.nome}</td>
+                <td style="text-align: center;">${p.marca}</td>
+                <td style="text-align: center;">${estoqueTotal} un</td>
+                <td style="text-align: center;">
+                    <button class="btn-editar" onclick="prepararEdicao('${id}')">Editar</button>
+                    <button class="btn-excluir" onclick="excluirProduto('${id}')">Excluir</button>
+                </td>`;
+            tabela.appendChild(tr);
+        });
+    }
+
+    window.prepararEdicao = async function(id) {
+        const docRef = doc(db, "produtos", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const p = docSnap.data();
+            document.getElementById('edit-id').value = id;
+            document.getElementById('nome').value = p.nome;
+            document.getElementById('marca').value = p.marca;
+            document.getElementById('secao').value = p.secao;
+            document.getElementById('imagem').value = p.imagem;
+            document.getElementById('descricao').value = p.descricao;
+            document.getElementById('descPix').value = p.descPix;
+            document.getElementById('desc6x').value = p.desc6x;
+            
+            document.getElementById('containerVariacoes').innerHTML = "";
+            if(p.opcoes) p.opcoes.forEach(opt => addVariacao(opt));
+            
+            document.getElementById('btnSalvar').innerText = "ATUALIZAR PRODUTO";
+            document.getElementById('btnCancelarEdit').style.display = "block";
+            document.getElementById('titulo-painel').innerText = "Editando: " + p.nome;
+            window.scrollTo(0,0);
+        }
+    }
+
+    window.cancelarEdicao = function() { location.reload(); }
+
+    window.excluirProduto = async function(id) {
+        if(confirm("Excluir permanentemente?")) {
+            await deleteDoc(doc(db, "produtos", id));
+            carregarProdutos();
+        }
+    }
 
     document.getElementById('formProduto').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSalvar');
-        btn.innerText = "PROCESSANDO..."; btn.disabled = true;
+        const idEdicao = document.getElementById('edit-id').value;
+        btn.disabled = true;
 
         const opcoes = Array.from(document.querySelectorAll('.variacao-item')).map(node => ({
             valor: `${node.querySelector('.v-ml').value}|${node.querySelector('.v-preco').value}`,
             estoque: parseInt(node.querySelector('.v-estoque').value),
+            imagemCor: node.querySelector('.v-img-cor').value, // Salva a foto da cor específica
             disponivel: node.querySelector('.v-disp').value === "true"
         }));
 
-        const novoProduto = {
-            id: "id_" + Date.now(),
+        const dadosProduto = {
             nome: document.getElementById('nome').value,
             marca: document.getElementById('marca').value.toUpperCase(),
             secao: document.getElementById('secao').value,
             imagem: document.getElementById('imagem').value,
             descricao: document.getElementById('descricao').value,
-            // GRAVANDO AS PORCENTAGENS NO BANCO
             descPix: parseFloat(document.getElementById('descPix').value) || 0,
             desc6x: parseFloat(document.getElementById('desc6x').value) || 0,
-            opcoes: opcoes,
-            dataCriacao: new Date()
+            opcoes: opcoes
         };
 
         try {
-            await addDoc(collection(db, "produtos"), novoProduto);
-            alert("Sucesso! Produto cadastrado.");
+            if (idEdicao) {
+                await updateDoc(doc(db, "produtos", idEdicao), dadosProduto);
+                alert("Atualizado com sucesso!");
+            } else {
+                dadosProduto.dataCriacao = new Date();
+                await addDoc(collection(db, "produtos"), dadosProduto);
+                alert("Produto cadastrado!");
+            }
             location.reload();
         } catch (error) {
-            console.error(error);
-            alert("Erro ao salvar.");
-        } finally {
-            btn.innerText = "Salvar Produto no Firebase"; btn.disabled = false;
+            alert("Erro ao salvar no banco.");
+            btn.disabled = false;
         }
     });
+
+    addVariacao();
+    carregarProdutos();
 </script>
 </body>
 </html>
