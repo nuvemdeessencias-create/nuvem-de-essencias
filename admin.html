@@ -1,1 +1,176 @@
-html
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Nuvem de Essências</title>
+    <style>
+        :root { --azul: #020b1f; --ouro: #b89356; --branco: #ffffff; }
+        body { background: #010614; color: var(--branco); font-family: 'Poppins', sans-serif; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: var(--azul); padding: 25px; border-radius: 15px; border: 1px solid var(--ouro); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h1 { color: var(--ouro); text-align: center; font-size: 22px; text-transform: uppercase; margin-bottom: 20px; }
+        .grupo { margin-bottom: 15px; display: flex; flex-direction: column; }
+        label { color: var(--ouro); font-weight: bold; margin-bottom: 8px; font-size: 13px; }
+        input, select, textarea { padding: 12px; border-radius: 8px; border: 1px solid #1a2a4a; background: #041233; color: white; outline: none; }
+        input:focus { border-color: var(--ouro); }
+        .row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        
+        .variacao-item { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 10px; border-left: 4px solid var(--ouro); position: relative; }
+        .btn-add { background: #2e7d32; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-bottom: 20px; font-weight: bold; width: 100%; }
+        .btn-remover { background: #d32f2f; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; position: absolute; top: 10px; right: 10px; }
+        
+        .promo-box { background: rgba(184, 147, 86, 0.1); padding: 15px; border: 1px dashed var(--ouro); border-radius: 8px; margin-top: 10px; }
+        .btn-salvar { width: 100%; padding: 18px; background: var(--ouro); color: var(--azul); border: none; font-weight: bold; cursor: pointer; border-radius: 8px; font-size: 16px; margin-top: 20px; transition: 0.3s; text-transform: uppercase; }
+        .btn-salvar:hover { background: #d4af37; transform: translateY(-2px); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Painel Nuvem - Cadastro</h1>
+    <form id="formProduto">
+        
+        <div class="row">
+            <div class="grupo">
+                <label>NOME DO PRODUTO</label>
+                <input type="text" id="nome" placeholder="Ex: Khamrah Lattafa" required>
+            </div>
+            <div class="grupo">
+                <label>MARCA (Exatamente como no filtro)</label>
+                <input type="text" id="marca" placeholder="Ex: CHLOE, SHAKIRA, LATTAFA..." required style="text-transform: uppercase;">
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="grupo">
+                <label>SEÇÃO (Filtro do Site)</label>
+                <select id="secao" required>
+                    <option value="alta">ALTA PERFUMARIA</option>
+                    <option value="arabe">PERFUMES ÁRABES</option>
+                    <option value="casa">CASA & VELAS</option>
+                    <option value="maquiagem">MAQUIAGEM</option>
+                    <option value="kits">KITS</option>
+                </select>
+            </div>
+            <div class="grupo">
+                <label>CAMINHO DA IMAGEM</label>
+                <input type="text" id="imagem" placeholder="img/produtos/perfume.png" required>
+            </div>
+        </div>
+
+        <h3 style="color:var(--ouro); font-size:16px; margin-top:20px;">VARIAÇÕES (ML/CORES)</h3>
+        <div id="containerVariacoes"></div>
+        <button type="button" class="btn-add" onclick="addVariacao()">+ ADICIONAR VARIAÇÃO</button>
+
+        <div class="promo-box">
+            <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                <input type="checkbox" id="emPromocao"> 
+                <strong>ATIVAR REGRAS DE PROMOÇÃO?</strong>
+            </label>
+            <p style="font-size:11px; color:#aaa; margin: 5px 0 0 30px;">(Isso travará o parcelamento em 6x e habilitará descontos PIX)</p>
+        </div>
+
+        <div class="grupo" style="margin-top:20px;">
+            <label>DESCRIÇÃO</label>
+            <textarea id="descricao" rows="4" placeholder="Detalhes do produto..."></textarea>
+        </div>
+
+        <button type="submit" class="btn-salvar" id="btnSalvar">Salvar no Sistema</button>
+    </form>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // --- CONFIGURAÇÃO DO SEU FIREBASE ---
+    const firebaseConfig = {
+        apiKey: "COLE_AQUI",
+        authDomain: "COLE_AQUI",
+        projectId: "COLE_AQUI",
+        storageBucket: "COLE_AQUI",
+        messagingSenderId: "COLE_AQUI",
+        appId: "COLE_AQUI"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Função para adicionar campos de variação
+    window.addVariacao = function() {
+        const container = document.getElementById('containerVariacoes');
+        const div = document.createElement('div');
+        div.className = 'variacao-item';
+        div.innerHTML = `
+            <button type="button" class="btn-remover" onclick="this.parentElement.remove()">✕</button>
+            <div class="row">
+                <div class="grupo">
+                    <label>TAMANHO/COR (Ex: 100ml)</label>
+                    <input type="text" class="v-ml" placeholder="Ex: 100ml" required>
+                </div>
+                <div class="grupo">
+                    <label>PREÇO BASE (R$)</label>
+                    <input type="number" class="v-preco" step="0.01" placeholder="0.00" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="grupo">
+                    <label>ESTOQUE</label>
+                    <input type="number" class="v-estoque" value="1" required>
+                </div>
+                <div class="grupo">
+                    <label>DISPONÍVEL?</label>
+                    <select class="v-disp">
+                        <option value="true">SIM</option>
+                        <option value="false">ESGOTADO</option>
+                    </select>
+                </div>
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    addVariacao(); // Inicia com uma variação
+
+    // Lógica para Salvar
+    document.getElementById('formProduto').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const btn = document.getElementById('btnSalvar');
+        btn.innerText = "SALVANDO...";
+        btn.disabled = true;
+
+        const variacoesNodes = document.querySelectorAll('.variacao-item');
+        const opcoes = Array.from(variacoesNodes).map(node => ({
+            valor: `${node.querySelector('.v-ml').value}|${node.querySelector('.v-preco').value}`,
+            estoque: parseInt(node.querySelector('.v-estoque').value),
+            disponivel: node.querySelector('.v-disp').value === "true"
+        }));
+
+        const novoProduto = {
+            id: "id_" + Date.now(),
+            nome: document.getElementById('nome').value,
+            marca: document.getElementById('marca').value.toUpperCase(),
+            secao: document.getElementById('secao').value,
+            imagem: document.getElementById('imagem').value,
+            descricao: document.getElementById('descricao').value,
+            emPromocao: document.getElementById('emPromocao').checked,
+            opcoes: opcoes
+        };
+
+        try {
+            await addDoc(collection(db, "produtos"), novoProduto);
+            alert("Sucesso! Produto cadastrado.");
+            document.getElementById('formProduto').reset();
+            location.reload();
+        } catch (error) {
+            console.error("Erro:", error);
+            alert("Erro ao salvar. Verifique as chaves do Firebase.");
+        } finally {
+            btn.innerText = "Salvar no Sistema";
+            btn.disabled = false;
+        }
+    });
+</script>
+
+</body>
+</html>
