@@ -801,9 +801,9 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     const pDoLink = urlParams.get('p');
 
     if (pDoLink) {
-        // Tentativa de abertura repetida para garantir que o banco carregou
+        // Tenta encontrar o produto a cada 500ms (máximo 20 tentativas)
         let tentativas = 0;
-        const intervalo = setInterval(() => {
+        const monitorarCarregamento = setInterval(() => {
             if (window.meusProdutos && window.meusProdutos.length > 0) {
                 const produtoEncontrado = window.meusProdutos.find(item => {
                     const nomeFormatado = item.nome.toLowerCase().trim().replace(/\s+/g, '-');
@@ -811,13 +811,19 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
                 });
 
                 if (produtoEncontrado) {
-                    clearInterval(intervalo);
-                    abrirDetalhes(produtoEncontrado.id);
+                    clearInterval(monitorarCarregamento); // Para de procurar
+                    
+                    // Pequeno delay extra para o navegador processar a imagem
+                    setTimeout(() => {
+                        if (typeof abrirDetalhes === "function") {
+                            abrirDetalhes(produtoEncontrado.id);
+                        }
+                    }, 300);
                 }
             }
             
             tentativas++;
-            if (tentativas > 20) clearInterval(intervalo); // Para após 10 segundos se não achar
+            if (tentativas > 20) clearInterval(monitorarCarregamento); 
         }, 500); 
     }
 }
@@ -1510,6 +1516,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
