@@ -139,9 +139,19 @@
     }
     // ----------------------------------
     
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
+   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { 
+    getFirestore, 
+    collection, 
+    addDoc, 
+    getDocs, 
+    deleteDoc, 
+    doc, 
+    updateDoc, 
+    getDoc,
+    query,    // <--- ADICIONE ESTE
+    orderBy   // <--- ADICIONE ESTE
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     const firebaseConfig = {
         apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
         authDomain: "nuvem-de-essencias.firebaseapp.com",
