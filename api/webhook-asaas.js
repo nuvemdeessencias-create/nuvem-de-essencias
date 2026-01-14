@@ -28,34 +28,27 @@ export default async function handler(req, res) {
         const payment = body.payment;
         
         if (!payment.metadata || !payment.metadata.itensPedido) {
-            console.error("ERRO: Metadata 'itensPedido' não encontrado no pagamento", payment.id);
+            console.error("ERRO: Metadata não encontrado no pagamento", payment.id);
             return res.status(200).json({ status: "erro", message: "sem metadata" });
         }
 
         try {
-            // Converte o texto do metadata em lista de itens
             const itens = JSON.parse(payment.metadata.itensPedido);
 
             for (const item of itens) {
-                // Aqui usamos o ID do documento, que você confirmou ser "SHAKIRA ROJO EDP"
+                // Aqui o item.id será "Xay7UtaNUSL7JrhMwMaL"
                 const produtoRef = doc(db, "produtos", item.id);
                 const snap = await getDoc(produtoRef);
 
                 if (snap.exists()) {
                     const dados = snap.data();
-                    console.log(`Processando produto: ${item.id}`);
                     
                     const novasOpcoes = dados.opcoes.map(opt => {
-                        // Divide "80 ml|239" para pegar apenas o "80 ml"
                         const [mlTamanho] = opt.valor.split('|');
-                        
-                        // Limpa espaços extras para garantir a comparação
                         if (mlTamanho.trim() === item.ml.trim()) {
                             const estoqueAtual = parseInt(opt.estoque) || 0;
                             const quantidadeComprada = parseInt(item.qtd) || 1;
                             const novoEstoque = Math.max(0, estoqueAtual - quantidadeComprada);
-                            
-                            console.log(`Baixando estoque de ${estoqueAtual} para ${novoEstoque} no tamanho ${mlTamanho}`);
                             
                             return { 
                                 ...opt, 
@@ -66,6 +59,7 @@ export default async function handler(req, res) {
                         return opt;
                     });
 
+                    // SALVA A ALTERAÇÃO NO FIREBASE
                     await updateDoc(produtoRef, { opcoes: novasOpcoes });
                     console.log(`Sucesso: Estoque de ${item.id} atualizado.`);
                 } else {
@@ -74,6 +68,7 @@ export default async function handler(req, res) {
             }
         } catch (err) {
             console.error("Erro interno ao processar baixa:", err.message);
+            return res.status(200).json({ status: "erro", message: err.message });
         }
     }
 
