@@ -29,18 +29,17 @@ export default async function handler(req, res) {
 
         // 2. ADICIONE "metadata" dentro do paymentBody
         const paymentBody = {
-            customer: customerData.id,
-            billingType: pagamento.metodo === 'PIX' ? 'PIX' : 'CREDIT_CARD',
-            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
-            value: pagamento.valor,
-            description: "Pedido Nuvem de Essências",
-            externalReference: `PED-${Date.now()}`,
-            metadata: metadata, // <-- ESSA LINHA CONECTA TUDO
-            callback: {
-                successUrl: urlDinamica, 
-                autoRedirect: false
-            }
-        };
+    customer: customerData.id,
+    billingType: pagamento.metodo === 'PIX' ? 'PIX' : 'CREDIT_CARD',
+    value: pagamento.valor,
+    dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
+    description: "Pedido Nuvem de Essências",
+    externalReference: `PED-${Date.now()}`,
+    // --- ESSA LINHA É OBRIGATÓRIA ---
+    metadata: req.body.metadata, 
+    // --------------------------------
+    callback: { successUrl: urlDinamica, autoRedirect: false }
+};
 
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
