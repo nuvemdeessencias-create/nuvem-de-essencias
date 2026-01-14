@@ -215,29 +215,30 @@ import {
 }
 
   
-    window.prepararEdicao = async function(id) {
-        const docRef = doc(db, "produtos", id);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-            const p = docSnap.data();
-            document.getElementById('edit-id').value = id;
-            document.getElementById('nome').value = p.nome;
-            document.getElementById('marca').value = p.marca;
-            document.getElementById('secao').value = p.secao;
-            document.getElementById('imagem').value = p.imagem;
-            document.getElementById('descricao').value = p.descricao;
-            document.getElementById('descPix').value = p.descPix;
-            document.getElementById('desc6x').value = p.desc6x;
-            
-            document.getElementById('containerVariacoes').innerHTML = "";
-            if(p.opcoes) p.opcoes.forEach(opt => addVariacao(opt));
-            
-            document.getElementById('btnSalvar').innerText = "ATUALIZAR PRODUTO";
-            document.getElementById('btnCancelarEdit').style.display = "block";
-            document.getElementById('titulo-painel').innerText = "Editando: " + p.nome;
-            window.scrollTo(0,0);
-        }
+   window.prepararEdicao = async function(id) {
+    const docRef = doc(db, "produtos", id);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+        const p = docSnap.data();
+        document.getElementById('edit-id').value = id;
+        document.getElementById('nome').value = p.nome;
+        document.getElementById('marca').value = p.marca;
+        document.getElementById('ordem').value = p.ordem || 1; // <--- ADICIONE ESTA LINHA
+        document.getElementById('secao').value = p.secao;
+        document.getElementById('imagem').value = p.imagem;
+        document.getElementById('descricao').value = p.descricao;
+        document.getElementById('descPix').value = p.descPix;
+        document.getElementById('desc6x').value = p.desc6x;
+        
+        document.getElementById('containerVariacoes').innerHTML = "";
+        if(p.opcoes) p.opcoes.forEach(opt => addVariacao(opt));
+        
+        document.getElementById('btnSalvar').innerText = "ATUALIZAR PRODUTO";
+        document.getElementById('btnCancelarEdit').style.display = "block";
+        document.getElementById('titulo-painel').innerText = "Editando: " + p.nome;
+        window.scrollTo(0,0);
     }
+}
 
     window.cancelarEdicao = function() { location.reload(); }
 
