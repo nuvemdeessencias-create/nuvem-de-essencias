@@ -14,40 +14,45 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
 export default async function handler(req, res) {
-    // Liberação de CORS para o Asaas não ser bloqueado
+    // --- 1. LIBERAÇÃO DE ACESSO (CORS) ---
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
+    // Responde rapidamente a verificações do Asaas
     if (req.method === 'OPTIONS') return res.status(200).end();
-    if (req.method !== 'POST') return res.status(200).send('Somente POST permitido');
+    if (req.method !== 'POST') return res.status(200).send('Webhook Ativo');
 
     const body = req.body;
     console.log("Evento Recebido:", body.event);
 
-    // Filtra apenas pagamentos confirmados
+    // --- 2. FILTRO DE EVENTOS ---
     if (body.event === 'PAYMENT_RECEIVED' || body.event === 'PAYMENT_CONFIRMED') {
         const payment = body.payment;
         
-        // Verifica se o metadata existe
+        // Verifica se o metadata com os itens existe
         if (!payment.metadata || !payment.metadata.itensPedido) {
-            console.error("ERRO: Pagamento sem metadata de itens.");
+            console.error("ERRO: Metadata ausente no pagamento", payment.id);
             return res.status(200).json({ status: "erro", message: "sem metadata" });
         }
 
         try {
             const itens = JSON.parse(payment.metadata.itensPedido);
 
+            // --- 3. LOOP DE ATUALIZAÇÃO NO FIREBASE ---
             for (const item of itens) {
                 const produtoRef = doc(db, "produtos", item.id);
                 const snap = await getDoc(produtoRef);
 
                 if (snap.exists()) {
                     const dados = snap.data();
+                    
+                    // Mapeia as opções (MLs) e subtrai a quantidade do estoque
                     const novasOpcoes = dados.opcoes.map(opt => {
                         const [mlTamanho] = opt.valor.split('|');
                         if (mlTamanho === item.ml) {
-                            const novoEstoque = Math.max(0, (opt.estoque || 0) - item.qtd);
+                            const estoqueAtual = parseInt(opt.estoque) || 0;
+                            const novoEstoque = Math.max(0, estoqueAtual - item.qtd);
                             return { 
                                 ...opt, 
                                 estoque: novoEstoque, 
@@ -56,15 +61,16 @@ export default async function handler(req, res) {
                         }
                         return opt;
                     });
+
                     await updateDoc(produtoRef, { opcoes: novasOpcoes });
-                    console.log(`Sucesso: Estoque baixado para ${item.id}`);
+                    console.log(`Estoque atualizado: Produto ${item.id} | ML ${item.ml}`);
                 }
             }
         } catch (err) {
-            console.error("Erro no processamento do Firebase:", err);
+            console.error("Erro ao processar baixa de estoque:", err);
         }
     }
 
-    // Retorna sempre 200 para o Asaas parar de tentar reenviar
+    // Retorna sempre 200 para o Asaas dar o envio como "Sucesso"
     return res.status(200).json({ success: true });
 }
