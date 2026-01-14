@@ -1,7 +1,11 @@
 async function coletarDadosCheckout(metodoPagamento, event) {
     if (event) event.preventDefault();
+    
+    // 1. Identifica o botão corretamente para não travar a interface
     const btnAcao = event.currentTarget || event.target;
+    if (!btnAcao) return;
 
+    // 2. Validações Iniciais
     const cepNoCadastro = document.getElementById('end_cep').value.replace(/\D/g, '');
     if (cepCalculadoGlobal === "" || cepNoCadastro !== cepCalculadoGlobal) {
         alert("⚠️ O CEP não confere com o frete calculado. Recalcule na sacola.");
@@ -15,21 +19,24 @@ async function coletarDadosCheckout(metodoPagamento, event) {
     const cpfLimpo = document.getElementById('cliente_cpf').value.replace(/\D/g, '');
     if (cpfLimpo.length < 11) return alert("⚠️ CPF inválido.");
 
+    // 3. Cálculos de Valor
     const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
     const freteSeguro = typeof valorFreteGlobal === 'number' ? valorFreteGlobal : 0;
     
-    // Define o valor total baseado no método
-    const valorTotal = (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal)) + freteSeguro;
+    // Valor total corrigido (Soma do carrinho + frete)
+    const valorTotalFinal = (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal)) + freteSeguro;
 
+    // 4. Lógica de Parcelamento para Cartão
     if (metodoPagamento === 'CREDIT_CARD' && !parcelaConfirmada) {
         const lista = document.getElementById('listaParcelas');
         if (!lista) return alert("Erro: Container de parcelas não encontrado.");
         
         lista.innerHTML = '';
         for (let i = 1; i <= limiteParcelas; i++) {
-            const valorParcela = (valorTotal / i).toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
+            const valorParcela = (valorTotalFinal / i).toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
             const btnP = document.createElement('button');
             btnP.type = "button";
+            btnP.className = "btn-parcela-selecao"; // Estilo opcional via CSS
             btnP.style = "display:block; width:100%; padding:12px; margin-bottom:8px; border:1px solid #ddd; border-radius:6px; cursor:pointer; text-align:left; background:#fff; color:#333;";
             btnP.innerHTML = `<span>${i}x</span> de <b>${valorParcela}</b>`;
             btnP.onclick = () => {
@@ -44,19 +51,20 @@ async function coletarDadosCheckout(metodoPagamento, event) {
         return;
     }
 
+    // 5. Início do Processamento (Estado de Carregamento)
     const textoOriginal = btnAcao.innerText;
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
     try {
-        // 1. Prepara o resumo para o estoque
+        // Prepara o resumo simplificado para o Webhook baixar o estoque
         const resumoItensEstoque = sacola.map(item => ({
             id: item.id,
             qtd: item.qtd,
             ml: item.ml
         }));
 
-        // 2. Monta o objeto completo para a API
+        // Montagem do objeto unificado para a API
         const checkoutData = {
             cliente: { 
                 nome: nomeInput, 
@@ -74,16 +82,16 @@ async function coletarDadosCheckout(metodoPagamento, event) {
                 complemento: document.getElementById('end_complemento').value
             },
             pagamento: { 
-                metodo: metodoPagamento === 'PIX' ? 'PIX' : 'CREDIT_CARD', 
-                valor: valorTotal,
+                metodo: metodoPagamento, // Corrigido aqui (estava metodoSelecionado)
+                valor: valorTotalFinal,  // Corrigido aqui (estava valorTotal)
                 parcelas: parcelasEscolhidasGlobal
             },
             metadata: {
-                itensPedido: JSON.stringify(resumoItensEstoque)
+                itensPedido: JSON.stringify(resumoItensEstoque) // Aqui os dados para o estoque
             }
         };
 
-        // 3. Envio unificado para a API
+        // Envio para a API Finalizar-Compra
         const response = await fetch('/api/finalizar-compra', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -94,6 +102,7 @@ async function coletarDadosCheckout(metodoPagamento, event) {
 
         if (response.ok && data.invoiceUrl) {
             window.open(data.invoiceUrl, "_blank");
+            
             const modalPrincipal = document.getElementById('modalCheckout');
             if (modalPrincipal) {
                 modalPrincipal.innerHTML = `
