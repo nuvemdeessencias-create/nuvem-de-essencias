@@ -121,42 +121,40 @@ function coletarDadosCheckout(metodoPagamento, event) {
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
-    // --- PREPARAÇÃO DO METADATA ---
-    const resumoItensEstoque = sacola.map(item => ({
-        id: item.id,
-        qtd: item.qtd,
-        ml: item.ml
-    }));
+   // 1. Prepare o resumo (você já fez isso)
+const resumoItensEstoque = sacola.map(item => ({
+    id: item.id,
+    qtd: item.qtd,
+    ml: item.ml
+}));
 
-    const checkoutData = {
-        cliente: {
-            nome: nomeInput,
-            email: document.getElementById('cliente_email').value,
-            cpfCnpj: cpfLimpo,
-            telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
-        },
-        endereco: {
-            cep: cepNoCadastro,
-            rua: document.getElementById('end_rua').value,
-            numero: document.getElementById('end_numero').value,
-            bairro: document.getElementById('end_bairro').value,
-            cidade: document.getElementById('end_cidade').value,
-            estado: document.getElementById('end_estado').value
-        },
-        pagamento: {
-            metodo: metodoPagamento,
-            valor: valorTotalBase, 
-            parcelas: (metodoPagamento === 'PIX' ? 1 : parcelasEscolhidasGlobal)
-        },
-        // O AJUSTE ESTAVA AQUI: Inserindo o metadata no objeto principal
-        metadata: { itensPedido: JSON.stringify(resumoItensEstoque) }
-    };
+// 2. O objeto de envio PRECISA ter o "metadata" no mesmo nível de "cliente"
+const checkoutData = {
+    cliente: { 
+        nome: nomeInput, 
+        email: document.getElementById('cliente_email').value,
+        cpfCnpj: cpfLimpo,
+        telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
+    },
+    endereco: { /* seus dados de endereço aqui */ },
+    pagamento: { 
+        metodo: metodoSelecionado, 
+        valor: valorTotal 
+    },
+    // --- ESTA É A PARTE QUE ESTÁ FALTANDO NO SEU ENVIO ---
+    metadata: {
+        itensPedido: JSON.stringify(resumoItensEstoque)
+    }
+    // ----------------------------------------------------
+};
 
-    fetch('/api/finalizar-compra', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(checkoutData)
-    })
+// 3. Envie para a sua API finalizar-compra
+const response = await fetch('/api/finalizar-compra', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(checkoutData)
+});
+    
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
