@@ -14,24 +14,31 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
 export default async function handler(req, res) {
-    // Responde sempre 200 para o Asaas não achar que seu site caiu
-    if (req.method !== 'POST') return res.status(200).send('OK');
+    // Liberação de CORS para o Asaas não ser bloqueado
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(200).send('Somente POST permitido');
 
     const body = req.body;
+    console.log("Evento Recebido:", body.event);
 
+    // Filtra apenas pagamentos confirmados
     if (body.event === 'PAYMENT_RECEIVED' || body.event === 'PAYMENT_CONFIRMED') {
-        const infoPagamento = body.payment;
+        const payment = body.payment;
         
-        // Se o metadata não existir, ignoramos para não dar erro de código
-        if (!infoPagamento.metadata || !infoPagamento.metadata.itensPedido) {
-            console.log("Pagamento confirmado, mas sem itens no metadata.");
-            return res.status(200).json({ status: "sem_metadata" });
+        // Verifica se o metadata existe
+        if (!payment.metadata || !payment.metadata.itensPedido) {
+            console.error("ERRO: Pagamento sem metadata de itens.");
+            return res.status(200).json({ status: "erro", message: "sem metadata" });
         }
 
-        const itens = JSON.parse(infoPagamento.metadata.itensPedido);
+        try {
+            const itens = JSON.parse(payment.metadata.itensPedido);
 
-        for (const item of itens) {
-            try {
+            for (const item of itens) {
                 const produtoRef = doc(db, "produtos", item.id);
                 const snap = await getDoc(produtoRef);
 
@@ -41,17 +48,23 @@ export default async function handler(req, res) {
                         const [mlTamanho] = opt.valor.split('|');
                         if (mlTamanho === item.ml) {
                             const novoEstoque = Math.max(0, (opt.estoque || 0) - item.qtd);
-                            return { ...opt, estoque: novoEstoque, disponivel: novoEstoque > 0 };
+                            return { 
+                                ...opt, 
+                                estoque: novoEstoque, 
+                                disponivel: novoEstoque > 0 
+                            };
                         }
                         return opt;
                     });
                     await updateDoc(produtoRef, { opcoes: novasOpcoes });
+                    console.log(`Sucesso: Estoque baixado para ${item.id}`);
                 }
-            } catch (err) {
-                console.error("Erro ao baixar estoque do item:", item.id, err);
             }
+        } catch (err) {
+            console.error("Erro no processamento do Firebase:", err);
         }
     }
 
+    // Retorna sempre 200 para o Asaas parar de tentar reenviar
     return res.status(200).json({ success: true });
 }
