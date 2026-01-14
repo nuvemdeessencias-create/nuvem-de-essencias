@@ -122,6 +122,13 @@ function coletarDadosCheckout(metodoPagamento, event) {
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
+  // --- NOVIDADE: Prepara a lista simplificada para o estoque ---
+    const resumoItensEstoque = sacola.map(item => ({
+        id: item.id,
+        qtd: item.qtd,
+        ml: item.ml
+    }));
+
     const checkoutData = {
         cliente: {
             nome: nomeInput,
@@ -141,7 +148,9 @@ function coletarDadosCheckout(metodoPagamento, event) {
             metodo: metodoPagamento,
             valor: valorTotalBase, 
             parcelas: (metodoPagamento === 'PIX' ? 1 : parcelasEscolhidasGlobal)
-        }
+        },
+        // --- ADICIONE ESTA LINHA ---
+        metadata: { itensPedido: JSON.stringify(resumoItensEstoque) }
     };
 
     fetch('/api/finalizar-compra', {
