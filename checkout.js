@@ -1,79 +1,4 @@
-/* --- checkout.js TOTALMENTE CORRIGIDO E TESTADO --- */
-
-let parcelasEscolhidasGlobal = 1;
-let parcelaConfirmada = false;
-
-function buscarCEP(cep) {
-    const valor = cep.replace(/\D/g, '');
-    if (valor.length !== 8) return;
-
-    fetch(`https://viacep.com.br/ws/${valor}/json/`)
-        .then(res => res.json())
-        .then(dados => {
-            if (!dados.erro) {
-                document.getElementById('end_rua').value = dados.logradouro || "";
-                document.getElementById('end_bairro').value = dados.bairro || "";
-                document.getElementById('end_cidade').value = dados.localidade || "";
-                document.getElementById('end_estado').value = dados.uf || "";
-                document.getElementById('end_numero').focus();
-            } else {
-                alert("CEP não encontrado.");
-            }
-        })
-        .catch(err => console.error("Erro ao buscar CEP:", err));
-}
-
-function prepararDadosParaAsaas() {
-    if (typeof sacola === 'undefined' || sacola.length === 0) return null;
-    
-    let dados = {
-        valorTotalPix: 0,
-        valorTotalCartao6x: 0,
-        valorTotalOriginal: 0,
-        itensDetalhados: []
-    };
-
-    sacola.forEach(item => {
-        const p = meusProdutos.find(prod => prod.id === item.id);
-        const precoOriginal = item.preco; 
-        const infoPromo = processarPrecoProduto({ id: item.id, ml: item.ml, preco: precoOriginal });
-
-        dados.valorTotalPix += infoPromo.pixValor * item.qtd;
-        dados.valorTotalCartao6x += (infoPromo.tem6x ? infoPromo.valor6x : precoOriginal) * item.qtd;
-        dados.valorTotalOriginal += precoOriginal * item.qtd;
-        
-        dados.itensDetalhados.push({ 
-            nome: p ? p.nome : "Produto", 
-            quantidade: item.qtd, 
-            precoUnitario: precoOriginal 
-        });
-    });
-
-    return dados;
-}
-
-function abrirCheckoutAsaas() {
-    if (typeof sacola === 'undefined' || sacola.length === 0) return alert("Sua sacola está vazia!");
-    if (!nomeFreteGlobal) return alert("⚠️ Selecione o frete antes de finalizar!");
-
-    const btnPix = document.getElementById('btn-pagar-pix');
-    const btnCartao = document.getElementById('btn-pagar-cartao');
-    if(btnPix) { btnPix.innerText = "PAGAR PIX"; btnPix.disabled = false; }
-    if(btnCartao) { btnCartao.innerText = "CARTÃO"; btnCartao.disabled = false; }
-
-    parcelaConfirmada = false;
-    const modalCheckout = document.getElementById('modalCheckout');
-    if (modalCheckout) modalCheckout.style.display = 'flex';
-}
-
-function fecharModalParcelas() {
-    document.getElementById('modalParcelas').style.display = 'none';
-    parcelaConfirmada = false;
-    const btnCartao = document.getElementById('btn-pagar-cartao');
-    if (btnCartao) { btnCartao.innerText = "CARTÃO"; btnCartao.disabled = false; }
-}
-
-function coletarDadosCheckout(metodoPagamento, event) {
+async function coletarDadosCheckout(metodoPagamento, event) {
     if (event) event.preventDefault();
     const btnAcao = event.currentTarget || event.target;
 
@@ -92,7 +17,9 @@ function coletarDadosCheckout(metodoPagamento, event) {
 
     const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
     const freteSeguro = typeof valorFreteGlobal === 'number' ? valorFreteGlobal : 0;
-    const valorTotalBase = (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal) + freteSeguro;
+    
+    // Define o valor total baseado no método
+    const valorTotal = (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal)) + freteSeguro;
 
     if (metodoPagamento === 'CREDIT_CARD' && !parcelaConfirmada) {
         const lista = document.getElementById('listaParcelas');
@@ -100,7 +27,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
         
         lista.innerHTML = '';
         for (let i = 1; i <= limiteParcelas; i++) {
-            const valorParcela = (valorTotalBase / i).toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
+            const valorParcela = (valorTotal / i).toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
             const btnP = document.createElement('button');
             btnP.type = "button";
             btnP.style = "display:block; width:100%; padding:12px; margin-bottom:8px; border:1px solid #ddd; border-radius:6px; cursor:pointer; text-align:left; background:#fff; color:#333;";
@@ -121,45 +48,52 @@ function coletarDadosCheckout(metodoPagamento, event) {
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
-   // 1. Prepare o resumo (você já fez isso)
-const resumoItensEstoque = sacola.map(item => ({
-    id: item.id,
-    qtd: item.qtd,
-    ml: item.ml
-}));
+    try {
+        // 1. Prepara o resumo para o estoque
+        const resumoItensEstoque = sacola.map(item => ({
+            id: item.id,
+            qtd: item.qtd,
+            ml: item.ml
+        }));
 
-// 2. O objeto de envio PRECISA ter o "metadata" no mesmo nível de "cliente"
-const checkoutData = {
-    cliente: { 
-        nome: nomeInput, 
-        email: document.getElementById('cliente_email').value,
-        cpfCnpj: cpfLimpo,
-        telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
-    },
-    endereco: { /* seus dados de endereço aqui */ },
-    pagamento: { 
-        metodo: metodoSelecionado, 
-        valor: valorTotal 
-    },
-    // --- ESTA É A PARTE QUE ESTÁ FALTANDO NO SEU ENVIO ---
-    metadata: {
-        itensPedido: JSON.stringify(resumoItensEstoque)
-    }
-    // ----------------------------------------------------
-};
+        // 2. Monta o objeto completo para a API
+        const checkoutData = {
+            cliente: { 
+                nome: nomeInput, 
+                email: document.getElementById('cliente_email').value,
+                cpfCnpj: cpfLimpo,
+                telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
+            },
+            endereco: {
+                cep: cepNoCadastro,
+                rua: document.getElementById('end_rua').value,
+                numero: document.getElementById('end_numero').value,
+                bairro: document.getElementById('end_bairro').value,
+                cidade: document.getElementById('end_cidade').value,
+                estado: document.getElementById('end_estado').value,
+                complemento: document.getElementById('end_complemento').value
+            },
+            pagamento: { 
+                metodo: metodoPagamento === 'PIX' ? 'PIX' : 'CREDIT_CARD', 
+                valor: valorTotal,
+                parcelas: parcelasEscolhidasGlobal
+            },
+            metadata: {
+                itensPedido: JSON.stringify(resumoItensEstoque)
+            }
+        };
 
-// 3. Envie para a sua API finalizar-compra
-const response = await fetch('/api/finalizar-compra', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(checkoutData)
-});
-    
-    .then(async res => {
-        const data = await res.json();
-        if (res.ok && data.invoiceUrl) {
+        // 3. Envio unificado para a API
+        const response = await fetch('/api/finalizar-compra', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(checkoutData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.invoiceUrl) {
             window.open(data.invoiceUrl, "_blank");
-            
             const modalPrincipal = document.getElementById('modalCheckout');
             if (modalPrincipal) {
                 modalPrincipal.innerHTML = `
@@ -171,30 +105,19 @@ const response = await fetch('/api/finalizar-compra', {
                                 A página de pagamento foi aberta em uma nova guia.<br>
                                 <span style="color: #b89356;">Pague e baixe seu comprovante por lá.</span>
                             </p>
-                            <div style="border-top: 1px solid #b8935633; padding-top: 25px;">
-                                <p style="font-size: 13px; font-weight: bold; margin-bottom: 15px;">JÁ FINALIZOU O PAGAMENTO?</p>
-                                <button onclick="voltarParaLoja()"  
-                                        style="background: #b89356; color: white; border: none; padding: 16px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer;">
-                                    LIMPAR SACOLA E VOLTAR
-                                </button>
-                            </div>
+                            <button onclick="voltarParaLoja()" style="background: #b89356; color: white; border: none; padding: 16px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                                LIMPAR SACOLA E VOLTAR
+                            </button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
         } else {
             throw new Error(data.error || "Erro no processamento");
         }
-    })
-    .catch(err => {
+    } catch (err) {
         alert("Erro: " + err.message);
         btnAcao.innerText = textoOriginal;
         btnAcao.disabled = false;
         parcelaConfirmada = false;
-    });
-}
-
-function voltarParaLoja() {
-    localStorage.removeItem('sacola');
-    window.location.reload();
+    }
 }
