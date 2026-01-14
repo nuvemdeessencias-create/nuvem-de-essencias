@@ -1,200 +1,76 @@
-/* --- checkout.js TOTALMENTE CORRIGIDO E TESTADO --- */
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
 
-let parcelasEscolhidasGlobal = 1;
-let parcelaConfirmada = false;
-
-function buscarCEP(cep) {
-    const valor = cep.replace(/\D/g, '');
-    if (valor.length !== 8) return;
-
-    fetch(`https://viacep.com.br/ws/${valor}/json/`)
-        .then(res => res.json())
-        .then(dados => {
-            if (!dados.erro) {
-                document.getElementById('end_rua').value = dados.logradouro || "";
-                document.getElementById('end_bairro').value = dados.bairro || "";
-                document.getElementById('end_cidade').value = dados.localidade || "";
-                document.getElementById('end_estado').value = dados.uf || "";
-                document.getElementById('end_numero').focus();
-            } else {
-                alert("CEP não encontrado.");
-            }
-        })
-        .catch(err => console.error("Erro ao buscar CEP:", err));
-}
-
-function prepararDadosParaAsaas() {
-    if (typeof sacola === 'undefined' || sacola.length === 0) return null;
-    
-    let dados = {
-        valorTotalPix: 0,
-        valorTotalCartao6x: 0,
-        valorTotalOriginal: 0,
-        itensDetalhados: []
-    };
-
-    sacola.forEach(item => {
-        const p = meusProdutos.find(prod => prod.id === item.id);
-        const precoOriginal = item.preco; 
-        const infoPromo = processarPrecoProduto({ id: item.id, ml: item.ml, preco: precoOriginal });
-
-        dados.valorTotalPix += infoPromo.pixValor * item.qtd;
-        dados.valorTotalCartao6x += (infoPromo.tem6x ? infoPromo.valor6x : precoOriginal) * item.qtd;
-        dados.valorTotalOriginal += precoOriginal * item.qtd;
-        
-        dados.itensDetalhados.push({ 
-            nome: p ? p.nome : "Produto", 
-            quantidade: item.qtd, 
-            precoUnitario: precoOriginal 
-        });
-    });
-
-    return dados;
-}
-
-function abrirCheckoutAsaas() {
-    if (typeof sacola === 'undefined' || sacola.length === 0) return alert("Sua sacola está vazia!");
-    if (!nomeFreteGlobal) return alert("⚠️ Selecione o frete antes de finalizar!");
-
-    const btnPix = document.getElementById('btn-pagar-pix');
-    const btnCartao = document.getElementById('btn-pagar-cartao');
-    if(btnPix) { btnPix.innerText = "PAGAR PIX"; btnPix.disabled = false; }
-    if(btnCartao) { btnCartao.innerText = "CARTÃO"; btnCartao.disabled = false; }
-
-    parcelaConfirmada = false;
-    const modalCheckout = document.getElementById('modalCheckout');
-    if (modalCheckout) modalCheckout.style.display = 'flex';
-}
-
-function fecharModalParcelas() {
-    document.getElementById('modalParcelas').style.display = 'none';
-    parcelaConfirmada = false;
-    const btnCartao = document.getElementById('btn-pagar-cartao');
-    if (btnCartao) { btnCartao.innerText = "CARTÃO"; btnCartao.disabled = false; }
-}
-
-function coletarDadosCheckout(metodoPagamento, event) {
-    if (event) event.preventDefault();
-    const btnAcao = event.currentTarget || event.target;
-
-    const cepNoCadastro = document.getElementById('end_cep').value.replace(/\D/g, '');
-    if (cepCalculadoGlobal === "" || cepNoCadastro !== cepCalculadoGlobal) {
-        alert("⚠️ O CEP não confere com o frete calculado. Recalcule na sacola.");
-        return;
-    }
-
-    const dadosCarrinho = prepararDadosParaAsaas();
-    const nomeInput = document.getElementById('cliente_nome').value.trim();
-
-    if (nomeInput.split(' ').length < 2) return alert("⚠️ Digite seu nome completo.");
-    const cpfLimpo = document.getElementById('cliente_cpf').value.replace(/\D/g, '');
-    if (cpfLimpo.length < 11) return alert("⚠️ CPF inválido.");
-
-    const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
-    const freteSeguro = typeof valorFreteGlobal === 'number' ? valorFreteGlobal : 0;
-    const valorTotalBase = (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal) + freteSeguro;
-
-    if (metodoPagamento === 'CREDIT_CARD' && !parcelaConfirmada) {
-        const lista = document.getElementById('listaParcelas');
-        if (!lista) return alert("Erro: Container de parcelas não encontrado.");
-        
-        lista.innerHTML = '';
-        for (let i = 1; i <= limiteParcelas; i++) {
-            const valorParcela = (valorTotalBase / i).toLocaleString('pt-br', {style: 'currency', currency: 'BRL'});
-            const btnP = document.createElement('button');
-            btnP.type = "button";
-            btnP.style = "display:block; width:100%; padding:12px; margin-bottom:8px; border:1px solid #ddd; border-radius:6px; cursor:pointer; text-align:left; background:#fff; color:#333;";
-            btnP.innerHTML = `<span>${i}x</span> de <b>${valorParcela}</b>`;
-            btnP.onclick = () => {
-                parcelasEscolhidasGlobal = i;
-                parcelaConfirmada = true;
-                document.getElementById('modalParcelas').style.display = 'none';
-                coletarDadosCheckout('CREDIT_CARD', { currentTarget: btnAcao });
-            };
-            lista.appendChild(btnP);
-        }
-        document.getElementById('modalParcelas').style.display = 'flex';
-        return;
-    }
-
-    const textoOriginal = btnAcao.innerText;
-    btnAcao.innerText = "PROCESSANDO...";
-    btnAcao.disabled = true;
-
-   // 1. Prepare o resumo (você já fez isso)
-const resumoItensEstoque = sacola.map(item => ({
-    id: item.id,
-    qtd: item.qtd,
-    ml: item.ml
-}));
-
-// 2. O objeto de envio PRECISA ter o "metadata" no mesmo nível de "cliente"
-const checkoutData = {
-    cliente: { 
-        nome: nomeInput, 
-        email: document.getElementById('cliente_email').value,
-        cpfCnpj: cpfLimpo,
-        telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
-    },
-    endereco: { /* seus dados de endereço aqui */ },
-    pagamento: { 
-        metodo: metodoSelecionado, 
-        valor: valorTotal 
-    },
-    // --- ESTA É A PARTE QUE ESTÁ FALTANDO NO SEU ENVIO ---
-    metadata: {
-        itensPedido: JSON.stringify(resumoItensEstoque)
-    }
-    // ----------------------------------------------------
+const firebaseConfig = {
+    apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
+    authDomain: "nuvem-de-essencias.firebaseapp.com",
+    projectId: "nuvem-de-essencias",
+    storageBucket: "nuvem-de-essencias.firebasestorage.app",
+    messagingSenderId: "929136751660",
+    appId: "1:929136751660:web:408079a808e0918ede0d89"
 };
 
-// 3. Envie para a sua API finalizar-compra
-const response = await fetch('/api/finalizar-compra', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(checkoutData)
-});
-    
-    .then(async res => {
-        const data = await res.json();
-        if (res.ok && data.invoiceUrl) {
-            window.open(data.invoiceUrl, "_blank");
-            
-            const modalPrincipal = document.getElementById('modalCheckout');
-            if (modalPrincipal) {
-                modalPrincipal.innerHTML = `
-                    <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100vh; background: rgba(2, 11, 31, 0.95); position: fixed; top: 0; left: 0; z-index: 9999;">
-                        <div style="background: #020b1f; color: white; padding: 40px 30px; border-radius: 15px; border: 1px solid #b89356; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                            <div style="font-size: 60px; color: #b89356; margin-bottom: 20px;">✔️</div>
-                            <h2 style="color: #b89356; font-family: serif; margin-bottom: 15px; font-size: 24px;">PEDIDO GERADO</h2>
-                            <p style="font-size: 15px; color: #d1d1d1; line-height: 1.6; margin-bottom: 30px;">
-                                A página de pagamento foi aberta em uma nova guia.<br>
-                                <span style="color: #b89356;">Pague e baixe seu comprovante por lá.</span>
-                            </p>
-                            <div style="border-top: 1px solid #b8935633; padding-top: 25px;">
-                                <p style="font-size: 13px; font-weight: bold; margin-bottom: 15px;">JÁ FINALIZOU O PAGAMENTO?</p>
-                                <button onclick="voltarParaLoja()"  
-                                        style="background: #b89356; color: white; border: none; padding: 16px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer;">
-                                    LIMPAR SACOLA E VOLTAR
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        } else {
-            throw new Error(data.error || "Erro no processamento");
-        }
-    })
-    .catch(err => {
-        alert("Erro: " + err.message);
-        btnAcao.innerText = textoOriginal;
-        btnAcao.disabled = false;
-        parcelaConfirmada = false;
-    });
-}
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
 
-function voltarParaLoja() {
-    localStorage.removeItem('sacola');
-    window.location.reload();
+export default async function handler(req, res) {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+    if (req.method === 'OPTIONS') return res.status(200).end();
+    if (req.method !== 'POST') return res.status(200).send('Webhook Ativo');
+
+    const body = req.body;
+    console.log("Evento Recebido do Asaas:", body.event);
+
+    if (body.event === 'PAYMENT_RECEIVED' || body.event === 'PAYMENT_CONFIRMED') {
+        const payment = body.payment;
+        
+        if (!payment.metadata || !payment.metadata.itensPedido) {
+            console.error("ERRO: Metadata não encontrado no pagamento", payment.id);
+            return res.status(200).json({ status: "erro", message: "sem metadata" });
+        }
+
+        try {
+            const itens = JSON.parse(payment.metadata.itensPedido);
+
+            for (const item of itens) {
+                // Aqui o item.id será "Xay7UtaNUSL7JrhMwMaL"
+                const produtoRef = doc(db, "produtos", item.id);
+                const snap = await getDoc(produtoRef);
+
+                if (snap.exists()) {
+                    const dados = snap.data();
+                    
+                    const novasOpcoes = dados.opcoes.map(opt => {
+                        const [mlTamanho] = opt.valor.split('|');
+                        if (mlTamanho.trim() === item.ml.trim()) {
+                            const estoqueAtual = parseInt(opt.estoque) || 0;
+                            const quantidadeComprada = parseInt(item.qtd) || 1;
+                            const novoEstoque = Math.max(0, estoqueAtual - quantidadeComprada);
+                            
+                            return { 
+                                ...opt, 
+                                estoque: novoEstoque, 
+                                disponivel: novoEstoque > 0 
+                            };
+                        }
+                        return opt;
+                    });
+
+                    // SALVA A ALTERAÇÃO NO FIREBASE
+                    await updateDoc(produtoRef, { opcoes: novasOpcoes });
+                    console.log(`Sucesso: Estoque de ${item.id} atualizado.`);
+                } else {
+                    console.error(`ERRO: Produto ID '${item.id}' não existe no Firestore.`);
+                }
+            }
+        } catch (err) {
+            console.error("Erro interno ao processar baixa:", err.message);
+            return res.status(200).json({ status: "erro", message: err.message });
+        }
+    }
+
+    return res.status(200).json({ success: true });
 }
