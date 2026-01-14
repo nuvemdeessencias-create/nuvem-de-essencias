@@ -91,7 +91,6 @@ function coletarDadosCheckout(metodoPagamento, event) {
     if (cpfLimpo.length < 11) return alert("⚠️ CPF inválido.");
 
     const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
-    // Proteção para garantir que valorFreteGlobal seja número
     const freteSeguro = typeof valorFreteGlobal === 'number' ? valorFreteGlobal : 0;
     const valorTotalBase = (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal) + freteSeguro;
 
@@ -122,7 +121,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
-  // --- NOVIDADE: Prepara a lista simplificada para o estoque ---
+    // --- PREPARAÇÃO DO METADATA ---
     const resumoItensEstoque = sacola.map(item => ({
         id: item.id,
         qtd: item.qtd,
@@ -149,7 +148,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
             valor: valorTotalBase, 
             parcelas: (metodoPagamento === 'PIX' ? 1 : parcelasEscolhidasGlobal)
         },
-        // --- ADICIONE ESTA LINHA ---
+        // O AJUSTE ESTAVA AQUI: Inserindo o metadata no objeto principal
         metadata: { itensPedido: JSON.stringify(resumoItensEstoque) }
     };
 
@@ -168,24 +167,21 @@ function coletarDadosCheckout(metodoPagamento, event) {
                 modalPrincipal.innerHTML = `
                     <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100vh; background: rgba(2, 11, 31, 0.95); position: fixed; top: 0; left: 0; z-index: 9999;">
                         <div style="background: #020b1f; color: white; padding: 40px 30px; border-radius: 15px; border: 1px solid #b89356; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
-                            <div style="font-size: 60px; color: #b89356; margin-bottom: 20px; animation: scaleUp 0.5s ease-out;">✔️</div>
-                            <h2 style="color: #b89356; font-family: serif; margin-bottom: 15px; font-size: 24px; letter-spacing: 1px;">PEDIDO GERADO</h2>
+                            <div style="font-size: 60px; color: #b89356; margin-bottom: 20px;">✔️</div>
+                            <h2 style="color: #b89356; font-family: serif; margin-bottom: 15px; font-size: 24px;">PEDIDO GERADO</h2>
                             <p style="font-size: 15px; color: #d1d1d1; line-height: 1.6; margin-bottom: 30px;">
                                 A página de pagamento foi aberta em uma nova guia.<br>
                                 <span style="color: #b89356;">Pague e baixe seu comprovante por lá.</span>
                             </p>
                             <div style="border-top: 1px solid #b8935633; padding-top: 25px;">
-                                <p style="font-size: 13px; font-weight: bold; margin-bottom: 15px; letter-spacing: 1px;">JÁ FINALIZOU O PAGAMENTO?</p>
+                                <p style="font-size: 13px; font-weight: bold; margin-bottom: 15px;">JÁ FINALIZOU O PAGAMENTO?</p>
                                 <button onclick="voltarParaLoja()"  
-                                        style="background: #b89356; color: white; border: none; padding: 16px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px;">
+                                        style="background: #b89356; color: white; border: none; padding: 16px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer;">
                                     LIMPAR SACOLA E VOLTAR
                                 </button>
                             </div>
                         </div>
                     </div>
-                    <style>
-                        @keyframes scaleUp { from { transform: scale(0); } to { transform: scale(1); } }
-                    </style>
                 `;
             }
         } else {
