@@ -1,31 +1,31 @@
-// Renomeado para coincidir com o erro "abrirCheckoutAsaas is not defined"
+// O nome agora combina com o seu index.html para não dar "not defined"
 async function abrirCheckoutAsaas(metodoPagamento, event) {
-    if (event) event.preventDefault();
+    // PROTEÇÃO: Impede que o erro de 'currentTarget' trave o código
+    if (event && event.preventDefault) event.preventDefault();
     
-    // Identifica o botão que foi clicado (PIX ou Cartão)
-    const btnAcao = event.currentTarget || event.target;
+    // Tenta pegar o botão de várias formas para garantir que funcione
+    const btnAcao = (event && (event.currentTarget || event.target)) || document.querySelector('button[onclick*="abrirCheckoutAsaas"]');
 
     try {
-        // 1. Validação do Frete Selecionado
+        // 1. Validação de Frete
         const cepNoCadastro = document.getElementById('end_cep').value.replace(/\D/g, '');
         if (!cepCalculadoGlobal || cepNoCadastro !== cepCalculadoGlobal) {
-            alert("⚠️ Por favor, calcule o frete na sacola antes de prosseguir.");
+            alert("⚠️ Por favor, calcule o frete antes de finalizar.");
             return;
         }
 
-        // 2. Coleta de Dados e Cálculo do Valor (Produtos + Frete)
+        // 2. Cálculos de Valor
         const dadosCarrinho = prepararDadosParaAsaas();
-        const nomeInput = document.getElementById('cliente_nome').value.trim();
         const freteValor = typeof valorFreteGlobal === 'number' ? valorFreteGlobal : 0;
-        
-        // Valor final que aparece na sua sacola
         const valorTotalFinal = (metodoPagamento === 'PIX' ? dadosCarrinho.valorTotalPix : dadosCarrinho.valorTotalOriginal) + freteValor;
 
-        // 3. Estado de Carregamento
-        btnAcao.innerText = "PROCESSANDO...";
-        btnAcao.disabled = true;
+        // 3. Muda o texto do botão com segurança
+        if (btnAcao) {
+            btnAcao.innerText = "PROCESSANDO...";
+            btnAcao.disabled = true;
+        }
 
-        // 4. Preparação do Metadata para o estoque
+        // 4. Prepara os Metadados para o estoque
         const resumoItensEstoque = sacola.map(item => ({
             id: item.id,
             qtd: item.qtd,
@@ -34,7 +34,7 @@ async function abrirCheckoutAsaas(metodoPagamento, event) {
 
         const checkoutData = {
             cliente: { 
-                nome: nomeInput, 
+                nome: document.getElementById('cliente_nome').value.trim(), 
                 email: document.getElementById('cliente_email').value,
                 cpfCnpj: document.getElementById('cliente_cpf').value.replace(/\D/g, ''),
                 telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
@@ -48,7 +48,7 @@ async function abrirCheckoutAsaas(metodoPagamento, event) {
             }
         };
 
-        // 5. Envio para a API na Vercel
+        // 5. Chamada para a API
         const response = await fetch('/api/finalizar-compra', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -58,26 +58,30 @@ async function abrirCheckoutAsaas(metodoPagamento, event) {
         const data = await response.json();
 
         if (response.ok && data.invoiceUrl) {
-            // Abre o checkout do Asaas em nova guia
             window.open(data.invoiceUrl, "_blank");
             
-            // Opcional: Mostra o modal de sucesso se ele existir no seu HTML
+            // Sucesso: Limpa o formulário e avisa o cliente
             const modalPrincipal = document.getElementById('modalCheckout');
             if (modalPrincipal) {
-                modalPrincipal.innerHTML = `<div style="text-align:center; padding:40px; color:white;">
-                    <h2 style="color:#b89356;">PEDIDO GERADO!</h2>
-                    <p>Pague na página que foi aberta.</p>
-                    <button onclick="window.location.reload()" style="background:#b89356; border:none; padding:10px 20px; color:white; border-radius:5px; cursor:pointer;">VOLTAR</button>
-                </div>`;
+                modalPrincipal.innerHTML = `
+                    <div style="text-align:center; padding:40px; background:#020b1f; color:white; border-radius:15px; border:1px solid #b89356;">
+                        <h2 style="color:#b89356;">PEDIDO GERADO!</h2>
+                        <p>O pagamento foi aberto em uma nova guia.</p>
+                        <button onclick="window.location.reload()" style="background:#b89356; color:white; padding:12px 25px; border:none; border-radius:5px; margin-top:20px; cursor:pointer;">VOLTAR À LOJA</button>
+                    </div>`;
             }
         } else {
-            throw new Error(data.error || "Erro ao processar");
+            throw new Error(data.error || "Erro no servidor");
         }
 
     } catch (err) {
-        console.error("Erro no processo:", err);
-        alert("Erro: " + err.message);
-        btnAcao.innerText = "FINALIZAR PAGAMENTO";
-        btnAcao.disabled = false;
+        console.error("Erro no checkout:", err);
+        alert("Erro ao processar: " + err.message);
+        
+        // Destrava o botão em caso de erro
+        if (btnAcao) {
+            btnAcao.innerText = "FINALIZAR PAGAMENTO";
+            btnAcao.disabled = false;
+        }
     }
 }
