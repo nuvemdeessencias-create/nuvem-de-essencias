@@ -124,35 +124,24 @@
 </div>
 
 <script type="module">
-  // --- chave ---
-const chaveMestra = "RWExNTIwMjQ="; 
-
-if (sessionStorage.getItem("adminLogado") !== "confirmado") {
-    const tentativa = prompt("Digite a senha de administrador:");
-    
-    // btoa converte o que foi digitado para comparar com a chave escondida
-    if (tentativa && btoa(tentativa) === chaveMestra) {
-        sessionStorage.setItem("adminLogado", "confirmado");
-    } else {
-        alert("Acesso negado!");
-        window.location.href = "index.html";
+    // --- Autenticação Simples ---
+    const chaveMestra = "RWExNTIwMjQ="; 
+    if (sessionStorage.getItem("adminLogado") !== "confirmado") {
+        const tentativa = prompt("Digite a senha de administrador:");
+        if (tentativa && btoa(tentativa) === chaveMestra) {
+            sessionStorage.setItem("adminLogado", "confirmado");
+        } else {
+            alert("Acesso negado!");
+            window.location.href = "index.html";
+        }
     }
-}
-// ---------------------------------
-    
-   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { 
-    getFirestore, 
-    collection, 
-    addDoc, 
-    getDocs, 
-    deleteDoc, 
-    doc, 
-    updateDoc, 
-    getDoc,
-    query,    // <--- ADICIONE ESTE
-    orderBy   // <--- ADICIONE ESTE
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+        getFirestore, collection, addDoc, getDocs, deleteDoc, 
+        doc, updateDoc, getDoc, query, orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
     const firebaseConfig = {
         apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
         authDomain: "nuvem-de-essencias.firebaseapp.com",
@@ -165,6 +154,7 @@ import {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
 
+    // Tornar funções globais para os botões HTML funcionarem
     window.addVariacao = function(dados = null) {
         const container = document.getElementById('containerVariacoes');
         const div = document.createElement('div');
@@ -185,62 +175,58 @@ import {
         container.appendChild(div);
     }
 
-   async function carregarProdutos() {
-    // Busca os produtos ordenados para a tabela também ficar organizada
-    const q = query(collection(db, "produtos"), orderBy("ordem", "asc"));
-    const querySnapshot = await getDocs(q);
-    
-    const tabela = document.getElementById('lista-produtos-admin');
-    tabela.innerHTML = "";
-    
-    querySnapshot.forEach((docSnap) => {
-        const p = docSnap.data();
-        const id = docSnap.id;
-        
-        // Calcula o estoque total somando as variações
-        const estoqueTotal = p.opcoes ? p.opcoes.reduce((acc, opt) => acc + (parseInt(opt.estoque) || 0), 0) : 0;
-        
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td style="text-align: center; font-weight: bold; color: var(--ouro);">${p.ordem || '-'}</td>
-            <td>${p.nome}</td>
-            <td style="text-align: center;">${p.marca}</td>
-            <td style="text-align: center;">${estoqueTotal} un</td>
-            <td style="text-align: center;">
-                <button class="btn-editar" onclick="prepararEdicao('${id}')">Editar</button>
-                <button class="btn-excluir" onclick="excluirProduto('${id}')">Excluir</button>
-            </td>`;
-        tabela.appendChild(tr);
-    });
-}
-
-  
-   window.prepararEdicao = async function(id) {
-    const docRef = doc(db, "produtos", id);
-    const docSnap = await getDoc(docRef);
-    if (docSnap.exists()) {
-        const p = docSnap.data();
-        document.getElementById('edit-id').value = id;
-        document.getElementById('nome').value = p.nome;
-        document.getElementById('marca').value = p.marca;
-        document.getElementById('ordem').value = p.ordem || 1; // <--- ADICIONE ESTA LINHA
-        document.getElementById('secao').value = p.secao;
-        document.getElementById('imagem').value = p.imagem;
-        document.getElementById('descricao').value = p.descricao;
-        document.getElementById('descPix').value = p.descPix;
-        document.getElementById('desc6x').value = p.desc6x;
-        
-        document.getElementById('containerVariacoes').innerHTML = "";
-        if(p.opcoes) p.opcoes.forEach(opt => addVariacao(opt));
-        
-        document.getElementById('btnSalvar').innerText = "ATUALIZAR PRODUTO";
-        document.getElementById('btnCancelarEdit').style.display = "block";
-        document.getElementById('titulo-painel').innerText = "Editando: " + p.nome;
-        window.scrollTo(0,0);
+    async function carregarProdutos() {
+        try {
+            const q = query(collection(db, "produtos"), orderBy("ordem", "asc"));
+            const querySnapshot = await getDocs(q);
+            const tabela = document.getElementById('lista-produtos-admin');
+            tabela.innerHTML = "";
+            
+            querySnapshot.forEach((docSnap) => {
+                const p = docSnap.data();
+                const id = docSnap.id;
+                const estoqueTotal = p.opcoes ? p.opcoes.reduce((acc, opt) => acc + (parseInt(opt.estoque) || 0), 0) : 0;
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="text-align: center; font-weight: bold; color: var(--ouro);">${p.ordem || '-'}</td>
+                    <td>${p.nome}</td>
+                    <td style="text-align: center;">${p.marca}</td>
+                    <td style="text-align: center;">${estoqueTotal} un</td>
+                    <td style="text-align: center;">
+                        <button class="btn-editar" onclick="prepararEdicao('${id}')">Editar</button>
+                        <button class="btn-excluir" onclick="excluirProduto('${id}')">Excluir</button>
+                    </td>`;
+                tabela.appendChild(tr);
+            });
+        } catch (e) {
+            console.error("Erro ao carregar lista:", e);
+        }
     }
-}
 
-    window.cancelarEdicao = function() { location.reload(); }
+    window.prepararEdicao = async function(id) {
+        const docRef = doc(db, "produtos", id);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+            const p = docSnap.data();
+            document.getElementById('edit-id').value = id;
+            document.getElementById('nome').value = p.nome;
+            document.getElementById('marca').value = p.marca;
+            document.getElementById('ordem').value = p.ordem || 1;
+            document.getElementById('secao').value = p.secao;
+            document.getElementById('imagem').value = p.imagem;
+            document.getElementById('descricao').value = p.descricao;
+            document.getElementById('descPix').value = p.descPix;
+            document.getElementById('desc6x').value = p.desc6x;
+            document.getElementById('containerVariacoes').innerHTML = "";
+            if(p.opcoes) p.opcoes.forEach(opt => addVariacao(opt));
+            
+            document.getElementById('btnSalvar').innerText = "ATUALIZAR PRODUTO";
+            document.getElementById('btnCancelarEdit').style.display = "block";
+            document.getElementById('titulo-painel').innerText = "Editando: " + p.nome;
+            window.scrollTo(0,0);
+        }
+    }
 
     window.excluirProduto = async function(id) {
         if(confirm("Excluir permanentemente?")) {
@@ -249,7 +235,8 @@ import {
         }
     }
 
-    
+    window.cancelarEdicao = () => location.reload();
+
     document.getElementById('formProduto').addEventListener('submit', async (e) => {
         e.preventDefault();
         const btn = document.getElementById('btnSalvar');
@@ -259,15 +246,15 @@ import {
         const opcoes = Array.from(document.querySelectorAll('.variacao-item')).map(node => ({
             valor: `${node.querySelector('.v-ml').value}|${node.querySelector('.v-preco').value}`,
             estoque: parseInt(node.querySelector('.v-estoque').value),
-            imagemCor: node.querySelector('.v-img-cor').value, // Salva a foto da cor específica
+            imagemCor: node.querySelector('.v-img-cor').value,
             disponivel: node.querySelector('.v-disp').value === "true"
         }));
 
         const dadosProduto = {
             nome: document.getElementById('nome').value,
-    marca: document.getElementById('marca').value.toUpperCase(),
-    ordem: parseInt(document.getElementById('ordem').value) || 99, // Adiciona a ordem aqui
-    secao: document.getElementById('secao').value,
+            marca: document.getElementById('marca').value.toUpperCase(),
+            ordem: parseInt(document.getElementById('ordem').value) || 99,
+            secao: document.getElementById('secao').value,
             imagem: document.getElementById('imagem').value,
             descricao: document.getElementById('descricao').value,
             descPix: parseFloat(document.getElementById('descPix').value) || 0,
@@ -278,19 +265,20 @@ import {
         try {
             if (idEdicao) {
                 await updateDoc(doc(db, "produtos", idEdicao), dadosProduto);
-                alert("Atualizado com sucesso!");
+                alert("Atualizado!");
             } else {
                 dadosProduto.dataCriacao = new Date();
                 await addDoc(collection(db, "produtos"), dadosProduto);
-                alert("Produto cadastrado!");
+                alert("Cadastrado!");
             }
             location.reload();
         } catch (error) {
-            alert("Erro ao salvar no banco.");
+            alert("Erro ao salvar.");
             btn.disabled = false;
         }
     });
 
+    // Inicialização
     addVariacao();
     carregarProdutos();
 </script>
