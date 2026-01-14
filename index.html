@@ -1293,12 +1293,24 @@ function confirmarAdicao() {
 
 // --- MODAL DE DETALHES ---
 function abrirDetalhes(p) {
-    document.getElementById('detalhe-img').src = p.imagem;
-    document.getElementById('detalhe-nome').innerText = p.nome;
-    document.getElementById('detalhe-marca').innerText = p.marca;
-    document.getElementById('detalhe-descricao').innerText = p.descricao || "Fragrância exclusiva.";
+    // Se o que veio foi um ID (string), buscamos o objeto no array global
+    let produto = p;
+    if (typeof p === 'string') {
+        produto = window.meusProdutos.find(item => item.id === p);
+    }
+
+    if (!produto) {
+        console.error("Produto não encontrado para abrir detalhes");
+        return;
+    }
+
+    // Preenche o modal com os dados do objeto
+    document.getElementById('detalhe-img').src = produto.imagem;
+    document.getElementById('detalhe-nome').innerText = produto.nome;
+    document.getElementById('detalhe-marca').innerText = produto.marca;
+    document.getElementById('detalhe-descricao').innerText = produto.descricao || "Fragrância exclusiva.";
     
-    const msg = encodeURIComponent(`Olá! Gostaria de saber mais sobre: *${p.nome}* (${p.marca})`);
+    const msg = encodeURIComponent(`Olá! Gostaria de saber mais sobre: *${produto.nome}* (${produto.marca})`);
     const btn = document.getElementById('btn-whats-detalhe');
     if(btn) btn.onclick = () => window.open(`https://wa.me/5563992576211?text=${msg}`, '_blank');
 
@@ -1516,6 +1528,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
