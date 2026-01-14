@@ -124,20 +124,21 @@
 </div>
 
 <script type="module">
-   // --- LÓGICA DE SENHA COM MEMÓRIA ---
-    let senhaSalva = sessionStorage.getItem("adminLogado");
+  // --- chave ---
+const chaveMestra = "RWExNTIwMjQ="; 
 
-    if (senhaSalva !== "Ea152024") {
-        const senhaDigitada = prompt("Digite a senha de administrador:");
-        
-        if (senhaDigitada === "Ea152024") {
-            sessionStorage.setItem("adminLogado", "Ea152024");
-        } else {
-            alert("Acesso negado!");
-            window.location.href = "index.html";
-        }
+if (sessionStorage.getItem("adminLogado") !== "confirmado") {
+    const tentativa = prompt("Digite a senha de administrador:");
+    
+    // btoa converte o que foi digitado para comparar com a chave escondida
+    if (tentativa && btoa(tentativa) === chaveMestra) {
+        sessionStorage.setItem("adminLogado", "confirmado");
+    } else {
+        alert("Acesso negado!");
+        window.location.href = "index.html";
     }
-    // ----------------------------------
+}
+// ---------------------------------
     
    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { 
