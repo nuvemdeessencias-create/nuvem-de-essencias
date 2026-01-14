@@ -779,53 +779,47 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     // Isso fará o produto nº 1 aparecer primeiro, depois o 2, etc.
     const q = query(collection(db, "produtos"), orderBy("ordem", "asc"));
     
-    onSnapshot(q, (snapshot) => {
+   onSnapshot(q, (snapshot) => {
         window.meusProdutos = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
         }));
 
-        console.log("Produtos carregados na sua ordem:", window.meusProdutos.length);
+        console.log("Produtos carregados:", window.meusProdutos.length);
         
         if (typeof carregarProdutos === "function") {
             carregarProdutos(window.meusProdutos);
         }
 
-    // --- CHAME A FUNÇÃO AQUI ---
-        // Isso garante que ela só rode quando os produtos já existirem na memória
+        // Chame aqui
         verificarLinkDireto();
     });
 
-   function verificarLinkDireto() {
+function verificarLinkDireto() {
     const urlParams = new URLSearchParams(window.location.search);
     const pDoLink = urlParams.get('p');
 
-    if (pDoLink) {
-        // Criamos um intervalo que checa a cada meio segundo se os produtos chegaram
-        const aguardarProdutos = setInterval(() => {
-            if (window.meusProdutos && window.meusProdutos.length > 0) {
-                
-                const produtoEncontrado = window.meusProdutos.find(item => {
-                    const nomeFormatado = item.nome.toLowerCase().trim().replace(/\s+/g, '-');
-                    return nomeFormatado === pDoLink.toLowerCase();
-                });
+    if (!pDoLink) return;
 
-                if (produtoEncontrado) {
-                    clearInterval(aguardarProdutos); // Para de procurar pois achou!
-                    
-                    // Dá 300ms para o navegador respirar e carrega o modal
-                    setTimeout(() => {
-                        if (typeof abrirDetalhes === "function") {
-                            abrirDetalhes(produtoEncontrado.id);
-                        }
-                    }, 300);
-                }
+    // Intervalo para esperar os produtos carregarem no window.meusProdutos
+    const aguardar = setInterval(() => {
+        if (window.meusProdutos && window.meusProdutos.length > 0) {
+            const produtoEncontrado = window.meusProdutos.find(item => {
+                // Remove espaços, acentos e deixa minusculo para comparar
+                const nomeURL = item.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, '-');
+                return nomeURL === pDoLink.toLowerCase();
+            });
+
+            if (produtoEncontrado) {
+                clearInterval(aguardar);
+                // Passamos o objeto inteiro para a função corrigida acima
+                abrirDetalhes(produtoEncontrado);
             }
-        }, 500);
+        }
+    }, 500);
 
-        // Se passar de 10 segundos e não carregar, para de tentar (limite de segurança)
-        setTimeout(() => clearInterval(aguardarProdutos), 10000);
-    }
+    // Timeout de segurança: para de procurar após 10 segundos
+    setTimeout(() => clearInterval(aguardar), 10000);
 }
 
 
@@ -1528,6 +1522,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
