@@ -796,23 +796,29 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         verificarLinkDireto();
     });
 
-       // --- COLOQUE A DEFINIÇÃO DA FUNÇÃO AQUI EMBAIXO ---
-function verificarLinkDireto() {
+    function verificarLinkDireto() {
     const urlParams = new URLSearchParams(window.location.search);
     const pDoLink = urlParams.get('p');
 
-    if (pDoLink && window.meusProdutos.length > 0) {
-        const produtoEncontrado = window.meusProdutos.find(item => {
-            const nomeFormatado = item.nome.toLowerCase().trim().replace(/\s+/g, '-');
-            return nomeFormatado === pDoLink.toLowerCase();
-        });
+    if (pDoLink) {
+        // Tentativa de abertura repetida para garantir que o banco carregou
+        let tentativas = 0;
+        const intervalo = setInterval(() => {
+            if (window.meusProdutos && window.meusProdutos.length > 0) {
+                const produtoEncontrado = window.meusProdutos.find(item => {
+                    const nomeFormatado = item.nome.toLowerCase().trim().replace(/\s+/g, '-');
+                    return nomeFormatado === pDoLink.toLowerCase();
+                });
 
-        if (produtoEncontrado) {
-    // Tente passar o objeto inteiro do produto se a sua função abrirDetalhes permitir
-    // Se a sua função abrirDetalhes original recebe apenas o ID, 
-    // certifique-se de que ela busca os dados no array global window.meusProdutos
-    abrirDetalhes(produtoEncontrado.id); 
-        }
+                if (produtoEncontrado) {
+                    clearInterval(intervalo);
+                    abrirDetalhes(produtoEncontrado.id);
+                }
+            }
+            
+            tentativas++;
+            if (tentativas > 20) clearInterval(intervalo); // Para após 10 segundos se não achar
+        }, 500); 
     }
 }
 
@@ -1504,6 +1510,7 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
 
 
 
