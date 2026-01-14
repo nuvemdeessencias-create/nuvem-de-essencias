@@ -214,6 +214,24 @@ import {
     });
 }
 
+    // --- FUNÇÃO PARA ABRIR PRODUTO VIA LINK DO INSTAGRAM ---
+function verificarLinkDireto() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const nomeProdutoLink = urlParams.get('p'); // Pega o que está depois de ?p=
+
+    if (nomeProdutoLink) {
+        // Procura no seu array de produtos um que tenha o nome parecido
+        const produtoEncontrado = window.meusProdutos.find(p => 
+            p.nome.toLowerCase().replace(/\s+/g, '-') === nomeProdutoLink.toLowerCase()
+        );
+
+        if (produtoEncontrado) {
+            // Chama a sua função de abrir detalhes que você já tem
+            abrirDetalhes(produtoEncontrado.id); 
+        }
+    }
+}
+
     window.prepararEdicao = async function(id) {
         const docRef = doc(db, "produtos", id);
         const docSnap = await getDoc(docRef);
