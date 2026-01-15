@@ -1400,6 +1400,8 @@ function finalizarWhatsApp() {
 
 
 </script>
+
+
 <div id="modal-detalhes" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; align-items:center; justify-content:center;">
     <div style="background:white; padding:20px; border-radius:12px; max-width:400px; width:90%; max-height: 85vh; overflow-y: auto; position:relative; color:#333; text-align:center; display: flex; flex-direction: column;">
         
@@ -1535,6 +1537,26 @@ function finalizarWhatsApp() {
         CNPJ: 58.620.682/0001-15 | © 2026 Nuvem de Essências Perfumaria - Todos os direitos reservados.
     </div>
 </footer>
+
+    <script>
+        // Faz o site virar App
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(() => console.log("App Nuvem de Essências carregado com sucesso!"))
+                .catch(err => console.log("Erro ao registrar App:", err));
+        }
+
+        // Função temporária de login (vamos conectar ao Firebase no próximo passo)
+        function abrirModalLogin() {
+            const email = prompt("Digite seu e-mail para acessar seus pontos:");
+            if(email) {
+                document.getElementById('status-pontos').innerHTML = "Bem-vindo! Você tem <b>150 pontos</b> acumulados.";
+                exibirAviso("Pontos carregados com sucesso!");
+            }
+        }
+    </script>
+</body>
+</html>
 
 
 
