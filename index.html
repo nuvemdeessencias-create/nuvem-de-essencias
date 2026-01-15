@@ -845,57 +845,56 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         verificarLinkDireto();
     });
 
-    // //////////////////////////////////////////////////
-    // 3. FUNÇÕES DE FIDELIDADE E LOGIN REAL (FIREBASE)
-    window.abrirModalLogin = async function() {
-        const email = prompt("Digite seu e-mail para acessar seus pontos:");
-        if (!email) return;
+   // //////////////////////////////////////////////////
+// LOGIN POR CPF (SISTEMA DE FIDELIDADE)
+window.abrirModalLogin = async function() {
+    const cpf = prompt("Digite seu CPF (apenas números) para acessar seus pontos:");
+    
+    // Validação básica: verifica se tem 11 dígitos
+    if (!cpf || cpf.length !== 11 || isNaN(cpf)) {
+        alert("Por favor, digite um CPF válido com 11 números.");
+        return;
+    }
 
-        const emailLimpo = email.toLowerCase().trim();
-        const clienteRef = doc(db, "clientes", emailLimpo);
+    const clienteRef = doc(db, "clientes", cpf);
 
-        try {
-            const docSnap = await getDoc(clienteRef);
-            const container = document.getElementById('status-pontos-container');
-            const areaDesconto = document.getElementById('area-desconto-pontos');
+    try {
+        const docSnap = await getDoc(clienteRef);
+        const container = document.getElementById('status-pontos-container');
+        const areaDesconto = document.getElementById('area-desconto-pontos');
 
-            if (docSnap.exists()) {
-                const dados = docSnap.data();
-                localStorage.setItem('emailCliente', emailLimpo);
-                
-                // Atualiza o Header (Perto da Sacola)
-                if(container) {
-                    container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
-                }
-                
-                // Atualiza a Sacola
-                if(areaDesconto) {
-                    areaDesconto.style.display = 'block';
-                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
-                    document.getElementById('valor-desconto-pwa').innerText = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
-                }
-            } else {
-                // Cria novo cliente se não existir
-                await setDoc(clienteRef, { pontos: 0, email: emailLimpo });
-                localStorage.setItem('emailCliente', emailLimpo);
-                if(container) container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ 0 pts</span>`;
-                if(areaDesconto) areaDesconto.style.display = 'block';
+        if (docSnap.exists()) {
+            const dados = docSnap.data();
+            localStorage.setItem('cpfCliente', cpf); // Salva o CPF no navegador
+            
+            // Atualiza o Header
+            if(container) {
+                container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
             }
-        } catch (error) {
-            console.error("Erro fidelidade:", error);
+            
+            // Atualiza a Sacola
+            if(areaDesconto) {
+                areaDesconto.style.display = 'block';
+                document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
+                document.getElementById('valor-desconto-pwa').innerText = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
+            }
+        } else {
+            // Se for o primeiro acesso, criamos a conta com o CPF
+            await setDoc(clienteRef, { 
+                pontos: 0, 
+                cpf: cpf,
+                dataCadastro: new Date().toISOString() 
+            });
+            localStorage.setItem('cpfCliente', cpf);
+            if(container) container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ 0 pts</span>`;
+            if(areaDesconto) areaDesconto.style.display = 'block';
+            alert("Cadastro de fidelidade criado com sucesso!");
         }
-    };
-
-    window.aplicarDescontoPontos = function() {
-        const elementoDesc = document.getElementById('valor-desconto-pwa');
-        if(elementoDesc) {
-            const valorDesc = elementoDesc.innerText.replace(',', '.');
-            localStorage.setItem('descontoAtivo', valorDesc);
-            alert("Desconto ativado! Ele será aplicado no valor final do pagamento.");
-        }
-    };
-    // //////////////////////////////////////////////////
-
+    } catch (error) {
+        console.error("Erro ao acessar pontos:", error);
+    }
+};
+// //////////////////////////////////////////////////
     function verificarLinkDireto() {
         const urlParams = new URLSearchParams(window.location.search);
         const pDoLink = urlParams.get('p');
@@ -1677,6 +1676,7 @@ function abrirModalLogin() {
     </script>
 </body>
 </html>
+
 
 
 
