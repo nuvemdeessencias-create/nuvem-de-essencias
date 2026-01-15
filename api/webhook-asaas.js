@@ -17,61 +17,56 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(200).send('Webhook Ativo');
 
     const body = req.body;
-    if (body.event === 'PAYMENT_RECEIVED' || body.event === 'PAYMENT_CONFIRMED') {
+    // Aceita qualquer status de confirmação do Asaas
+    if (['PAYMENT_RECEIVED', 'PAYMENT_CONFIRMED'].includes(body.event)) {
         const payment = body.payment;
         
         try {
-            // --- PARTE 1: BAIXA DE ESTOQUE (COM CORREÇÃO DA BARRA '|') ---
-            if (payment.metadata && payment.metadata.itensPedido) {
+            // --- PARTE 1: ESTOQUE ---
+            if (payment.metadata?.itensPedido) {
                 const itens = JSON.parse(payment.metadata.itensPedido);
 
                 for (const item of itens) {
-                    const produtoRef = doc(db, "produtos", item.id);
+                    const produtoRef = doc(db, "produtos", item.id.trim());
                     const snap = await getDoc(produtoRef);
 
                     if (snap.exists()) {
                         const dados = snap.data();
-                        let houveAlteracao = false;
-
                         const novasOpcoes = dados.opcoes.map(opt => {
-                            // CORREÇÃO: Verifica se o "80 ml" está contido em "80 ml|239"
-                            if (opt.valor.includes(item.ml.trim())) {
+                            // Limpeza total para comparação: tira espaços e deixa minúsculo
+                            const mlFirebase = String(opt.valor).split('|')[0].toLowerCase().trim();
+                            const mlPedido = String(item.ml).toLowerCase().trim();
+
+                            if (mlFirebase === mlPedido || opt.valor.includes(mlPedido)) {
                                 const estoqueAtual = parseInt(opt.estoque) || 0;
-                                const quantidadeComprada = parseInt(item.qtd) || 1;
-                                const novoEstoque = Math.max(0, estoqueAtual - quantidadeComprada);
-                                houveAlteracao = true;
-                                return { ...opt, estoque: novoEstoque, disponivel: novoEstoque > 0 };
+                                const qtdComprada = parseInt(item.qtd) || 1;
+                                return { ...opt, estoque: Math.max(0, estoqueAtual - qtdComprada), disponivel: (estoqueAtual - qtdComprada) > 0 };
                             }
                             return opt;
                         });
-
-                        if (houveAlteracao) {
-                            await updateDoc(produtoRef, { opcoes: novasOpcoes });
-                            console.log(`Sucesso: Estoque de ${item.id} baixado.`);
-                        }
+                        await updateDoc(produtoRef, { opcoes: novasOpcoes });
                     }
                 }
             }
           
-            // --- PARTE 2: FIDELIDADE (GARANTINDO A SOMA) ---
-            const cpfFinal = payment.metadata?.cpfFidelidade;
+            // --- PARTE 2: FIDELIDADE ---
+            const cpfFinal = payment.metadata?.cpfFidelidade || payment.externalReference?.replace(/\D/g, '');
             if (cpfFinal) {
                 const cpfLimpo = cpfFinal.replace(/\D/g, '');
                 const clienteRef = doc(db, "clientes", cpfLimpo);
-                const pontosGanhos = Math.floor(payment.value);
+                
+                // Força o valor a ser um número para o increment funcionar
+                const valorNumerico = Math.floor(Number(payment.value));
 
-                // Usamos setDoc com merge para garantir que NUNCA falhe
                 await setDoc(clienteRef, { 
                     cpf: cpfLimpo,
-                    pontos: increment(pontosGanhos),
+                    pontos: increment(valorNumerico),
                     ultimaAtualizacao: new Date().toISOString()
                 }, { merge: true });
-                
-                console.log(`Sucesso: ${pontosGanhos} pontos para o CPF ${cpfLimpo}`);
             }
 
         } catch (err) {
-            console.error("Erro fatal:", err.message);
+            console.error("Erro no processamento:", err.message);
         }
     }
     return res.status(200).json({ success: true });
