@@ -848,9 +848,9 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     });
 
 // //////////////////////////////////////////////////
-// LOGIN POR CPF (FIDELIDADE ATUALIZADO)
+// LOGIN POR CPF (FIDELIDADE ATUALIZADO - CRÉDITO)
 window.abrirModalLogin = async function() {
-    const cpf = prompt("Digite seu CPF (apenas os 11 números) para acessar seus pontos:");
+    const cpf = prompt("Digite seu CPF (apenas os 11 números) para acessar seu crédito:");
     
     // Validação de segurança
     if (!cpf || cpf.length !== 11 || isNaN(cpf)) {
@@ -869,16 +869,19 @@ window.abrirModalLogin = async function() {
             const dados = docSnap.data();
             localStorage.setItem('cpfCliente', cpf); // Lembra o CPF no celular do cliente
             
-            // Mostra os pontos ao lado da sacola
+            // Mostra os pontos no topo (Header)
             if(container) {
                 container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
             }
             
-            // Mostra o desconto na sacola
+            // Mostra a área de resgate na sacola
             if(areaDesconto) {
                 areaDesconto.style.display = 'block';
                 document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
-                document.getElementById('valor-desconto-pwa').innerText = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
+                
+                // Calcula o valor do crédito (2%)
+                const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
+                document.getElementById('valor-desconto-pwa').innerText = valorCredito;
             }
         } else {
             // Se o CPF não existir, cria o cadastro com 0 pontos
@@ -890,12 +893,26 @@ window.abrirModalLogin = async function() {
             localStorage.setItem('cpfCliente', cpf);
             if(container) container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ 0 pts</span>`;
             if(areaDesconto) areaDesconto.style.display = 'block';
-            alert("Bem-vindo à Nuvem de Essências! Seu cadastro de pontos foi criado.");
+            alert("Bem-vindo à Nuvem de Essências! Agora você já está acumulando pontos em suas compras.");
         }
     } catch (error) {
         console.error("Erro no sistema de pontos:", error);
     }
 };
+
+// FUNÇÃO PARA APLICAR O CRÉDITO NA SACOLA
+window.aplicarDescontoPontos = function() {
+    const elementoValor = document.getElementById('valor-desconto-pwa');
+    if (elementoValor) {
+        const valorDesc = elementoValor.innerText;
+        // Salva o valor no navegador para o checkout.js usar
+        localStorage.setItem('descontoAtivo', valorDesc.replace(',', '.'));
+        
+        // Mensagem confirmando o resgate
+        alert(`✨ Crédito de R$ ${valorDesc} resgatado com sucesso! O valor será subtraído no pagamento.`);
+    }
+};
+// //////////////////////////////////////////////////
 // //////////////////////////////////////////////////
     function verificarLinkDireto() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -1678,6 +1695,7 @@ function abrirModalLogin() {
     </script>
 </body>
 </html>
+
 
 
 
