@@ -644,25 +644,23 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 </head>
 <body>
 
-   <header>
-    <img src="img/logo.png" alt="NUVEM DE ESSÊNCIAS" class="logo-img">
+   <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;">
     
-   <div id="status-pontos-container">
-    <button class="btn-login-header" onclick="abrirModalLogin()">
-        ✨ ENTRAR
-    </button>
-</div>
-<div id="area-desconto-pontos" style="background: #0a1633; padding: 12px; border-radius: 8px; margin: 10px 0; border: 1px dashed #b89356; display: none;">
-    <p style="font-size: 11px; color: #ccc; margin: 0;">Pontos: <span id="label-pontos-disponiveis">0</span></p>
-    <p style="font-size: 14px; color: #b89356; font-weight: bold; margin: 5px 0;">Vale Desconto: R$ <span id="valor-desconto-pwa">0,00</span></p>
-    <button onclick="aplicarDescontoPontos()" style="width: 100%; background: #b89356; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold;">
-        ATIVAR DESCONTO DE 2%
-    </button>
-</div>
+    <img src="img/logo.png" alt="NUVEM DE ESSÊNCIAS" class="logo-img" style="max-height: 50px;">
 
-        <div class="cart-icon-container" onclick="toggleCart()">
-            🛍️ <span id="cart-count">0</span>
+    <div class="header-actions" style="display: flex; align-items: center; gap: 15px;">
+        
+        <div id="status-pontos-container">
+            <button class="btn-login-header" onclick="abrirModalLogin()" style="background: #b89356; color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 11px; white-space: nowrap;">
+                ✨ ENTRAR
+            </button>
         </div>
+
+        <div class="cart-icon-container" onclick="toggleCart()" style="position: relative; cursor: pointer; background: #b89356; padding: 5px 12px; border-radius: 15px; display: flex; align-items: center;">
+            <span style="font-size: 18px;">🛍️</span>
+            <span id="cart-count" style="color: black; font-weight: bold; margin-left: 5px;">0</span>
+        </div>
+
     </div>
 </header>
 
@@ -1594,6 +1592,7 @@ function abrirModalLogin() {
     </script>
 </body>
 </html>
+
 
 
 
