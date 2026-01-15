@@ -965,37 +965,38 @@ window.aplicarDescontoPontos = function() {
     }
 
 // //////////////////////////////////////////////////
-// LOGIN AUTOMÁTICO AO ABRIR O APP
-const emailSalvo = localStorage.getItem('emailCliente');
-if (emailSalvo) {
-    // Cria um pequeno atraso para garantir que o banco de dados está pronto
-    setTimeout(() => {
-        // Simula o preenchimento automático sem abrir o prompt
-        const container = document.getElementById('status-pontos-container');
-        if(container) {
-            container.innerHTML = `<span style="color: #b89356; font-size: 11px;">Carregando pontos...</span>`;
-            // Reutiliza a lógica de busca do Firebase
-            buscarPontosSilencioso(emailSalvo);
-        }
-    }, 1000);
-}
-
-async function buscarPontosSilencioso(email) {
-    const clienteRef = doc(db, "clientes", email);
-    const docSnap = await getDoc(clienteRef);
-    if (docSnap.exists()) {
-        const dados = docSnap.data();
-        document.getElementById('status-pontos-container').innerHTML = 
-            `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
+// LOGIN AUTOMÁTICO AO ABRIR O APP (VERSÃO CORRIGIDA)
+document.addEventListener('DOMContentLoaded', () => {
+    const cpfSalvo = localStorage.getItem('cpfCliente');
+    
+    if (cpfSalvo && cpfSalvo.length === 11) {
+        console.log("Recuperando sessão para o CPF:", cpfSalvo);
         
-        const areaDesconto = document.getElementById('area-desconto-pontos');
-        if(areaDesconto) {
-            areaDesconto.style.display = 'block';
-            document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
-            document.getElementById('valor-desconto-pwa').innerText = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
-        }
+        // Usamos o db que foi definido no topo do script
+        const clienteRef = doc(db, "clientes", cpfSalvo);
+        
+        onSnapshot(clienteRef, (docAtualizado) => {
+            if (docAtualizado.exists()) {
+                const dados = docAtualizado.data();
+                
+                // Atualiza o topo do site
+                const container = document.getElementById('status-pontos-container');
+                if(container) {
+                    container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
+                }
+                
+                // Atualiza a sacola
+                const areaDesconto = document.getElementById('area-desconto-pontos');
+                if(areaDesconto) {
+                    areaDesconto.style.display = 'block';
+                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
+                    const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
+                    document.getElementById('valor-desconto-pwa').innerText = valorCredito;
+                }
+            }
+        });
     }
-}
+});
 // //////////////////////////////////////////////////
       
 </script>    
@@ -1724,6 +1725,7 @@ function abrirModalLogin() {
     </script>
 </body>
 </html>
+
 
 
 
