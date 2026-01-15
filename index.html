@@ -809,10 +809,10 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 <script src="promocoes.js"></script>
 <script src="checkout.js"></script>
 
-   <script type="module">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    // ADICIONEI o 'onSnapshot' na lista de imports abaixo:
-    import { getFirestore, collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    // Adicionado doc, getDoc e setDoc para o sistema de pontos
+    import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
@@ -828,12 +828,10 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
     window.meusProdutos = [];
 
-    // --- AQUI ESTÁ A MUDANÇA ---
-    // Trocamos "dataCriacao", "desc" por "ordem", "asc"
-    // Isso fará o produto nº 1 aparecer primeiro, depois o 2, etc.
+    // --- CARREGAMENTO DE PRODUTOS ---
     const q = query(collection(db, "produtos"), orderBy("ordem", "asc"));
     
-   onSnapshot(q, (snapshot) => {
+    onSnapshot(q, (snapshot) => {
         window.meusProdutos = snapshot.docs.map(doc => ({
             id: doc.id,
             ...doc.data()
@@ -844,42 +842,81 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         if (typeof carregarProdutos === "function") {
             carregarProdutos(window.meusProdutos);
         }
-
-        // Chame aqui
         verificarLinkDireto();
     });
 
-function verificarLinkDireto() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const pDoLink = urlParams.get('p');
+    // //////////////////////////////////////////////////
+    // 3. FUNÇÕES DE FIDELIDADE E LOGIN REAL (FIREBASE)
+    window.abrirModalLogin = async function() {
+        const email = prompt("Digite seu e-mail para acessar seus pontos:");
+        if (!email) return;
 
-    if (!pDoLink) return;
+        const emailLimpo = email.toLowerCase().trim();
+        const clienteRef = doc(db, "clientes", emailLimpo);
 
-    // Intervalo para esperar os produtos carregarem no window.meusProdutos
-    const aguardar = setInterval(() => {
-        if (window.meusProdutos && window.meusProdutos.length > 0) {
-            const produtoEncontrado = window.meusProdutos.find(item => {
-                // Remove espaços, acentos e deixa minusculo para comparar
-                const nomeURL = item.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, '-');
-                return nomeURL === pDoLink.toLowerCase();
-            });
+        try {
+            const docSnap = await getDoc(clienteRef);
+            const container = document.getElementById('status-pontos-container');
+            const areaDesconto = document.getElementById('area-desconto-pontos');
 
-            if (produtoEncontrado) {
-                clearInterval(aguardar);
-                // Passamos o objeto inteiro para a função corrigida acima
-                abrirDetalhes(produtoEncontrado);
+            if (docSnap.exists()) {
+                const dados = docSnap.data();
+                localStorage.setItem('emailCliente', emailLimpo);
+                
+                // Atualiza o Header (Perto da Sacola)
+                if(container) {
+                    container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
+                }
+                
+                // Atualiza a Sacola
+                if(areaDesconto) {
+                    areaDesconto.style.display = 'block';
+                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
+                    document.getElementById('valor-desconto-pwa').innerText = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
+                }
+            } else {
+                // Cria novo cliente se não existir
+                await setDoc(clienteRef, { pontos: 0, email: emailLimpo });
+                localStorage.setItem('emailCliente', emailLimpo);
+                if(container) container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ 0 pts</span>`;
+                if(areaDesconto) areaDesconto.style.display = 'block';
             }
+        } catch (error) {
+            console.error("Erro fidelidade:", error);
         }
-    }, 500);
+    };
 
-    // Timeout de segurança: para de procurar após 10 segundos
-    setTimeout(() => clearInterval(aguardar), 10000);
-}
+    window.aplicarDescontoPontos = function() {
+        const elementoDesc = document.getElementById('valor-desconto-pwa');
+        if(elementoDesc) {
+            const valorDesc = elementoDesc.innerText.replace(',', '.');
+            localStorage.setItem('descontoAtivo', valorDesc);
+            alert("Desconto ativado! Ele será aplicado no valor final do pagamento.");
+        }
+    };
+    // //////////////////////////////////////////////////
 
+    function verificarLinkDireto() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const pDoLink = urlParams.get('p');
+        if (!pDoLink) return;
 
-</script>
+        const aguardar = setInterval(() => {
+            if (window.meusProdutos && window.meusProdutos.length > 0) {
+                const produtoEncontrado = window.meusProdutos.find(item => {
+                    const nomeURL = item.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, '-');
+                    return nomeURL === pDoLink.toLowerCase();
+                });
 
-    
+                if (produtoEncontrado) {
+                    clearInterval(aguardar);
+                    abrirDetalhes(produtoEncontrado);
+                }
+            }
+        }, 500);
+        setTimeout(() => clearInterval(aguardar), 10000);
+    }
+</script>    
 <script>
 function exibirAviso(mensagem, tipo = 'info') {
     const antigo = document.querySelector('.aviso-nuvem');
@@ -1605,6 +1642,7 @@ function abrirModalLogin() {
     </script>
 </body>
 </html>
+
 
 
 
