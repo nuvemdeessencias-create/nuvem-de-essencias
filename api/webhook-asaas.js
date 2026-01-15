@@ -17,16 +17,13 @@ export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(200).send('Webhook Ativo');
 
     const body = req.body;
-    console.log("Evento Recebido:", body.event);
-
     if (body.event === 'PAYMENT_RECEIVED' || body.event === 'PAYMENT_CONFIRMED') {
         const payment = body.payment;
         
         try {
-            // --- PARTE 1: BAIXA DE ESTOQUE ---
+            // --- PARTE 1: BAIXA DE ESTOQUE (COM CORREÇÃO DA BARRA '|') ---
             if (payment.metadata && payment.metadata.itensPedido) {
                 const itens = JSON.parse(payment.metadata.itensPedido);
-                console.log("Processando itens para estoque...");
 
                 for (const item of itens) {
                     const produtoRef = doc(db, "produtos", item.id);
@@ -34,48 +31,48 @@ export default async function handler(req, res) {
 
                     if (snap.exists()) {
                         const dados = snap.data();
+                        let houveAlteracao = false;
+
                         const novasOpcoes = dados.opcoes.map(opt => {
-                            const [mlTamanho] = opt.valor.split('|');
-                            if (mlTamanho.trim() === item.ml.trim()) {
+                            // CORREÇÃO: Verifica se o "80 ml" está contido em "80 ml|239"
+                            if (opt.valor.includes(item.ml.trim())) {
                                 const estoqueAtual = parseInt(opt.estoque) || 0;
                                 const quantidadeComprada = parseInt(item.qtd) || 1;
                                 const novoEstoque = Math.max(0, estoqueAtual - quantidadeComprada);
+                                houveAlteracao = true;
                                 return { ...opt, estoque: novoEstoque, disponivel: novoEstoque > 0 };
                             }
                             return opt;
                         });
-                        await updateDoc(produtoRef, { opcoes: novasOpcoes });
-                        console.log(`Estoque atualizado: ${item.id}`);
+
+                        if (houveAlteracao) {
+                            await updateDoc(produtoRef, { opcoes: novasOpcoes });
+                            console.log(`Sucesso: Estoque de ${item.id} baixado.`);
+                        }
                     }
                 }
             }
           
-            // --- PARTE 2: FIDELIDADE (CADASTRO/ATUALIZAÇÃO) ---
+            // --- PARTE 2: FIDELIDADE (GARANTINDO A SOMA) ---
             const cpfFinal = payment.metadata?.cpfFidelidade;
-            
             if (cpfFinal) {
                 const cpfLimpo = cpfFinal.replace(/\D/g, '');
                 const clienteRef = doc(db, "clientes", cpfLimpo);
-                
                 const pontosGanhos = Math.floor(payment.value);
 
-                // setDoc com merge: true resolve o erro de "Documento não encontrado"
+                // Usamos setDoc com merge para garantir que NUNCA falhe
                 await setDoc(clienteRef, { 
-                    nome: "Cliente Novo", // Você pode editar no Firebase depois
                     cpf: cpfLimpo,
                     pontos: increment(pontosGanhos),
                     ultimaAtualizacao: new Date().toISOString()
                 }, { merge: true });
                 
-                console.log(`Fidelidade: Sucesso para o CPF ${cpfLimpo}`);
+                console.log(`Sucesso: ${pontosGanhos} pontos para o CPF ${cpfLimpo}`);
             }
 
         } catch (err) {
-            console.error("Erro no processamento:", err.message);
-            // Retornamos 200 mesmo com erro para o Asaas não ficar repetindo o erro 500
-            return res.status(200).json({ error: err.message });
+            console.error("Erro fatal:", err.message);
         }
     }
-
     return res.status(200).json({ success: true });
 }
