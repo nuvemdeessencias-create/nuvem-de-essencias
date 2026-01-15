@@ -1571,17 +1571,24 @@ function finalizarWhatsApp() {
                 .catch(err => console.log("Erro ao registrar App:", err));
         }
 
-        // Função temporária de login (vamos conectar ao Firebase no próximo passo)
-        function abrirModalLogin() {
-            const email = prompt("Digite seu e-mail para acessar seus pontos:");
-            if(email) {
-                document.getElementById('status-pontos').innerHTML = "Bem-vindo! Você tem <b>150 pontos</b> acumulados.";
-                exibirAviso("Pontos carregados com sucesso!");
-            }
+     // //////////////////////////////////////////////////
+// FUNÇÃO DE LOGIN ATUALIZADA PARA O HEADER
+function abrirModalLogin() {
+    const email = prompt("Digite seu e-mail para acessar seus pontos:");
+    if(email) {
+        const container = document.getElementById('status-pontos-container');
+        if(container) {
+            // Substitui o botão pelo saldo de pontos
+            container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 12px;">150 pts</span>`;
+            exibirAviso("Bem-vindo! Seus pontos foram atualizados.");
         }
+    }
+}
+// //////////////////////////////////////////////////
     </script>
 </body>
 </html>
+
 
 
 
