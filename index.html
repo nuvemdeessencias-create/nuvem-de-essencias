@@ -845,14 +845,14 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         verificarLinkDireto();
     });
 
-   // //////////////////////////////////////////////////
-// LOGIN POR CPF (SISTEMA DE FIDELIDADE)
+// //////////////////////////////////////////////////
+// LOGIN POR CPF (FIDELIDADE ATUALIZADO)
 window.abrirModalLogin = async function() {
-    const cpf = prompt("Digite seu CPF (apenas números) para acessar seus pontos:");
+    const cpf = prompt("Digite seu CPF (apenas os 11 números) para acessar seus pontos:");
     
-    // Validação básica: verifica se tem 11 dígitos
+    // Validação de segurança
     if (!cpf || cpf.length !== 11 || isNaN(cpf)) {
-        alert("Por favor, digite um CPF válido com 11 números.");
+        alert("Por favor, digite um CPF válido com 11 números (somente números).");
         return;
     }
 
@@ -865,33 +865,33 @@ window.abrirModalLogin = async function() {
 
         if (docSnap.exists()) {
             const dados = docSnap.data();
-            localStorage.setItem('cpfCliente', cpf); // Salva o CPF no navegador
+            localStorage.setItem('cpfCliente', cpf); // Lembra o CPF no celular do cliente
             
-            // Atualiza o Header
+            // Mostra os pontos ao lado da sacola
             if(container) {
                 container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
             }
             
-            // Atualiza a Sacola
+            // Mostra o desconto na sacola
             if(areaDesconto) {
                 areaDesconto.style.display = 'block';
                 document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
                 document.getElementById('valor-desconto-pwa').innerText = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
             }
         } else {
-            // Se for o primeiro acesso, criamos a conta com o CPF
+            // Se o CPF não existir, cria o cadastro com 0 pontos
             await setDoc(clienteRef, { 
                 pontos: 0, 
                 cpf: cpf,
-                dataCadastro: new Date().toISOString() 
+                dataCriacao: new Date().toISOString()
             });
             localStorage.setItem('cpfCliente', cpf);
             if(container) container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ 0 pts</span>`;
             if(areaDesconto) areaDesconto.style.display = 'block';
-            alert("Cadastro de fidelidade criado com sucesso!");
+            alert("Bem-vindo à Nuvem de Essências! Seu cadastro de pontos foi criado.");
         }
     } catch (error) {
-        console.error("Erro ao acessar pontos:", error);
+        console.error("Erro no sistema de pontos:", error);
     }
 };
 // //////////////////////////////////////////////////
@@ -1676,6 +1676,7 @@ function abrirModalLogin() {
     </script>
 </body>
 </html>
+
 
 
 
