@@ -943,49 +943,21 @@ window.aplicarDescontoPontos = function() {
     }
 };
       
-    function verificarLinkDireto() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const pDoLink = urlParams.get('p');
-        if (!pDoLink) return;
-
-        const aguardar = setInterval(() => {
-            if (window.meusProdutos && window.meusProdutos.length > 0) {
-                const produtoEncontrado = window.meusProdutos.find(item => {
-                    const nomeURL = item.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, '-');
-                    return nomeURL === pDoLink.toLowerCase();
-                });
-
-                if (produtoEncontrado) {
-                    clearInterval(aguardar);
-                    abrirDetalhes(produtoEncontrado);
-                }
-            }
-        }, 500);
-        setTimeout(() => clearInterval(aguardar), 10000);
-    }
-
-// //////////////////////////////////////////////////
-// LOGIN AUTOMÁTICO AO ABRIR O APP (VERSÃO CORRIGIDA)
+   // --- SÓ DEIXE ESTE BLOCO DE LOGIN AUTOMÁTICO ---
 document.addEventListener('DOMContentLoaded', () => {
     const cpfSalvo = localStorage.getItem('cpfCliente');
     
     if (cpfSalvo && cpfSalvo.length === 11) {
         console.log("Recuperando sessão para o CPF:", cpfSalvo);
-        
-        // Usamos o db que foi definido no topo do script
         const clienteRef = doc(db, "clientes", cpfSalvo);
         
         onSnapshot(clienteRef, (docAtualizado) => {
             if (docAtualizado.exists()) {
                 const dados = docAtualizado.data();
-                
-                // Atualiza o topo do site
                 const container = document.getElementById('status-pontos-container');
                 if(container) {
                     container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
                 }
-                
-                // Atualiza a sacola
                 const areaDesconto = document.getElementById('area-desconto-pontos');
                 if(areaDesconto) {
                     areaDesconto.style.display = 'block';
@@ -997,7 +969,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
-// //////////////////////////////////////////////////
+
+// Mantém apenas a função de link direto que você já tinha
+function verificarLinkDireto() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const pDoLink = urlParams.get('p');
+    if (!pDoLink) return;
+    const aguardar = setInterval(() => {
+        if (window.meusProdutos && window.meusProdutos.length > 0) {
+            const produtoEncontrado = window.meusProdutos.find(item => {
+                const nomeURL = item.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, '-');
+                return nomeURL === pDoLink.toLowerCase();
+            });
+            if (produtoEncontrado) {
+                clearInterval(aguardar);
+                abrirDetalhes(produtoEncontrado);
+            }
+        }
+    }, 500);
+    setTimeout(() => clearInterval(aguardar), 10000);
+}
       
 </script>    
 <script>
@@ -1725,6 +1716,7 @@ function abrirModalLogin() {
     </script>
 </body>
 </html>
+
 
 
 
