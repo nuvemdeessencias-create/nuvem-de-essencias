@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, doc, getDoc, updateDoc, increment } from "firebase/firestore"; // Adicionamos increment
+import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
@@ -26,15 +26,15 @@ export default async function handler(req, res) {
             // --- PARTE 1: BAIXA DE ESTOQUE ---
             if (payment.metadata && payment.metadata.itensPedido) {
                 const itens = JSON.parse(payment.metadata.itensPedido);
+                console.log("Processando itens para estoque...");
 
- for (const item of itens) {
+                for (const item of itens) {
                     const produtoRef = doc(db, "produtos", item.id);
                     const snap = await getDoc(produtoRef);
 
                     if (snap.exists()) {
                         const dados = snap.data();
                         const novasOpcoes = dados.opcoes.map(opt => {
-                            // Limpamos espaços extras para garantir a comparação
                             const [mlTamanho] = opt.valor.split('|');
                             if (mlTamanho.trim() === item.ml.trim()) {
                                 const estoqueAtual = parseInt(opt.estoque) || 0;
@@ -50,28 +50,30 @@ export default async function handler(req, res) {
                 }
             }
           
-            // --- PARTE 2: FIDELIDADE (SOMA DE PONTOS) ---
-            // Buscamos o CPF que o site enviou no metadata ou na referência
-            const cpfFinal = payment.metadata?.cpfFidelidade || payment.externalReference;
+            // --- PARTE 2: FIDELIDADE (CADASTRO/ATUALIZAÇÃO) ---
+            const cpfFinal = payment.metadata?.cpfFidelidade;
             
             if (cpfFinal) {
                 const cpfLimpo = cpfFinal.replace(/\D/g, '');
                 const clienteRef = doc(db, "clientes", cpfLimpo);
                 
-                // Calculamos os novos pontos (R$ 1,00 = 1 ponto)
                 const pontosGanhos = Math.floor(payment.value);
 
-                // IMPORTANTE: Usamos 'increment' para SOMAR aos pontos que ele já tem!
-                await updateDoc(clienteRef, { 
+                // setDoc com merge: true resolve o erro de "Documento não encontrado"
+                await setDoc(clienteRef, { 
+                    nome: "Cliente Novo", // Você pode editar no Firebase depois
+                    cpf: cpfLimpo,
                     pontos: increment(pontosGanhos),
                     ultimaAtualizacao: new Date().toISOString()
-                });
+                }, { merge: true });
                 
-                console.log(`Fidelidade: Adicionados ${pontosGanhos} pontos ao CPF ${cpfLimpo}`);
+                console.log(`Fidelidade: Sucesso para o CPF ${cpfLimpo}`);
             }
 
         } catch (err) {
             console.error("Erro no processamento:", err.message);
+            // Retornamos 200 mesmo com erro para o Asaas não ficar repetindo o erro 500
+            return res.status(200).json({ error: err.message });
         }
     }
 
