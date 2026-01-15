@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, doc, getDoc, updateDoc } from "firebase/firestore";
+import { getFirestore, doc, getDoc, updateDoc, increment } from "firebase/firestore"; // Adicionamos increment
 
 const firebaseConfig = {
     apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
@@ -14,72 +14,64 @@ const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 
 export default async function handler(req, res) {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-    if (req.method === 'OPTIONS') return res.status(200).end();
     if (req.method !== 'POST') return res.status(200).send('Webhook Ativo');
 
     const body = req.body;
-    console.log("Evento Recebido do Asaas:", body.event);
+    console.log("Evento Recebido:", body.event);
 
     if (body.event === 'PAYMENT_RECEIVED' || body.event === 'PAYMENT_CONFIRMED') {
         const payment = body.payment;
         
-        if (!payment.metadata || !payment.metadata.itensPedido) {
-            console.error("ERRO: Metadata não encontrado no pagamento", payment.id);
-            return res.status(200).json({ status: "erro", message: "sem metadata" });
-        }
-
         try {
-            // --- PARTE 1: BAIXA DE ESTOQUE (SEU CÓDIGO ORIGINAL) ---
-            const itens = JSON.parse(payment.metadata.itensPedido);
+            // --- PARTE 1: BAIXA DE ESTOQUE ---
+            if (payment.metadata && payment.metadata.itensPedido) {
+                const itens = JSON.parse(payment.metadata.itensPedido);
 
-            for (const item of itens) {
-                const produtoRef = doc(db, "produtos", item.id);
-                const snap = await getDoc(produtoRef);
+                for (const item of itens) {
+                    const produtoRef = doc(db, "produtos", item.id);
+                    const snap = await getDoc(produtoRef);
 
-                if (snap.exists()) {
-                    const dados = snap.data();
-                    const novasOpcoes = dados.opcoes.map(opt => {
-                        const [mlTamanho] = opt.valor.split('|');
-                        if (mlTamanho.trim() === item.ml.trim()) {
-                            const estoqueAtual = parseInt(opt.estoque) || 0;
-                            const quantidadeComprada = parseInt(item.qtd) || 1;
-                            const novoEstoque = Math.max(0, estoqueAtual - quantidadeComprada);
-                            return { ...opt, estoque: novoEstoque, disponivel: novoEstoque > 0 };
-                        }
-                        return opt;
-                    });
-                    await updateDoc(produtoRef, { opcoes: novasOpcoes });
-                    console.log(`Sucesso: Estoque de ${item.id} atualizado.`);
+                    if (snap.exists()) {
+                        const dados = snap.data();
+                        const novasOpcoes = dados.opcoes.map(opt => {
+                            // Limpamos espaços extras para garantir a comparação
+                            const [mlTamanho] = opt.valor.split('|');
+                            if (mlTamanho.trim() === item.ml.trim()) {
+                                const estoqueAtual = parseInt(opt.estoque) || 0;
+                                const quantidadeComprada = parseInt(item.qtd) || 1;
+                                const novoEstoque = Math.max(0, estoqueAtual - quantidadeComprada);
+                                return { ...opt, estoque: novoEstoque, disponivel: novoEstoque > 0 };
+                            }
+                            return opt;
+                        });
+                        await updateDoc(produtoRef, { opcoes: novasOpcoes });
+                        console.log(`Estoque atualizado: ${item.id}`);
+                    }
                 }
             }
 
-            // --- PARTE 2: ATUALIZAÇÃO AUTOMÁTICA DE PONTOS (NOVO) ---
-            // O CPF vem do campo customerCpfCnpj ou do metadata que configuramos
-            const cpfCliente = payment.externalReference || payment.customerCpfCnpj;
+            // --- PARTE 2: FIDELIDADE (SOMA DE PONTOS) ---
+            // Buscamos o CPF que o site enviou no metadata ou na referência
+            const cpfFinal = payment.metadata?.cpfFidelidade || payment.externalReference;
             
-            if (cpfCliente) {
-                const cpfLimpo = cpfCliente.replace(/\D/g, ''); // Garante que só existam números
+            if (cpfFinal) {
+                const cpfLimpo = cpfFinal.replace(/\D/g, '');
                 const clienteRef = doc(db, "clientes", cpfLimpo);
                 
-                // Calculamos os novos pontos baseados no valor pago (R$ 1,00 = 1 ponto)
-                // Usamos Math.floor para arredondar para baixo (Ex: R$ 150,90 vira 150 pontos)
-                const novosPontos = Math.floor(payment.value);
+                // Calculamos os novos pontos (R$ 1,00 = 1 ponto)
+                const pontosGanhos = Math.floor(payment.value);
 
+                // IMPORTANTE: Usamos 'increment' para SOMAR aos pontos que ele já tem!
                 await updateDoc(clienteRef, { 
-                    pontos: novosPontos,
+                    pontos: increment(pontosGanhos),
                     ultimaAtualizacao: new Date().toISOString()
                 });
                 
-                console.log(`Fidelidade: CPF ${cpfLimpo} atualizado com ${novosPontos} pontos.`);
+                console.log(`Fidelidade: Adicionados ${pontosGanhos} pontos ao CPF ${cpfLimpo}`);
             }
 
         } catch (err) {
-            console.error("Erro interno ao processar webhook:", err.message);
-            return res.status(200).json({ status: "erro", message: err.message });
+            console.error("Erro no processamento:", err.message);
         }
     }
 
