@@ -896,20 +896,30 @@ window.abrirModalLogin = async function() {
     }
 };
 
-// FUNÇÃO PARA APLICAR O CRÉDITO NA SACOLA
 window.aplicarDescontoPontos = function() {
     const elementoValor = document.getElementById('valor-desconto-pwa');
-    if (elementoValor) {
-        const valorDesc = elementoValor.innerText;
-        // Salva o valor no navegador para o checkout.js usar
-        localStorage.setItem('descontoAtivo', valorDesc.replace(',', '.'));
-        
-        // Mensagem confirmando o resgate
-        alert(`✨ Crédito de R$ ${valorDesc} resgatado com sucesso! O valor será subtraído no pagamento.`);
+    if (!elementoValor) return;
+
+    const valorDescStr = elementoValor.innerText.replace(',', '.');
+    const valorNumerico = parseFloat(valorDescStr);
+
+    if (valorNumerico <= 0) {
+        alert("Você não possui crédito suficiente para resgate.");
+        return;
+    }
+
+    // 1. Salva o valor para o checkout e para a sacola
+    localStorage.setItem('descontoAtivo', valorNumerico);
+    
+    // 2. Avisa o cliente
+    alert(`✨ Crédito de R$ ${valorDescStr.replace('.', ',')} resgatado com sucesso!`);
+
+    // 3. Atualiza a sacola para subtrair o valor do Total:
+    if (typeof renderizarSacola === 'function') {
+        renderizarSacola(); 
     }
 };
-// //////////////////////////////////////////////////
-// //////////////////////////////////////////////////
+      
     function verificarLinkDireto() {
         const urlParams = new URLSearchParams(window.location.search);
         const pDoLink = urlParams.get('p');
@@ -1691,6 +1701,7 @@ function abrirModalLogin() {
     </script>
 </body>
 </html>
+
 
 
 
