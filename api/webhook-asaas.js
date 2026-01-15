@@ -33,41 +33,52 @@ export default async function handler(req, res) {
         }
 
         try {
+            // --- PARTE 1: BAIXA DE ESTOQUE (SEU CÓDIGO ORIGINAL) ---
             const itens = JSON.parse(payment.metadata.itensPedido);
 
             for (const item of itens) {
-                // Aqui o item.id será "Xay7UtaNUSL7JrhMwMaL"
                 const produtoRef = doc(db, "produtos", item.id);
                 const snap = await getDoc(produtoRef);
 
                 if (snap.exists()) {
                     const dados = snap.data();
-                    
                     const novasOpcoes = dados.opcoes.map(opt => {
                         const [mlTamanho] = opt.valor.split('|');
                         if (mlTamanho.trim() === item.ml.trim()) {
                             const estoqueAtual = parseInt(opt.estoque) || 0;
                             const quantidadeComprada = parseInt(item.qtd) || 1;
                             const novoEstoque = Math.max(0, estoqueAtual - quantidadeComprada);
-                            
-                            return { 
-                                ...opt, 
-                                estoque: novoEstoque, 
-                                disponivel: novoEstoque > 0 
-                            };
+                            return { ...opt, estoque: novoEstoque, disponivel: novoEstoque > 0 };
                         }
                         return opt;
                     });
-
-                    // SALVA A ALTERAÇÃO NO FIREBASE
                     await updateDoc(produtoRef, { opcoes: novasOpcoes });
                     console.log(`Sucesso: Estoque de ${item.id} atualizado.`);
-                } else {
-                    console.error(`ERRO: Produto ID '${item.id}' não existe no Firestore.`);
                 }
             }
+
+            // --- PARTE 2: ATUALIZAÇÃO AUTOMÁTICA DE PONTOS (NOVO) ---
+            // O CPF vem do campo customerCpfCnpj ou do metadata que configuramos
+            const cpfCliente = payment.externalReference || payment.customerCpfCnpj;
+            
+            if (cpfCliente) {
+                const cpfLimpo = cpfCliente.replace(/\D/g, ''); // Garante que só existam números
+                const clienteRef = doc(db, "clientes", cpfLimpo);
+                
+                // Calculamos os novos pontos baseados no valor pago (R$ 1,00 = 1 ponto)
+                // Usamos Math.floor para arredondar para baixo (Ex: R$ 150,90 vira 150 pontos)
+                const novosPontos = Math.floor(payment.value);
+
+                await updateDoc(clienteRef, { 
+                    pontos: novosPontos,
+                    ultimaAtualizacao: new Date().toISOString()
+                });
+                
+                console.log(`Fidelidade: CPF ${cpfLimpo} atualizado com ${novosPontos} pontos.`);
+            }
+
         } catch (err) {
-            console.error("Erro interno ao processar baixa:", err.message);
+            console.error("Erro interno ao processar webhook:", err.message);
             return res.status(200).json({ status: "erro", message: err.message });
         }
     }
