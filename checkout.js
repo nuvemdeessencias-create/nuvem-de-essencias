@@ -148,13 +148,16 @@ function coletarDadosCheckout(metodoPagamento, event) {
         ml: item.ml
     }));
 
-    const checkoutData = {
-        cliente: {
-            nome: nomeInput,
-            email: document.getElementById('cliente_email').value,
-            cpfCnpj: cpfLimpo,
-            telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
-        },
+   const checkoutData = {
+    cliente: {
+        nome: nomeInput,
+        email: document.getElementById('cliente_email').value,
+        cpfCnpj: cpfLimpo, // Isso aqui o Asaas usa para o cadastro
+        telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
+    },
+
+   // ADICIONE ESTA LINHA ABAIXO (Fora do objeto cliente)
+    externalReference: cpfLimpo, // <--- O Webhook vai ler daqui para dar os pontos    
         endereco: {
             cep: cepNoCadastro,
             rua: document.getElementById('end_rua').value,
