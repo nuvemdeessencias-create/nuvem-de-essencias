@@ -885,6 +885,40 @@ window.abrirModalLogin = async function() {
     }
 };
 
+// --- FUNÇÃO PARA MANTER O CLIENTE LOGADO AO RECARREGAR A PÁGINA ---
+document.addEventListener('DOMContentLoaded', () => {
+    const cpfSalvo = localStorage.getItem('cpfCliente');
+    
+    // Se existir um CPF salvo, ele ativa o monitoramento de pontos na hora
+    if (cpfSalvo && cpfSalvo.length === 11) {
+        console.log("Cliente reconhecido: ativando pontos em tempo real...");
+        
+        // Chamamos a lógica de monitoramento sem pedir o prompt de novo
+        const clienteRef = doc(db, "clientes", cpfSalvo);
+        
+        onSnapshot(clienteRef, (docAtualizado) => {
+            if (docAtualizado.exists()) {
+                const dados = docAtualizado.data();
+                
+                // Atualiza o visor de 500 pts no topo
+                const container = document.getElementById('status-pontos-container');
+                if(container) {
+                    container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
+                }
+                
+                // Garante que a área de resgate na sacola apareça
+                const areaDesconto = document.getElementById('area-desconto-pontos');
+                if(areaDesconto) {
+                    areaDesconto.style.display = 'block';
+                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
+                    const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
+                    document.getElementById('valor-desconto-pwa').innerText = valorCredito;
+                }
+            }
+        });
+    }
+});
+
 window.aplicarDescontoPontos = function() {
     const elementoValor = document.getElementById('valor-desconto-pwa');
     if (!elementoValor) return;
@@ -1690,6 +1724,7 @@ function abrirModalLogin() {
     </script>
 </body>
 </html>
+
 
 
 
