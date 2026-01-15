@@ -843,59 +843,45 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         verificarLinkDireto();
     });
 
-// //////////////////////////////////////////////////
-// LOGIN POR CPF COM ATUALIZAÇÃO EM TEMPO REAL (onSnapshot)
 window.abrirModalLogin = async function() {
-    const cpf = prompt("Digite seu CPF (apenas os 11 números) para acessar seu crédito:");
+    const cpf = prompt("Digite seu CPF (apenas números) para acessar seu crédito:");
     
     if (!cpf || cpf.length !== 11 || isNaN(cpf)) {
-        alert("Por favor, digite um CPF válido com 11 números (somente números).");
+        alert("Digite um CPF válido com 11 números.");
         return;
     }
 
     const clienteRef = doc(db, "clientes", cpf);
 
     try {
-        // 1. Verificamos primeiro se o cliente existe, se não existir, criamos
         const docSnap = await getDoc(clienteRef);
         if (!docSnap.exists()) {
-            await setDoc(clienteRef, { 
-                pontos: 0, 
-                cpf: cpf,
-                dataCriacao: new Date().toISOString()
-            });
-            alert("Bem-vindo! Agora você já está acumulando pontos.");
+            await setDoc(clienteRef, { pontos: 0, cpf: cpf, dataCriacao: new Date().toISOString() });
         }
 
-        // 2. ATIVA O MONITORAMENTO EM TEMPO REAL (A mágica acontece aqui)
-        // O onSnapshot fica "vigiando" o Firebase. Se o Webhook mudar os pontos, a tela muda na hora.
+        // --- MONITORAMENTO EM TEMPO REAL ATIVADO ---
         onSnapshot(clienteRef, (docAtualizado) => {
             if (docAtualizado.exists()) {
                 const dados = docAtualizado.data();
                 localStorage.setItem('cpfCliente', cpf);
 
+                // Atualiza o saldo de 500 pts no topo instantaneamente
                 const container = document.getElementById('status-pontos-container');
-                const areaDesconto = document.getElementById('area-desconto-pontos');
-
-                // Atualiza o saldo no topo (Header)
-                if(container) {
-                    container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
-                }
+                if(container) container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
                 
-                // Atualiza a área de resgate na sacola
+                // Atualiza os dados de crédito (2%) na sacola
+                const areaDesconto = document.getElementById('area-desconto-pontos');
                 if(areaDesconto) {
                     areaDesconto.style.display = 'block';
                     document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
                     
-                    // Calcula o crédito (2%) e atualiza o visual
                     const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
                     document.getElementById('valor-desconto-pwa').innerText = valorCredito;
                 }
             }
         });
-
     } catch (error) {
-        console.error("Erro no sistema de fidelidade:", error);
+        console.error("Erro no sistema:", error);
     }
 };
 
