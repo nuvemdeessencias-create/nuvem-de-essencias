@@ -1,4 +1,4 @@
-/* --- checkout.js TOTALMENTE CORRIGIDO E TESTADO --- */
+/* --- checkout.js COM INTEGRAÇÃO DE FIDELIDADE (2%) --- */
 
 let parcelasEscolhidasGlobal = 1;
 let parcelaConfirmada = false;
@@ -56,6 +56,13 @@ function abrirCheckoutAsaas() {
     if (typeof sacola === 'undefined' || sacola.length === 0) return alert("Sua sacola está vazia!");
     if (!nomeFreteGlobal) return alert("⚠️ Selecione o frete antes de finalizar!");
 
+    // Se o cliente estiver logado, preenchemos o CPF automaticamente no checkout
+    const cpfSalvo = localStorage.getItem('cpfCliente');
+    if (cpfSalvo) {
+        const campoCpf = document.getElementById('cliente_cpf');
+        if (campoCpf) campoCpf.value = cpfSalvo;
+    }
+
     const btnPix = document.getElementById('btn-pagar-pix');
     const btnCartao = document.getElementById('btn-pagar-cartao');
     if(btnPix) { btnPix.innerText = "PAGAR PIX"; btnPix.disabled = false; }
@@ -92,7 +99,15 @@ function coletarDadosCheckout(metodoPagamento, event) {
 
     const limiteParcelas = (sacola.length > 0) ? (sacola[0].maxParcelas || 10) : 10;
     const freteSeguro = typeof valorFreteGlobal === 'number' ? valorFreteGlobal : 0;
-    const valorTotalBase = (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal) + freteSeguro;
+    
+    // --- LÓGICA DE DESCONTO FIDELIDADE ---
+    const descontoFidelidade = parseFloat(localStorage.getItem('descontoAtivo')) || 0;
+    
+    let valorTotalBase = (limiteParcelas === 6 ? dadosCarrinho.valorTotalCartao6x : dadosCarrinho.valorTotalOriginal) + freteSeguro;
+    
+    // Subtrai o desconto de fidelidade do valor total
+    valorTotalBase = valorTotalBase - descontoFidelidade;
+    if (valorTotalBase < 0) valorTotalBase = 0;
 
     if (metodoPagamento === 'CREDIT_CARD' && !parcelaConfirmada) {
         const lista = document.getElementById('listaParcelas');
@@ -117,11 +132,16 @@ function coletarDadosCheckout(metodoPagamento, event) {
         return;
     }
 
+    // Ajuste específico para o PIX se houver desconto de fidelidade
+    let valorFinalFinal = valorTotalBase;
+    if (metodoPagamento === 'PIX') {
+        valorFinalFinal = (dadosCarrinho.valorTotalPix + freteSeguro) - descontoFidelidade;
+    }
+
     const textoOriginal = btnAcao.innerText;
     btnAcao.innerText = "PROCESSANDO...";
     btnAcao.disabled = true;
 
-    // --- PREPARAÇÃO DO METADATA ---
     const resumoItensEstoque = sacola.map(item => ({
         id: item.id,
         qtd: item.qtd,
@@ -145,11 +165,14 @@ function coletarDadosCheckout(metodoPagamento, event) {
         },
         pagamento: {
             metodo: metodoPagamento,
-            valor: valorTotalBase, 
+            valor: valorFinalFinal, 
             parcelas: (metodoPagamento === 'PIX' ? 1 : parcelasEscolhidasGlobal)
         },
-        // O AJUSTE ESTAVA AQUI: Inserindo o metadata no objeto principal
-        metadata: { itensPedido: JSON.stringify(resumoItensEstoque) }
+        metadata: { 
+            itensPedido: JSON.stringify(resumoItensEstoque),
+            descontoFidelidadeAplicado: descontoFidelidade.toString(),
+            cpfFidelidade: localStorage.getItem('cpfCliente') || cpfLimpo
+        }
     };
 
     fetch('/api/finalizar-compra', {
@@ -160,6 +183,9 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
+            // Limpa o desconto usado para não repetir na próxima compra
+            localStorage.removeItem('descontoAtivo');
+            
             window.open(data.invoiceUrl, "_blank");
             
             const modalPrincipal = document.getElementById('modalCheckout');
