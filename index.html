@@ -844,11 +844,10 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     });
 
 // //////////////////////////////////////////////////
-// LOGIN POR CPF (FIDELIDADE ATUALIZADO - CRÉDITO)
+// LOGIN POR CPF COM ATUALIZAÇÃO EM TEMPO REAL (onSnapshot)
 window.abrirModalLogin = async function() {
     const cpf = prompt("Digite seu CPF (apenas os 11 números) para acessar seu crédito:");
     
-    // Validação de segurança
     if (!cpf || cpf.length !== 11 || isNaN(cpf)) {
         alert("Por favor, digite um CPF válido com 11 números (somente números).");
         return;
@@ -857,42 +856,46 @@ window.abrirModalLogin = async function() {
     const clienteRef = doc(db, "clientes", cpf);
 
     try {
+        // 1. Verificamos primeiro se o cliente existe, se não existir, criamos
         const docSnap = await getDoc(clienteRef);
-        const container = document.getElementById('status-pontos-container');
-        const areaDesconto = document.getElementById('area-desconto-pontos');
-
-        if (docSnap.exists()) {
-            const dados = docSnap.data();
-            localStorage.setItem('cpfCliente', cpf); // Lembra o CPF no celular do cliente
-            
-            // Mostra os pontos no topo (Header)
-            if(container) {
-                container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
-            }
-            
-            // Mostra a área de resgate na sacola
-            if(areaDesconto) {
-                areaDesconto.style.display = 'block';
-                document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
-                
-                // Calcula o valor do crédito (2%)
-                const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
-                document.getElementById('valor-desconto-pwa').innerText = valorCredito;
-            }
-        } else {
-            // Se o CPF não existir, cria o cadastro com 0 pontos
+        if (!docSnap.exists()) {
             await setDoc(clienteRef, { 
                 pontos: 0, 
                 cpf: cpf,
                 dataCriacao: new Date().toISOString()
             });
-            localStorage.setItem('cpfCliente', cpf);
-            if(container) container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ 0 pts</span>`;
-            if(areaDesconto) areaDesconto.style.display = 'block';
-            alert("Bem-vindo à Nuvem de Essências! Agora você já está acumulando pontos em suas compras.");
+            alert("Bem-vindo! Agora você já está acumulando pontos.");
         }
+
+        // 2. ATIVA O MONITORAMENTO EM TEMPO REAL (A mágica acontece aqui)
+        // O onSnapshot fica "vigiando" o Firebase. Se o Webhook mudar os pontos, a tela muda na hora.
+        onSnapshot(clienteRef, (docAtualizado) => {
+            if (docAtualizado.exists()) {
+                const dados = docAtualizado.data();
+                localStorage.setItem('cpfCliente', cpf);
+
+                const container = document.getElementById('status-pontos-container');
+                const areaDesconto = document.getElementById('area-desconto-pontos');
+
+                // Atualiza o saldo no topo (Header)
+                if(container) {
+                    container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
+                }
+                
+                // Atualiza a área de resgate na sacola
+                if(areaDesconto) {
+                    areaDesconto.style.display = 'block';
+                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
+                    
+                    // Calcula o crédito (2%) e atualiza o visual
+                    const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
+                    document.getElementById('valor-desconto-pwa').innerText = valorCredito;
+                }
+            }
+        });
+
     } catch (error) {
-        console.error("Erro no sistema de pontos:", error);
+        console.error("Erro no sistema de fidelidade:", error);
     }
 };
 
@@ -1701,6 +1704,7 @@ function abrirModalLogin() {
     </script>
 </body>
 </html>
+
 
 
 
