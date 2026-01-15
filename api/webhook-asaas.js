@@ -1,4 +1,80 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
+import { getFirestore, doc, getDoc, updateDoc, setDoc, increment } from "firebase/firestore";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
+    authDomain: "nuvem-de-essencias.firebaseapp.com",
+    projectId: "nuvem-de-essencias",
+    storageBucket: "nuvem-de-essencias.firebasestorage.app",
+    messagingSenderId: "929136751660",
+    appId: "1:929136751660:web:408079a808e0918ede0d89"
+};
+
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
+
+export default async function handler(req, res) {
+    if (req.method !== 'POST') return res.status(200).send('OK');
+
+    const { event, payment } = req.body;
+
+    if (event === 'PAYMENT_RECEIVED' || event === 'PAYMENT_CONFIRMED') {
+        try {
+            // 1. BUSCA O PEDIDO NO SEU BANCO PELO ID (externalReference)
+            // O Asaas envia: "PED-1768503890207", precisamos do ID puro
+            const pedidoId = payment.externalReference;
+            const pedidoRef = doc(db, "pedidos", pedidoId); 
+            const pedidoSnap = await getDoc(pedidoRef);
+
+            if (!pedidoSnap.exists()) {
+                console.error("Pedido não encontrado no Firebase:", pedidoId);
+                return res.status(200).json({ error: "Pedido não registrado" });
+            }
+
+            const dadosPedido = pedidoSnap.data();
+
+            // 2. BAIXA DE ESTOQUE (Usando os dados que já estão no seu Firebase)
+            for (const item of dadosPedido.itens) {
+                const produtoRef = doc(db, "produtos", item.id);
+                const produtoSnap = await getDoc(produtoRef);
+
+                if (produtoSnap.exists()) {
+                    const prodData = produtoSnap.data();
+                    const novasOpcoes = prodData.opcoes.map(opt => {
+                        if (opt.valor.includes(item.ml)) {
+                            const estoqueAtual = parseInt(opt.estoque) || 0;
+                            const novoEstoque = Math.max(0, estoqueAtual - (item.qtd || 1));
+                            return { ...opt, estoque: novoEstoque, disponivel: novoEstoque > 0 };
+                        }
+                        return opt;
+                    });
+                    await updateDoc(produtoRef, { opcoes: novasOpcoes });
+                }
+            }
+
+            // 3. FIDELIDADE (Usando o CPF que está no pedido)
+            if (dadosPedido.cpf) {
+                const cpfLimpo = dadosPedido.cpf.replace(/\D/g, '');
+                const clienteRef = doc(db, "clientes", cpfLimpo);
+                await setDoc(clienteRef, { 
+                    pontos: increment(Math.floor(payment.value)),
+                    ultimaAtualizacao: new Date().toISOString()
+                }, { merge: true });
+            }
+
+            // 4. MARCA PEDIDO COMO PAGO
+            await updateDoc(pedidoRef, { status: "pago", dataPagamento: new Date().toISOString() });
+
+            return res.status(200).json({ success: true });
+
+        } catch (err) {
+            console.error("Erro no processamento:", err.message);
+            return res.status(200).json({ error: err.message });
+        }
+    }
+
+    return res.status(200).json({ success: true });
+}import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore, doc, getDoc, setDoc, updateDoc, increment } from "firebase/firestore";
 
 const firebaseConfig = {
