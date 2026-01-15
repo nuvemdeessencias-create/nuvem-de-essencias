@@ -621,17 +621,19 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 </head>
 <body>
 
-    <div id="painel-fidelidade" style="background: #020b1f; border-bottom: 1px solid #b89356; padding: 10px; text-align: center; font-size: 13px;">
-        <span id="status-pontos">✨ Ganhe 1 ponto a cada R$ 1,00 em compras!</span>
-        <button onclick="abrirModalLogin()" style="background: #b89356; color: white; border: none; padding: 4px 10px; border-radius: 12px; margin-left: 10px; cursor: pointer; font-weight: bold; font-size: 11px;">
-            ENTRAR
-        </button>
-    </div>
-
-<header>
+   <header>
     <img src="img/logo.png" alt="NUVEM DE ESSÊNCIAS" class="logo-img">
-    <div class="cart-icon-container" onclick="toggleCart()">
-        🛍️ <span id="cart-count">0</span>
+    
+    <div class="header-actions">
+        <div id="status-pontos-container">
+            <button class="btn-login-header" onclick="abrirModalLogin()">
+                ✨ ENTRAR
+            </button>
+        </div>
+
+        <div class="cart-icon-container" onclick="toggleCart()">
+            🛍️ <span id="cart-count">0</span>
+        </div>
     </div>
 </header>
 
@@ -1557,6 +1559,7 @@ function finalizarWhatsApp() {
     </script>
 </body>
 </html>
+
 
 
 
