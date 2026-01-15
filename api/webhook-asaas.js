@@ -27,28 +27,36 @@ export default async function handler(req, res) {
             if (payment.metadata && payment.metadata.itensPedido) {
                 const itens = JSON.parse(payment.metadata.itensPedido);
 
-                for (const item of itens) {
-                    const produtoRef = doc(db, "produtos", item.id);
-                    const snap = await getDoc(produtoRef);
+               // --- VERSÃO PARA DIAGNÓSTICO NO WEBHOOK ---
+for (const item of itens) {
+    console.log(`Tentando baixar item: ${item.id} - ML: ${item.ml}`);
+    const produtoRef = doc(db, "produtos", item.id);
+    const snap = await getDoc(produtoRef);
 
-                    if (snap.exists()) {
-                        const dados = snap.data();
-                        const novasOpcoes = dados.opcoes.map(opt => {
-                            // Limpamos espaços extras para garantir a comparação
-                            const [mlTamanho] = opt.valor.split('|');
-                            if (mlTamanho.trim() === item.ml.trim()) {
-                                const estoqueAtual = parseInt(opt.estoque) || 0;
-                                const quantidadeComprada = parseInt(item.qtd) || 1;
-                                const novoEstoque = Math.max(0, estoqueAtual - quantidadeComprada);
-                                return { ...opt, estoque: novoEstoque, disponivel: novoEstoque > 0 };
-                            }
-                            return opt;
-                        });
-                        await updateDoc(produtoRef, { opcoes: novasOpcoes });
-                        console.log(`Estoque atualizado: ${item.id}`);
-                    }
-                }
+    if (snap.exists()) {
+        const dados = snap.data();
+        console.log("Produto encontrado no Firebase:", dados.nome);
+
+        const novasOpcoes = dados.opcoes.map(opt => {
+            const [mlTamanho] = opt.valor.split('|');
+            
+            // Debug: vamos ver o que o Firebase tem e o que o Asaas enviou
+            console.log(`Comparando: [${mlTamanho.trim()}] com [${item.ml.trim()}]`);
+
+            if (mlTamanho.trim().toLowerCase() === item.ml.trim().toLowerCase()) {
+                const estoqueAtual = parseInt(opt.estoque) || 0;
+                const quantidadeComprada = parseInt(item.qtd) || 1;
+                console.log(`Baixando estoque: ${estoqueAtual} -> ${estoqueAtual - quantidadeComprada}`);
+                return { ...opt, estoque: Math.max(0, estoqueAtual - quantidadeComprada) };
             }
+            return opt;
+        });
+
+        await updateDoc(produtoRef, { opcoes: novasOpcoes });
+    } else {
+        console.error("ERRO: Produto ID não existe no Firebase:", item.id);
+    }
+}
 
             // --- PARTE 2: FIDELIDADE (SOMA DE PONTOS) ---
             // Buscamos o CPF que o site enviou no metadata ou na referência
