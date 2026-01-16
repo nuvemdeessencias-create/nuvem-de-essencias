@@ -1,5 +1,5 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, updateDoc, increment } from "firebase/firestore";
 
 const firebaseConfig = {
     apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
@@ -45,19 +45,34 @@ export default async function handler(req, res) {
         // 2. Definir a Referência Externa (ID do Pedido)
         const idPedidoGerado = `PED-${Date.now()}`;
 
-        // --- NOVO: SALVAR NA COLEÇÃO "pedidos" ANTES DE IR PRO ASAAS ---
+        // --- SALVAR NA COLEÇÃO "pedidos" E ABATER PONTOS ---
         try {
             const itensLista = JSON.parse(metadata.itensPedido || "[]");
+            const cpfLimpo = String(metadata.cpfFidelidade).replace(/\D/g, '');
+
+            // SE O CLIENTE USOU PONTOS, SUBTRAI DO SALDO DELE AGORA
+            const pontosParaSubtrair = parseInt(metadata.pontosUtilizados || 0);
+            if (pontosParaSubtrair > 0) {
+                const clienteRef = doc(db, "clientes", cpfLimpo);
+                await updateDoc(clienteRef, {
+                    pontos: increment(-pontosParaSubtrair)
+                });
+            }
+
+            // SALVA O PEDIDO COM O FRETE E OS PONTOS RESGATADOS
             await setDoc(doc(db, "pedidos", idPedidoGerado), {
-                cpf: metadata.cpfFidelidade,
+                cpf: cpfLimpo,
                 itens: itensLista,
                 valorTotal: pagamento.valor,
+                valorFrete: metadata.valorFrete || 0,
+                pontosResgatadosNoCheckout: pontosParaSubtrair, // CAMPO ESSENCIAL PARA DEVOLUÇÃO AUTOMÁTICA
                 status: "pendente",
                 dataCriacao: new Date().toISOString()
             });
-            console.log("Pedido salvo no Firebase:", idPedidoGerado);
+            
+            console.log("Pedido processado no Firebase:", idPedidoGerado);
         } catch (firebaseErr) {
-            console.error("Erro ao salvar no Firebase (não travou o Asaas):", firebaseErr.message);
+            console.error("Erro no Firebase (Pedido/Pontos):", firebaseErr.message);
         }
         // -------------------------------------------------------------
 
@@ -68,7 +83,7 @@ export default async function handler(req, res) {
             dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
             description: "Pedido Nuvem de Essências",
             externalReference: idPedidoGerado,
-            metadata: metadata, // Enviando os dados originais para o Asaas também
+            metadata: metadata,
             callback: { successUrl: urlDinamica, autoRedirect: false }
         };
 
