@@ -35,7 +35,7 @@ export default async function handler(req, res) {
                 email: cliente.email,
                 cpfCnpj: cliente.cpfCnpj,
                 mobilePhone: cliente.telefone,
-                notificationDisabled: true
+                notificationDisabled: false
             })
         });
 
