@@ -804,7 +804,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; margin-bottom:25px; line-height:1.4;">
             Crédito de R$ 0,00 resgatado com sucesso!
         </p>
-       <button id="btn-fechar-sucesso" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+     <button id="btn-ok-sucesso-final" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; font-size:13px; text-transform:uppercase;">
     OK
 </button>
     </div>
@@ -974,11 +974,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     }
 
     // A FUNÇÃO QUE FECHA O MODAL (AGORA GLOBAL E CORRETA)
-    window.fecharModalSucesso = function() {
-        const modal = document.getElementById('modal-sucesso-resgate');
-        if (modal) modal.style.display = 'none';
-        if (typeof renderizarSacola === 'function') renderizarSacola();
-    };
+    
 
     window.abrirModalLogin = function() {
         document.getElementById('modal-cpf-fidelidade').style.display = 'flex';
@@ -1786,6 +1782,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
