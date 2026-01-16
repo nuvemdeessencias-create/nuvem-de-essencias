@@ -1004,12 +1004,14 @@ function mostrarSucessoResgate(valor) {
     }
 }
 
-function fecharModalSucesso() {
+// Adicione o "window." antes do nome da função
+window.fecharModalSucesso = function() {
     const modal = document.getElementById('modal-sucesso-resgate');
     if (modal) {
         modal.style.display = 'none';
+        console.log("Modal de sucesso fechado com sucesso."); // Para você testar no console
     }
-}
+};
     // --- LOGIN MANUAL ---
   window.abrirModalLogin = function() {
     document.getElementById('modal-cpf-fidelidade').style.display = 'flex';
@@ -1847,6 +1849,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
