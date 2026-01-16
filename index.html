@@ -847,44 +847,43 @@ import {
     });
 
     // --- RESGATE DE PONTOS (A FUNÇÃO QUE PRECISA ZERAR) ---
-     window.aplicarDescontoPontos = async function() {
-    console.log("Botão clicado: Iniciando resgate...");
+window.aplicarDescontoPontos = async function() {
+    console.log("Iniciando resgate forçado...");
 
     const cpfSalvo = localStorage.getItem('cpfCliente');
     const elementoValor = document.getElementById('valor-desconto-pwa');
-    const labelPontos = document.getElementById('label-pontos-disponiveis');
-
+    
     if (!cpfSalvo || !window.db) {
-        alert("Erro: Sistema não inicializado ou CPF não encontrado.");
+        alert("Erro: Sessão expirada. Por favor, recarregue a página.");
         return;
     }
 
     const cpfLimpo = cpfSalvo.replace(/\D/g, '');
-    const valorDescStr = elementoValor.innerText.replace(',', '.');
-    const valorNumerico = parseFloat(valorDescStr);
+    const valorNumerico = parseFloat(elementoValor.innerText.replace(',', '.'));
 
     try {
+        // Referência direta ao documento
         const clienteRef = doc(window.db, "clientes", cpfLimpo);
         
-        // 1. ZERA NO BANCO DE DADOS (Igual à lógica de estoque do produto)
+        // --- LOGICA IGUAL AO PRODUTO: SOBREPOSIÇÃO TOTAL ---
+        // Usamos um objeto limpo para garantir que o Firebase ignore incrementos anteriores
         await updateDoc(clienteRef, { 
-            pontos: 0 
+            "pontos": 0 
         });
 
-        // 2. SALVA LOCALMENTE PARA O CHECKOUT
+        // Grava o desconto para o checkout.js usar
         localStorage.setItem('descontoAtivo', valorNumerico.toString());
         
-        // 3. FEEDBACK PARA O USUÁRIO
-        alert(`✨ Crédito de R$ ${valorDescStr.replace('.', ',')} resgatado com sucesso!`);
+        alert(`✨ Crédito de R$ ${valorNumerico.toFixed(2).replace('.', ',')} resgatado com sucesso!`);
 
-        // 4. ATUALIZA A TELA (A sacola vai esconder o botão e o topo vai zerar)
+        // Fecha a sacola e atualiza visual
         if (typeof renderizarSacola === 'function') {
             renderizarSacola();
         }
 
     } catch (error) {
-        console.error("Erro ao zerar pontos no Firebase:", error);
-        alert("Falha técnica: O saldo não pôde ser zerado no servidor.");
+        console.error("Erro ao zerar no Firebase:", error);
+        alert("Erro ao comunicar com o servidor. Tente novamente.");
     }
 };
     // --- LOGIN MANUAL ---
@@ -1662,6 +1661,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
