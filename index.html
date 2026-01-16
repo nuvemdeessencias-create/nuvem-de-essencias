@@ -651,15 +651,24 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
     <div class="header-actions" style="display: flex; align-items: center; gap: 10px;">
     
-<span id="msg-incentivo-login" style="
-    color: #d4af37; /* Dourado metálico mais suave */
-    font-family: 'Playball', cursive;
-    font-size: 22px; 
-    white-space: nowrap; 
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.8); /* Apenas uma sombra para ler no fundo escuro */
-">
-    Identifique-se e ganhe pontos nesta compra ✨
-</span>
+<div id="status-pontos-container" style="display: flex; align-items: center; gap: 10px; margin-right: 10px;">
+    <span id="msg-incentivo-login" style="
+        color: #d4af37; 
+        font-family: 'Playball', cursive;
+        font-size: 19px; 
+        font-weight: 400; 
+        white-space: nowrap; 
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        letter-spacing: 0.3px;
+    ">
+        Identifique-se e ganhe pontos nesta compra ✨
+    </span>
+
+    <button class="btn-login-header" onclick="abrirModalLogin()" 
+            style="background: #b89356; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 10px; white-space: nowrap; text-transform: uppercase;">
+        ENTRAR
+    </button>
+</div>
 
     <button class="btn-login-header" onclick="abrirModalLogin()" 
             style="background: #b89356; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 10px; white-space: nowrap; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
@@ -1671,6 +1680,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
