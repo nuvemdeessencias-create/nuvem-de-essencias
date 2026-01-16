@@ -750,6 +750,20 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         ✨ Sinta o aroma dos sonhos e realce sua beleza! ✨
     </p>
 </div>
+
+<div id="modal-cpf-fidelidade" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#0d1b3e; border:2px solid #b89356; padding:30px; border-radius:20px; width:90%; max-width:400px; text-align:center; box-shadow:0 0 20px rgba(184,147,86,0.3);">
+        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:28px; margin-bottom:15px;">Programa de Pontos ✨</h2>
+        <p style="color:#fff; font-size:14px; margin-bottom:20px;">Digite seu CPF para acessar seus créditos e ganhar pontos nesta compra:</p>
+        
+        <input type="text" id="input-cpf-modal" placeholder="000.000.000-00" style="width:100%; padding:12px; border-radius:10px; border:1px solid #b89356; background:#fff; color:#333; font-weight:bold; text-align:center; margin-bottom:20px; font-size:16px;">
+        
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button onclick="fecharModalCPF()" style="background:transparent; color:#fff; border:1px solid #fff; padding:10px 20px; border-radius:20px; cursor:pointer; font-size:12px; text-transform:uppercase;">Cancelar</button>
+            <button onclick="confirmarCPFModal()" style="background:#b89356; color:#fff; border:none; padding:10px 25px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:12px; text-transform:uppercase;">Acessar Créditos</button>
+        </div>
+    </div>
+</div>
     
 <div class="filtros-container">
     <div class="busca-grupo">
@@ -900,21 +914,58 @@ window.aplicarDescontoPontos = async function() {
     }
 };
     // --- LOGIN MANUAL ---
-    window.abrirModalLogin = async function() {
-        const cpf = prompt("Digite seu CPF (apenas números) para acessar seu crédito:");
-        if (!cpf || cpf.length !== 11 || isNaN(cpf)) {
-            alert("Digite um CPF válido com 11 números.");
-            return;
+  window.abrirModalLogin = function() {
+    document.getElementById('modal-cpf-fidelidade').style.display = 'flex';
+};
+
+window.fecharModalCPF = function() {
+    document.getElementById('modal-cpf-fidelidade').style.display = 'none';
+};
+
+window.confirmarCPFModal = async function() {
+    const inputCPF = document.getElementById('input-cpf-modal');
+    const cpf = inputCPF.value.replace(/\D/g, ''); // Limpa pontos/traços
+
+    if (!cpf || cpf.length !== 11) {
+        alert("Por favor, digite um CPF válido com 11 números.");
+        return;
+    }
+
+    const btnConfirmar = document.querySelector("#modal-cpf-fidelidade button:last-child");
+    btnConfirmar.innerText = "VERIFICANDO...";
+    btnConfirmar.disabled = true;
+
+    const clienteRef = doc(db, "clientes", cpf);
+    
+    try {
+        const docSnap = await getDoc(clienteRef);
+        
+        if (!docSnap.exists()) {
+            await setDoc(clienteRef, { 
+                pontos: 0, 
+                cpf: cpf, 
+                dataCriacao: new Date().toISOString() 
+            });
         }
-        const clienteRef = doc(db, "clientes", cpf);
-        try {
-            const docSnap = await getDoc(clienteRef);
-            if (!docSnap.exists()) {
-                await setDoc(clienteRef, { pontos: 0, cpf: cpf, dataCriacao: new Date().toISOString() });
-            }
-            ativarMonitoramento(cpf);
-        } catch (error) { console.error("Erro no login:", error); }
-    };
+        
+        // CONEXÃO COM SEU CÓDIGO ATUAL:
+        // Usamos 'cpfCliente' para bater com o seu localStorage.getItem('cpfCliente')
+        localStorage.setItem('cpfCliente', cpf); 
+        
+        // Chama a sua função que atualiza o saldo na tela
+        ativarMonitoramento(cpf); 
+        
+        fecharModalCPF();
+        // Não precisa de reload, o onSnapshot da sua função já atualizará a frase!
+
+    } catch (error) { 
+        console.error("Erro no login:", error);
+        alert("Erro ao conectar. Tente novamente.");
+    } finally {
+        btnConfirmar.innerText = "ACESSAR CRÉDITOS";
+        btnConfirmar.disabled = false;
+    }
+};
 
     // --- LOGIN AUTOMÁTICO E MONITORAMENTO ---
     function ativarMonitoramento(cpf) {
@@ -1674,6 +1725,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
