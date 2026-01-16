@@ -771,9 +771,9 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; line-height:1.5; margin-bottom:30px;">
             Seu desconto foi aplicado com sucesso.
         </p>
-        <button onclick="window.fecharTudoAgora()" style="background:#b89356; color:#fff; border:none; padding:15px 50px; border-radius:30px; cursor:pointer; font-weight:bold; text-transform:uppercase;">
-            OK
-        </button>
+        <button onclick="window.fecharTudoAgora()" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold;">
+    OK
+</button>
     </div>
 </div>
     
@@ -1014,22 +1014,26 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
 // FUNÇÃO PARA DESTRAVAR A TELA NA MARRA
 window.fecharTudoAgora = function() {
-    console.log("Executando fechamento forçado...");
+    console.log("Fechando modal e sacola...");
     
-    // 1. Esconde o modal de sucesso
-    const modalSucesso = document.getElementById('MODAL_SUCESSO_FINAL');
-    if (modalSucesso) {
-        modalSucesso.style.display = 'none';
+    // 1. Esconde o modal pelo ID que está no seu print
+    const modal = document.getElementById('modal-sucesso-resgate');
+    if (modal) {
+        modal.style.display = 'none';
     }
 
-    // 2. Fecha a sacola (cart-modal)
+    // 2. Fecha a sacola (cart-modal) para liberar a tela
     const sacola = document.getElementById('cart-modal');
     if (sacola) {
-        sacola.classList.remove('active'); // Remove a classe que abre a sacola
-        sacola.style.right = '-100%';    // Força ela para fora da tela
+        sacola.classList.remove('active');
+        sacola.style.right = '-100%';
     }
 
-    console.log("Tela liberada!");
+    // 3. Remove qualquer fundo escuro travado
+    const overlay = document.querySelector('.cart-overlay');
+    if (overlay) overlay.style.display = 'none';
+
+    console.log("Pronto! Tela liberada.");
 };
     
 </script>
@@ -1748,6 +1752,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
