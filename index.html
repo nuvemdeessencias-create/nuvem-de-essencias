@@ -1004,12 +1004,17 @@ function mostrarSucessoResgate(valor) {
     }
 }
 
-// Adicione o "window." antes do nome da função
+// Definindo como window. para que o HTML sempre encontre a função
 window.fecharModalSucesso = function() {
     const modal = document.getElementById('modal-sucesso-resgate');
     if (modal) {
         modal.style.display = 'none';
-        console.log("Modal de sucesso fechado com sucesso."); // Para você testar no console
+        console.log("Modal de sucesso fechado. Prosseguindo...");
+    }
+    
+    // Atualiza a sacola para garantir que o desconto apareça lá agora
+    if (typeof renderizarSacola === 'function') {
+        renderizarSacola();
     }
 };
     // --- LOGIN MANUAL ---
@@ -1849,6 +1854,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
