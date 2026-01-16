@@ -640,6 +640,47 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     margin: 15px 0;
 }
 
+/* Configuração para Computador e Janelas Grandes */
+    .status-pontos-responsivo {
+        display: flex !important; /* Força a exibição no PWA */
+        align-items: center;
+        justify-content: flex-end;
+        gap: 15px;
+        margin-right: 15px;
+        flex: 1;
+    }
+
+    .texto-incentivo {
+        color: #d4af37;
+        font-family: 'Playball', cursive;
+        font-size: 24px; /* Tamanho elegante no PC */
+        white-space: nowrap;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        display: block !important;
+    }
+
+    .btn-login-header {
+        background: #b89356;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        font-size: 10px;
+        text-transform: uppercase;
+        flex-shrink: 0;
+    }
+
+    /* AJUSTE PARA O APLICATIVO E CELULAR (Telas menores) */
+    @media (max-width: 900px) {
+        .texto-incentivo {
+            font-size: 16px; /* Diminui para caber na janela do App */
+        }
+        .status-pontos-responsivo {
+            gap: 8px;
+        }
+    }
         
     </style>
 </head>
@@ -651,21 +692,12 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
     <div class="header-actions" style="display: flex; align-items: center; gap: 10px;">
     
-<div id="status-pontos-container" style="display: flex; align-items: center; gap: 15px; margin-right: 15px;">
-    <span id="msg-incentivo-login" style="
-        color: #d4af37; 
-        font-family: 'Playball', cursive;
-        font-size: 24px; 
-        font-weight: 400; 
-        white-space: nowrap; 
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-        letter-spacing: 0.3px;
-    ">
-        Identifique-se e ganhe pontos nesta compra ✨
+<div id="status-pontos-container" class="status-pontos-responsivo">
+    <span id="msg-incentivo-login" class="texto-incentivo">
+        Identifique-se e ganhe pontos ✨
     </span>
 
-    <button class="btn-login-header" onclick="abrirModalLogin()" 
-            style="background: #b89356; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 10px; white-space: nowrap; text-transform: uppercase;">
+    <button class="btn-login-header" onclick="abrirModalLogin()">
         ENTRAR
     </button>
 </div>
@@ -1815,6 +1847,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
