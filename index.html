@@ -809,8 +809,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    // Adicionado doc, getDoc e setDoc para o sistema de pontos
-    import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
@@ -919,27 +918,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-window.aplicarDescontoPontos = function() {
+window.aplicarDescontoPontos = async function() {
     const elementoValor = document.getElementById('valor-desconto-pwa');
-    if (!elementoValor) return;
+    const labelPontos = document.getElementById('label-pontos-disponiveis');
+    const cpfSalvo = localStorage.getItem('cpfCliente');
+
+    if (!elementoValor || !labelPontos || !cpfSalvo) return;
 
     const valorDescStr = elementoValor.innerText.replace(',', '.');
     const valorNumerico = parseFloat(valorDescStr);
+    const pontosParaSubtrair = parseInt(labelPontos.innerText);
 
     if (valorNumerico <= 0) {
         alert("Você não possui crédito suficiente para resgate.");
         return;
     }
 
-    // 1. Salva o valor para o checkout e para a sacola
-    localStorage.setItem('descontoAtivo', valorNumerico);
-    
-    // 2. Avisa o cliente
-    alert(`✨ Crédito de R$ ${valorDescStr.replace('.', ',')} resgatado com sucesso!`);
+    try {
+        // --- A MUDANÇA CRÍTICA ESTÁ AQUI ---
+        // 1. Diminui os pontos no Firebase na hora do clique
+        const clienteRef = doc(db, "clientes", cpfSalvo);
+        await updateDoc(clienteRef, {
+            pontos: increment(-pontosParaSubtrair)
+        });
 
-    // 3. Atualiza a sacola para subtrair o valor do Total:
-    if (typeof renderizarSacola === 'function') {
-        renderizarSacola(); 
+        // 2. Salva o valor do desconto e a quantidade de pontos usados para o checkout
+        localStorage.setItem('descontoAtivo', valorNumerico);
+        localStorage.setItem('pontosUtilizadosNestaCompra', pontosParaSubtrair);
+        
+        // 3. Avisa o cliente e atualiza a interface
+        alert(`✨ Crédito de R$ ${valorDescStr.replace('.', ',')} resgatado com sucesso!`);
+
+        if (typeof renderizarSacola === 'function') {
+            renderizarSacola(); 
+        }
+    } catch (error) {
+        console.error("Erro ao resgatar pontos:", error);
+        alert("Erro ao processar resgate. Verifique sua conexão.");
     }
 };
       
@@ -1716,6 +1731,7 @@ function abrirModalLogin() {
     </script>
 </body>
 </html>
+
 
 
 
