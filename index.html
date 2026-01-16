@@ -640,47 +640,6 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     margin: 15px 0;
 }
 
-/* Configuração para Computador e Janelas Grandes */
-    .status-pontos-responsivo {
-        display: flex !important; /* Força a exibição no PWA */
-        align-items: center;
-        justify-content: flex-end;
-        gap: 15px;
-        margin-right: 15px;
-        flex: 1;
-    }
-
-    .texto-incentivo {
-        color: #d4af37;
-        font-family: 'Playball', cursive;
-        font-size: 24px; /* Tamanho elegante no PC */
-        white-space: nowrap;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-        display: block !important;
-    }
-
-    .btn-login-header {
-        background: #b89356;
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 20px;
-        cursor: pointer;
-        font-weight: bold;
-        font-size: 10px;
-        text-transform: uppercase;
-        flex-shrink: 0;
-    }
-
-    /* AJUSTE PARA O APLICATIVO E CELULAR (Telas menores) */
-    @media (max-width: 900px) {
-        .texto-incentivo {
-            font-size: 16px; /* Diminui para caber na janela do App */
-        }
-        .status-pontos-responsivo {
-            gap: 8px;
-        }
-    }
         
     </style>
 </head>
@@ -692,15 +651,25 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
     <div class="header-actions" style="display: flex; align-items: center; gap: 10px;">
     
-<div id="status-pontos-container" class="status-pontos-responsivo">
-    <span id="msg-incentivo-login" class="texto-incentivo">
+<div id="status-pontos-container" style="display: flex; align-items: center; gap: 10px; margin-right: 10px;">
+    <span id="msg-incentivo-login" style="
+        color: #d4af37; 
+        font-family: 'Playball', cursive;
+        font-size: 19px; 
+        font-weight: 400; 
+        white-space: nowrap; 
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+        letter-spacing: 0.3px;
+    ">
         Identifique-se e ganhe pontos nesta compra ✨
     </span>
 
-    <button class="btn-login-header" onclick="abrirModalLogin()">
+    <button class="btn-login-header" onclick="abrirModalLogin()" 
+            style="background: #b89356; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 10px; white-space: nowrap; text-transform: uppercase;">
         ENTRAR
     </button>
 </div>
+
   
     <div class="cart-icon-container" onclick="toggleCart()" style="position: relative; cursor: pointer; background: #b89356; padding: 5px 12px; border-radius: 15px; display: flex; align-items: center;">
         <span style="font-size: 18px;">🛍️</span>
@@ -782,33 +751,6 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         ✨ Sinta o aroma dos sonhos e realce sua beleza! ✨
     </p>
 </div>
-
-<div id="modal-cpf-fidelidade" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:9999; align-items:center; justify-content:center;">
-    <div style="background:#0d1b3e; border:2px solid #b89356; padding:30px; border-radius:20px; width:90%; max-width:400px; text-align:center; box-shadow:0 0 20px rgba(184,147,86,0.3);">
-        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:28px; margin-bottom:15px;">Programa de Pontos ✨</h2>
-        <p style="color:#fff; font-size:14px; margin-bottom:20px;">Digite seu CPF para acessar seus créditos e ganhar pontos nesta compra:</p>
-        
-        <input type="text" id="input-cpf-modal" placeholder="000.000.000-00" style="width:100%; padding:12px; border-radius:10px; border:1px solid #b89356; background:#fff; color:#333; font-weight:bold; text-align:center; margin-bottom:20px; font-size:16px;">
-        
-        <div style="display:flex; gap:10px; justify-content:center;">
-            <button onclick="fecharModalCPF()" style="background:transparent; color:#fff; border:1px solid #fff; padding:10px 20px; border-radius:20px; cursor:pointer; font-size:12px; text-transform:uppercase;">Cancelar</button>
-            <button onclick="confirmarCPFModal()" style="background:#b89356; color:#fff; border:none; padding:10px 25px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:12px; text-transform:uppercase;">Acessar Créditos</button>
-        </div>
-    </div>
-</div>
-
-    <div id="modal-sucesso-resgate" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
-    <div style="background:#0d1b3e; border:2px solid #b89356; padding:30px; border-radius:20px; width:90%; max-width:350px; text-align:center;">
-        <div style="font-size: 50px; margin-bottom: 15px;">✨</div>
-        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:26px; margin-bottom:10px;">Resgate Concluído!</h2>
-        <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; margin-bottom:25px;">
-            Crédito resgatado com sucesso!
-        </p>
-        <button id="btn-fechar-modal-v3" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; text-transform:uppercase;">
-            OK
-        </button>
-    </div>
-</div>
     
 <div class="filtros-container">
     <div class="busca-grupo">
@@ -881,18 +823,19 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { 
-        getFirestore, 
-        collection, 
-        query, 
-        orderBy, 
-        onSnapshot, 
-        doc, 
-        getDoc, 
-        setDoc, 
-        updateDoc, 
-        increment 
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+// COMBINADO: Todas as funções do Firestore em uma única linha
+import { 
+    getFirestore, 
+    collection, 
+    query, 
+    orderBy, 
+    onSnapshot, 
+    doc, 
+    getDoc, 
+    setDoc, 
+    updateDoc, 
+    increment 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     
     const firebaseConfig = {
         apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
@@ -917,78 +860,51 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         verificarLinkDireto();
     });
 
-    // --- RESGATE DE PONTOS ---
-    window.aplicarDescontoPontos = async function() {
-        console.log("Iniciando resgate forçado...");
-        const cpfSalvo = localStorage.getItem('cpfCliente');
-        const elementoValor = document.getElementById('valor-desconto-pwa');
-        
-        if (!cpfSalvo || !window.db) {
-            alert("Erro: Sessão expirada. Por favor, recarregue a página.");
-            return;
-        }
+    // --- RESGATE DE PONTOS (A FUNÇÃO QUE PRECISA ZERAR) ---
+window.aplicarDescontoPontos = async function() {
+    console.log("Iniciando resgate forçado...");
 
-        const cpfLimpo = cpfSalvo.replace(/\D/g, '');
-        const valorNumerico = parseFloat(elementoValor.innerText.replace(',', '.'));
-
-        try {
-            const clienteRef = doc(window.db, "clientes", cpfLimpo);
-            await updateDoc(clienteRef, { "pontos": 0 });
-
-            localStorage.setItem('descontoAtivo', valorNumerico.toString());
-            const valorFormatado = valorNumerico.toFixed(2).replace('.', ',');
-            mostrarSucessoResgate(valorFormatado);
-
-            if (typeof renderizarSacola === 'function') renderizarSacola();
-        } catch (error) {
-            console.error("Erro ao zerar no Firebase:", error);
-        }
-    };
-
-    // --- CANCELAR E ESTORNAR ---
-    window.cancelarResgate = async function() {
-        const cpfSalvo = localStorage.getItem('cpfCliente');
-        const descontoAtivo = localStorage.getItem('descontoAtivo');
-        if (!descontoAtivo || !cpfSalvo) return;
-
-        const pontosParaDevolver = Math.round(parseFloat(descontoAtivo) / 0.02);
-        const cpfLimpo = cpfSalvo.replace(/\D/g, '');
-
-        try {
-            const clienteRef = doc(window.db, "clientes", cpfLimpo);
-            await updateDoc(clienteRef, { "pontos": pontosParaDevolver });
-            localStorage.removeItem('descontoAtivo');
-            alert("Resgate cancelado! Seus pontos foram devolvidos ao seu saldo. ✨");
-            if (typeof renderizarSacola === 'function') renderizarSacola();
-        } catch (error) {
-            console.error("Erro ao estornar:", error);
-        }
-    };
-
-    // --- CONTROLE DOS MODAIS ---
-    function mostrarSucessoResgate(valor) {
-        const textoModal = document.getElementById('texto-sucesso-resgate');
-        if (textoModal) textoModal.innerHTML = `Crédito de <strong>R$ ${valor}</strong> resgatado com sucesso!`;
-        const modal = document.getElementById('modal-sucesso-resgate');
-        if (modal) modal.style.display = 'flex';
+    const cpfSalvo = localStorage.getItem('cpfCliente');
+    const elementoValor = document.getElementById('valor-desconto-pwa');
+    
+    if (!cpfSalvo || !window.db) {
+        alert("Erro: Sessão expirada. Por favor, recarregue a página.");
+        return;
     }
 
-    // A FUNÇÃO QUE FECHA O MODAL (AGORA GLOBAL E CORRETA)
-    
+    const cpfLimpo = cpfSalvo.replace(/\D/g, '');
+    const valorNumerico = parseFloat(elementoValor.innerText.replace(',', '.'));
 
-    window.abrirModalLogin = function() {
-        document.getElementById('modal-cpf-fidelidade').style.display = 'flex';
-    };
+    try {
+        // Referência direta ao documento
+        const clienteRef = doc(window.db, "clientes", cpfLimpo);
+        
+        // --- LOGICA IGUAL AO PRODUTO: SOBREPOSIÇÃO TOTAL ---
+        // Usamos um objeto limpo para garantir que o Firebase ignore incrementos anteriores
+        await updateDoc(clienteRef, { 
+            "pontos": 0 
+        });
 
-    window.fecharModalCPF = function() {
-        document.getElementById('modal-cpf-fidelidade').style.display = 'none';
-    };
+        // Grava o desconto para o checkout.js usar
+        localStorage.setItem('descontoAtivo', valorNumerico.toString());
+        
+        alert(`✨ Crédito de R$ ${valorNumerico.toFixed(2).replace('.', ',')} resgatado com sucesso!`);
 
-    window.confirmarCPFModal = async function() {
-        const inputCPF = document.getElementById('input-cpf-modal');
-        const cpf = inputCPF.value.replace(/\D/g, '');
-        if (!cpf || cpf.length !== 11) {
-            alert("Digite um CPF válido.");
+        // Fecha a sacola e atualiza visual
+        if (typeof renderizarSacola === 'function') {
+            renderizarSacola();
+        }
+
+    } catch (error) {
+        console.error("Erro ao zerar no Firebase:", error);
+        alert("Erro ao comunicar com o servidor. Tente novamente.");
+    }
+};
+    // --- LOGIN MANUAL ---
+    window.abrirModalLogin = async function() {
+        const cpf = prompt("Digite seu CPF (apenas números) para acessar seu crédito:");
+        if (!cpf || cpf.length !== 11 || isNaN(cpf)) {
+            alert("Digite um CPF válido com 11 números.");
             return;
         }
         const clienteRef = doc(db, "clientes", cpf);
@@ -997,35 +913,27 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
             if (!docSnap.exists()) {
                 await setDoc(clienteRef, { pontos: 0, cpf: cpf, dataCriacao: new Date().toISOString() });
             }
-            localStorage.setItem('cpfCliente', cpf);
             ativarMonitoramento(cpf);
-            fecharModalCPF();
-        } catch (error) { console.error(error); }
+        } catch (error) { console.error("Erro no login:", error); }
     };
 
+    // --- LOGIN AUTOMÁTICO E MONITORAMENTO ---
     function ativarMonitoramento(cpf) {
+        localStorage.setItem('cpfCliente', cpf);
         const clienteRef = doc(db, "clientes", cpf);
         onSnapshot(clienteRef, (docAtualizado) => {
             if (docAtualizado.exists()) {
                 const dados = docAtualizado.data();
                 const container = document.getElementById('status-pontos-container');
-                const temDesconto = localStorage.getItem('descontoAtivo');
+                if(container) container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
                 
-                if (container) {
-                    if (dados.pontos === 0 && temDesconto) {
-                        container.innerHTML = `<div style="display:flex;flex-direction:column;align-items:flex-end;">
-                            <span style="color:#b89356;font-weight:bold;font-size:13px;">✨ Crédito em uso</span>
-                            <a href="javascript:void(0)" onclick="cancelarResgate()" style="color:#ff4444;font-size:10px;">(Cancelar)</a>
-                        </div>`;
-                    } else {
-                        container.innerHTML = `<span style="color:#d4af37;font-family:'Playball',cursive;font-size:22px;">✨ ${dados.pontos} pts</span>`;
-                    }
+                const areaDesconto = document.getElementById('area-desconto-pontos');
+                if(areaDesconto) {
+                    areaDesconto.style.display = 'block';
+                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
+                    const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
+                    document.getElementById('valor-desconto-pwa').innerText = valorCredito;
                 }
-                // Atualiza valores na sacola
-                const v = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
-                if(document.getElementById('label-pontos-disponiveis')) document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
-                if(document.getElementById('valor-desconto-pwa')) document.getElementById('valor-desconto-pwa').innerText = v;
-                if(document.getElementById('area-desconto-pontos')) document.getElementById('area-desconto-pontos').style.display = 'block';
             }
         });
     }
@@ -1040,46 +948,17 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         const pDoLink = urlParams.get('p');
         if (!pDoLink) return;
         const aguardar = setInterval(() => {
-            if (window.meusProdutos.length > 0) {
-                const prod = window.meusProdutos.find(item => item.nome.toLowerCase().includes(pDoLink.toLowerCase()));
-                if (prod) { clearInterval(aguardar); abrirDetalhes(prod); }
+            if (window.meusProdutos && window.meusProdutos.length > 0) {
+                const produtoEncontrado = window.meusProdutos.find(item => {
+                    const nomeURL = item.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, '-');
+                    return nomeURL === pDoLink.toLowerCase();
+                });
+                if (produtoEncontrado) { clearInterval(aguardar); abrirDetalhes(produtoEncontrado); }
             }
         }, 500);
-        setTimeout(() => clearInterval(aguardar), 5000);
+        setTimeout(() => clearInterval(aguardar), 10000);
     }
-
-// FORÇAR O FECHAMENTO PELO ID - RESOLVE O TRAVAMENTO
-document.addEventListener('click', function(e) {
-    if (e.target && e.target.id === 'botao-fechar-trava') {
-        const modalSucesso = document.getElementById('modal-sucesso-resgate');
-        if (modalSucesso) {
-            modalSucesso.style.display = 'none'; // Destrava a tela removendo o modal
-            console.log("Modal fechado e tela liberada.");
-        }
-        
-        // Atualiza a sacola para garantir que o desconto de R$ 4,76 apareça
-        if (typeof renderizarSacola === 'function') {
-            renderizarSacola();
-        }
-    }
-});
-
-    // Gerenciador de cliques para o Modal de CPF
-document.addEventListener('click', function(e) {
-    // Se clicar em Cancelar CPF
-    if (e.target && e.target.id === 'btn-cancelar-cpf') {
-        document.getElementById('modal-cpf-fidelidade').style.display = 'none';
-    }
-
-    // Se clicar em Acessar Créditos
-    if (e.target && e.target.id === 'btn-confirmar-cpf') {
-        if (typeof window.confirmarCPFModal === 'function') {
-            window.confirmarCPFModal();
-        }
-    }
-});
-    
-</script>
+</script>    
 
 
 
@@ -1796,24 +1675,6 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
