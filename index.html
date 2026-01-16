@@ -798,15 +798,15 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 </div>
 
     <div id="modal-sucesso-resgate" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
-    <div style="background:#0d1b3e; border:2px solid #b89356; padding:30px; border-radius:20px; width:90%; max-width:350px; text-align:center; box-shadow:0 0 30px rgba(184,147,86,0.3);">
+    <div style="background:#0d1b3e; border:2px solid #b89356; padding:30px; border-radius:20px; width:90%; max-width:350px; text-align:center;">
         <div style="font-size: 50px; margin-bottom: 15px;">✨</div>
         <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:26px; margin-bottom:10px;">Resgate Concluído!</h2>
-        <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; margin-bottom:25px; line-height:1.4;">
-            Crédito de R$ 0,00 resgatado com sucesso!
+        <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; margin-bottom:25px;">
+            Crédito resgatado com sucesso!
         </p>
-    <button id="botao-fechar-trava" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
-    OK
-</button>
+        <button id="btn-fechar-modal-v3" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; text-transform:uppercase;">
+            OK
+        </button>
     </div>
 </div>
     
@@ -1060,6 +1060,21 @@ document.addEventListener('click', function(e) {
         // Atualiza a sacola para garantir que o desconto de R$ 4,76 apareça
         if (typeof renderizarSacola === 'function') {
             renderizarSacola();
+        }
+    }
+});
+
+    // Gerenciador de cliques para o Modal de CPF
+document.addEventListener('click', function(e) {
+    // Se clicar em Cancelar CPF
+    if (e.target && e.target.id === 'btn-cancelar-cpf') {
+        document.getElementById('modal-cpf-fidelidade').style.display = 'none';
+    }
+
+    // Se clicar em Acessar Créditos
+    if (e.target && e.target.id === 'btn-confirmar-cpf') {
+        if (typeof window.confirmarCPFModal === 'function') {
+            window.confirmarCPFModal();
         }
     }
 });
@@ -1781,6 +1796,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
