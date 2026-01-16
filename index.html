@@ -835,42 +835,45 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     });
 
     // --- RESGATE DE PONTOS (A FUNÇÃO QUE PRECISA ZERAR) ---
-       window.aplicarDescontoPontos = async function() {
+      window.aplicarDescontoPontos = async function() {
     const cpfSalvo = localStorage.getItem('cpfCliente');
     const labelPontos = document.getElementById('label-pontos-disponiveis');
     const elementoValor = document.getElementById('valor-desconto-pwa');
 
-    // Usamos o db que tornamos global lá em cima
+    // Verifica se o banco de dados está acessível
     if (!window.db || !cpfSalvo) {
         alert("Erro de conexão. Por favor, recarregue a página.");
         return;
     }
 
+    // Garante que o CPF seja apenas números (ex: 12345678901)
     const cpfLimpo = cpfSalvo.replace(/\D/g, '');
-    const valorDescStr = elementoValor.innerText.replace(',', '.');
-    const valorNumerico = parseFloat(valorDescStr);
+    const valorNumerico = parseFloat(elementoValor.innerText.replace(',', '.'));
 
     try {
-        // IMPORTANTE: Importamos o 'doc' e 'updateDoc' de dentro do window se necessário
-        // Mas o ideal é que esta função esteja DENTRO do script module
-        const { doc, updateDoc } from await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+        // Importa os comandos necessários diretamente para garantir execução
+        const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
         
         const clienteRef = doc(window.db, "clientes", cpfLimpo);
         
-        // Zera o saldo no Firebase antes de qualquer outra coisa
-        await updateDoc(clienteRef, { pontos: 0 });
+        // --- O COMANDO QUE ZERA O FIREBASE ---
+        await updateDoc(clienteRef, { 
+            pontos: 0 
+        });
 
+        // Salva o valor para o Checkout usar
         localStorage.setItem('descontoAtivo', valorNumerico.toString());
-        alert(`✨ Crédito de R$ ${valorDescStr.replace('.', ',')} resgatado com sucesso!`);
         
+        alert(`✨ Crédito de R$ ${elementoValor.innerText} resgatado com sucesso!`);
+        
+        // Atualiza a sacola visualmente
         if (typeof renderizarSacola === 'function') renderizarSacola();
 
     } catch (error) {
         console.error("Erro ao zerar no Firebase:", error);
-        alert("Falha técnica ao zerar pontos. Verifique sua conexão.");
+        alert("Falha ao comunicar com o servidor. Os pontos não foram zerados.");
     }
 };
-
     // --- LOGIN MANUAL ---
     window.abrirModalLogin = async function() {
         const cpf = prompt("Digite seu CPF (apenas números) para acessar seu crédito:");
@@ -1646,6 +1649,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
