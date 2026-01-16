@@ -751,6 +751,31 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         ✨ Sinta o aroma dos sonhos e realce sua beleza! ✨
     </p>
 </div>
+
+<div id="modal-cpf-fidelidade" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+    <div style="background:#0d1b3e; border:2px solid #b89356; padding:30px; border-radius:20px; width:90%; max-width:400px; text-align:center; box-shadow:0 0 30px rgba(184,147,86,0.4);">
+        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:32px; margin-bottom:15px;">Programa de Pontos ✨</h2>
+        <p style="color:#fff; font-size:14px; margin-bottom:20px;">Digite seu CPF para acessar seus créditos:</p>
+        <input type="text" id="input-cpf-modal" placeholder="000.000.000-00" style="width:100%; padding:15px; border-radius:10px; border:1px solid #b89356; background:#fff; color:#333; font-weight:bold; text-align:center; margin-bottom:20px; font-size:18px;">
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <button id="btn-fechar-cpf" style="background:transparent; color:#fff; border:1px solid #fff; padding:10px 20px; border-radius:20px; cursor:pointer; font-size:12px; text-transform:uppercase;">Cancelar</button>
+            <button id="btn-confirmar-cpf" style="background:#b89356; color:#fff; border:none; padding:10px 25px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:12px; text-transform:uppercase;">Acessar Créditos</button>
+        </div>
+    </div>
+</div>
+
+<div id="modal-sucesso-resgate" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10001; align-items:center; justify-content:center; backdrop-filter: blur(8px);">
+    <div style="background:#0d1b3e; border:2px solid #b89356; padding:40px 30px; border-radius:25px; width:90%; max-width:350px; text-align:center; box-shadow:0 0 40px rgba(184,147,86,0.5);">
+        <div style="font-size: 60px; margin-bottom: 20px;">✨</div>
+        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:30px; margin-bottom:15px;">Crédito Resgatado!</h2>
+        <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; line-height:1.5; margin-bottom:30px;">
+            Seu desconto foi aplicado com sucesso.
+        </p>
+        <button id="btn-ok-sucesso" style="background:#b89356; color:#fff; border:none; padding:15px 50px; border-radius:30px; cursor:pointer; font-weight:bold; font-size:14px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 4px 15px rgba(0,0,0,0.4);">
+            OK
+        </button>
+    </div>
+</div>
     
 <div class="filtros-container">
     <div class="busca-grupo">
@@ -823,20 +848,10 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-// COMBINADO: Todas as funções do Firestore em uma única linha
-import { 
-    getFirestore, 
-    collection, 
-    query, 
-    orderBy, 
-    onSnapshot, 
-    doc, 
-    getDoc, 
-    setDoc, 
-    updateDoc, 
-    increment 
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    
+    import { 
+        getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, setDoc, updateDoc 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
     const firebaseConfig = {
         apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
         authDomain: "nuvem-de-essencias.firebaseapp.com",
@@ -849,10 +864,9 @@ import {
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     window.db = db;
-
     window.meusProdutos = [];
 
-    // --- CARREGAMENTO DE PRODUTOS ---
+    // --- CARREGAMENTO DE PRODUTOS (MANTIDO DO SEU ORIGINAL) ---
     const q = query(collection(db, "produtos"), orderBy("ordem", "asc"));
     onSnapshot(q, (snapshot) => {
         window.meusProdutos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -860,53 +874,66 @@ import {
         verificarLinkDireto();
     });
 
-    // --- RESGATE DE PONTOS (A FUNÇÃO QUE PRECISA ZERAR) ---
-window.aplicarDescontoPontos = async function() {
-    console.log("Iniciando resgate forçado...");
+    // --- RESGATE DE PONTOS (COM MODAL BONITO) ---
+    window.aplicarDescontoPontos = async function() {
+        const cpfSalvo = localStorage.getItem('cpfCliente');
+        const elementoValor = document.getElementById('valor-desconto-pwa');
+        if (!cpfSalvo || !window.db) return;
 
-    const cpfSalvo = localStorage.getItem('cpfCliente');
-    const elementoValor = document.getElementById('valor-desconto-pwa');
-    
-    if (!cpfSalvo || !window.db) {
-        alert("Erro: Sessão expirada. Por favor, recarregue a página.");
-        return;
-    }
+        const cpfLimpo = cpfSalvo.replace(/\D/g, '');
+        const valorNumerico = parseFloat(elementoValor.innerText.replace(',', '.'));
 
-    const cpfLimpo = cpfSalvo.replace(/\D/g, '');
-    const valorNumerico = parseFloat(elementoValor.innerText.replace(',', '.'));
+        try {
+            const clienteRef = doc(window.db, "clientes", cpfLimpo);
+            await updateDoc(clienteRef, { "pontos": 0 }); // Zera no Firebase
+            
+            localStorage.setItem('descontoAtivo', valorNumerico.toString());
 
-    try {
-        // Referência direta ao documento
-        const clienteRef = doc(window.db, "clientes", cpfLimpo);
-        
-        // --- LOGICA IGUAL AO PRODUTO: SOBREPOSIÇÃO TOTAL ---
-        // Usamos um objeto limpo para garantir que o Firebase ignore incrementos anteriores
-        await updateDoc(clienteRef, { 
-            "pontos": 0 
-        });
+            // Abre o modal de sucesso em vez do alert() antigo
+            document.getElementById('texto-sucesso-resgate').innerHTML = `Crédito de <b>R$ ${valorNumerico.toFixed(2).replace('.', ',')}</b> aplicado!`;
+            document.getElementById('modal-sucesso-resgate').style.display = 'flex';
 
-        // Grava o desconto para o checkout.js usar
-        localStorage.setItem('descontoAtivo', valorNumerico.toString());
-        
-        alert(`✨ Crédito de R$ ${valorNumerico.toFixed(2).replace('.', ',')} resgatado com sucesso!`);
-
-        // Fecha a sacola e atualiza visual
-        if (typeof renderizarSacola === 'function') {
-            renderizarSacola();
+            if (typeof renderizarSacola === 'function') renderizarSacola();
+        } catch (error) {
+            console.error("Erro no resgate:", error);
         }
+    };
 
-    } catch (error) {
-        console.error("Erro ao zerar no Firebase:", error);
-        alert("Erro ao comunicar com o servidor. Tente novamente.");
-    }
-};
-    // --- LOGIN MANUAL ---
-    window.abrirModalLogin = async function() {
-        const cpf = prompt("Digite seu CPF (apenas números) para acessar seu crédito:");
-        if (!cpf || cpf.length !== 11 || isNaN(cpf)) {
-            alert("Digite um CPF válido com 11 números.");
+    // --- NOVA FUNÇÃO: RECUPERAR PONTOS SE DESISTIR ---
+    window.cancelarResgate = async function() {
+        const cpf = localStorage.getItem('cpfCliente');
+        const valorDesconto = localStorage.getItem('descontoAtivo');
+        if (!cpf || !valorDesconto) return;
+
+        // Converte o valor de volta para pontos (R$ 1,00 = 50 pts)
+        const pontosParaDevolver = Math.round(parseFloat(valorDesconto) / 0.02);
+
+        try {
+            const clienteRef = doc(db, "clientes", cpf.replace(/\D/g, ''));
+            await updateDoc(clienteRef, { "pontos": pontosParaDevolver });
+            
+            localStorage.removeItem('descontoAtivo'); // Remove o desconto do carrinho
+            if (typeof renderizarSacola === 'function') renderizarSacola();
+            alert("Pontos devolvidos ao seu saldo! ✨");
+        } catch (e) {
+            console.error("Erro ao devolver pontos:", e);
+        }
+    };
+
+    // --- LOGIN COM MODAL (SUBSTITUI O PROMPT) ---
+    window.abrirModalLogin = () => {
+        document.getElementById('modal-cpf-fidelidade').style.display = 'flex';
+    };
+
+    window.confirmarCPFModal = async function() {
+        const input = document.getElementById('input-cpf-modal');
+        const cpf = input.value.replace(/\D/g, '');
+        
+        if (cpf.length !== 11) {
+            alert("Digite os 11 números do CPF.");
             return;
         }
+
         const clienteRef = doc(db, "clientes", cpf);
         try {
             const docSnap = await getDoc(clienteRef);
@@ -914,10 +941,11 @@ window.aplicarDescontoPontos = async function() {
                 await setDoc(clienteRef, { pontos: 0, cpf: cpf, dataCriacao: new Date().toISOString() });
             }
             ativarMonitoramento(cpf);
-        } catch (error) { console.error("Erro no login:", error); }
+            document.getElementById('modal-cpf-fidelidade').style.display = 'none';
+        } catch (e) { console.error(e); }
     };
 
-    // --- LOGIN AUTOMÁTICO E MONITORAMENTO ---
+    // --- MONITORAMENTO (MELHORADO COM OPÇÃO DE CANCELAR) ---
     function ativarMonitoramento(cpf) {
         localStorage.setItem('cpfCliente', cpf);
         const clienteRef = doc(db, "clientes", cpf);
@@ -925,19 +953,43 @@ window.aplicarDescontoPontos = async function() {
             if (docAtualizado.exists()) {
                 const dados = docAtualizado.data();
                 const container = document.getElementById('status-pontos-container');
-                if(container) container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
+                const descontoAtivo = localStorage.getItem('descontoAtivo');
+
+                if (container) {
+                    // Se ele já resgatou, mostra opção de cancelar
+                    if (dados.pontos === 0 && descontoAtivo) {
+                        container.innerHTML = `
+                            <div style="text-align: right;">
+                                <span style="color: #b89356; font-weight: bold; font-size: 13px;">✨ Crédito em Uso</span><br>
+                                <a href="javascript:void(0)" onclick="cancelarResgate()" style="color: #ff4444; font-size: 10px; text-decoration: underline;">Cancelar Resgate</a>
+                            </div>`;
+                    } else {
+                        container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
+                    }
+                }
                 
+                // Atualiza a área de desconto na sacola
                 const areaDesconto = document.getElementById('area-desconto-pontos');
                 if(areaDesconto) {
-                    areaDesconto.style.display = 'block';
-                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
+                    areaDesconto.style.display = dados.pontos > 0 ? 'block' : 'none';
+                    if(document.getElementById('label-pontos-disponiveis')) 
+                        document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
                     const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
-                    document.getElementById('valor-desconto-pwa').innerText = valorCredito;
+                    if(document.getElementById('valor-desconto-pwa')) 
+                        document.getElementById('valor-desconto-pwa').innerText = valorCredito;
                 }
             }
         });
     }
 
+    // --- EVENTOS DE CLIQUE PARA OS BOTÕES (EVITA O ERRO "NOT DEFINED") ---
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'btn-confirmar-cpf') confirmarCPFModal();
+        if (e.target.id === 'btn-fechar-cpf') document.getElementById('modal-cpf-fidelidade').style.display = 'none';
+        if (e.target.id === 'btn-ok-sucesso') document.getElementById('modal-sucesso-resgate').style.display = 'none';
+    });
+
+    // --- MANTIDO DO SEU ORIGINAL ---
     document.addEventListener('DOMContentLoaded', () => {
         const cpfSalvo = localStorage.getItem('cpfCliente');
         if (cpfSalvo && cpfSalvo.length === 11) ativarMonitoramento(cpfSalvo);
@@ -958,8 +1010,7 @@ window.aplicarDescontoPontos = async function() {
         }, 500);
         setTimeout(() => clearInterval(aguardar), 10000);
     }
-</script>    
-
+</script>
 
 
     
@@ -1675,6 +1726,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
