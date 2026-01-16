@@ -1706,31 +1706,19 @@ function finalizarWhatsApp() {
     </div>
 </footer>
 
-    <script>
-        // Faz o site virar App
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(() => console.log("App Nuvem de Essências carregado com sucesso!"))
-                .catch(err => console.log("Erro ao registrar App:", err));
-        }
-
-     // //////////////////////////////////////////////////
-// FUNÇÃO DE LOGIN ATUALIZADA PARA O HEADER
-function abrirModalLogin() {
-    const email = prompt("Digite seu e-mail para acessar seus pontos:");
-    if(email) {
-        const container = document.getElementById('status-pontos-container');
-        if(container) {
-            // Substitui o botão pelo saldo de pontos
-            container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 12px;">150 pts</span>`;
-            exibirAviso("Bem-vindo! Seus pontos foram atualizados.");
-        }
+   <script>
+    // Mantemos apenas o registro do Service Worker aqui
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/service-worker.js')
+            .then(() => console.log("App Nuvem de Essências carregado com sucesso!"))
+            .catch(err => console.log("Erro ao registrar App:", err));
     }
-}
-// //////////////////////////////////////////////////
-    </script>
+
+    
+</script>
 </body>
 </html>
+
 
 
 
