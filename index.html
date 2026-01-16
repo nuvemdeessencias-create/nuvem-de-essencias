@@ -764,6 +764,19 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         </div>
     </div>
 </div>
+
+    <div id="modal-sucesso-resgate" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+    <div style="background:#0d1b3e; border:2px solid #b89356; padding:30px; border-radius:20px; width:90%; max-width:350px; text-align:center; box-shadow:0 0 30px rgba(184,147,86,0.3);">
+        <div style="font-size: 50px; margin-bottom: 15px;">✨</div>
+        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:26px; margin-bottom:10px;">Resgate Concluído!</h2>
+        <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; margin-bottom:25px; line-height:1.4;">
+            Crédito de R$ 0,00 resgatado com sucesso!
+        </p>
+        <button onclick="fecharModalSucesso()" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+            OK
+        </button>
+    </div>
+</div>
     
 <div class="filtros-container">
     <div class="busca-grupo">
@@ -873,7 +886,7 @@ import {
         verificarLinkDireto();
     });
 
-    // --- RESGATE DE PONTOS (A FUNÇÃO QUE PRECISA ZERAR) ---
+// --- RESGATE DE PONTOS (A FUNÇÃO QUE PRECISA ZERAR) ---
 window.aplicarDescontoPontos = async function() {
     console.log("Iniciando resgate forçado...");
 
@@ -889,11 +902,9 @@ window.aplicarDescontoPontos = async function() {
     const valorNumerico = parseFloat(elementoValor.innerText.replace(',', '.'));
 
     try {
-        // Referência direta ao documento
         const clienteRef = doc(window.db, "clientes", cpfLimpo);
         
-        // --- LOGICA IGUAL AO PRODUTO: SOBREPOSIÇÃO TOTAL ---
-        // Usamos um objeto limpo para garantir que o Firebase ignore incrementos anteriores
+        // Zera os pontos no Firebase
         await updateDoc(clienteRef, { 
             "pontos": 0 
         });
@@ -901,7 +912,9 @@ window.aplicarDescontoPontos = async function() {
         // Grava o desconto para o checkout.js usar
         localStorage.setItem('descontoAtivo', valorNumerico.toString());
         
-        alert(`✨ Crédito de R$ ${valorNumerico.toFixed(2).replace('.', ',')} resgatado com sucesso!`);
+        // --- MUDANÇA AQUI: SUBSTITUÍMOS O ALERT PELO MODAL BONITO ---
+        const valorFormatado = valorNumerico.toFixed(2).replace('.', ',');
+        mostrarSucessoResgate(valorFormatado);
 
         // Fecha a sacola e atualiza visual
         if (typeof renderizarSacola === 'function') {
@@ -913,6 +926,25 @@ window.aplicarDescontoPontos = async function() {
         alert("Erro ao comunicar com o servidor. Tente novamente.");
     }
 };
+
+// Função para exibir o Modal de Sucesso (Certifique-se de ter o HTML no seu código)
+function mostrarSucessoResgate(valor) {
+    const textoModal = document.getElementById('texto-sucesso-resgate');
+    if (textoModal) {
+        textoModal.innerHTML = `Crédito de <strong>R$ ${valor}</strong> resgatado com sucesso!`;
+    }
+    const modal = document.getElementById('modal-sucesso-resgate');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function fecharModalSucesso() {
+    const modal = document.getElementById('modal-sucesso-resgate');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
     // --- LOGIN MANUAL ---
   window.abrirModalLogin = function() {
     document.getElementById('modal-cpf-fidelidade').style.display = 'flex';
@@ -1725,6 +1757,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
