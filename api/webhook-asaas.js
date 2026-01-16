@@ -24,7 +24,6 @@ export default async function handler(req, res) {
         let pedidoRef = doc(db, "pedidos", refLimpa);
         let pedidoSnap = await getDoc(pedidoRef);
 
-        // Tentativa de busca alternativa (caso o ID esteja sem o prefixo PED-)
         if (!pedidoSnap.exists() && refLimpa.includes('-')) {
             const apenasNumeros = refLimpa.split('-')[1];
             pedidoRef = doc(db, "pedidos", apenasNumeros);
@@ -59,11 +58,10 @@ export default async function handler(req, res) {
                 }
             }
 
-            // A.2 - FIDELIDADE (Soma pontos ignorando o frete)
+            // A.2 - FIDELIDADE (TRAVA DE SEGURANÇA CONTRA PONTOS INFINITOS)
             if (dadosPedido.cpf) {
-                const valorPagoAsaas = Number(payment.value);
-                const valorDoFrete = Number(dadosPedido.valorFrete || 0);
-                const pontosNovos = Math.max(0, Math.floor(valorPagoAsaas - valorDoFrete));
+                // Usamos a base calculada na FINALIZAÇÃO (Valor - Frete - Descontos usados)
+                const pontosNovos = Math.max(0, Math.floor(dadosPedido.baseCalculoPontos || 0));
 
                 if (pontosNovos > 0) {
                     const clienteRef = doc(db, "clientes", dadosPedido.cpf.replace(/\D/g, ''));
