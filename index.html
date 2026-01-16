@@ -804,7 +804,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; margin-bottom:25px; line-height:1.4;">
             Crédito de R$ 0,00 resgatado com sucesso!
         </p>
-     <button id="btn-ok-sucesso-final" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; font-size:13px; text-transform:uppercase;">
+    <button id="botao-fechar-trava" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
     OK
 </button>
     </div>
@@ -1048,22 +1048,21 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         setTimeout(() => clearInterval(aguardar), 5000);
     }
 
-// Este código ignora erros de "not defined" e fecha o modal pelo ID
+// FORÇAR O FECHAMENTO PELO ID - RESOLVE O TRAVAMENTO
 document.addEventListener('click', function(e) {
-    if (e.target && e.target.id === 'btn-ok-sucesso-final') {
-        console.log("Clique detectado! Fechando modal...");
-        const modal = document.getElementById('modal-sucesso-resgate');
-        if (modal) {
-            modal.style.display = 'none'; // Esconde a camada de bloqueio
+    if (e.target && e.target.id === 'botao-fechar-trava') {
+        const modalSucesso = document.getElementById('modal-sucesso-resgate');
+        if (modalSucesso) {
+            modalSucesso.style.display = 'none'; // Destrava a tela removendo o modal
+            console.log("Modal fechado e tela liberada.");
         }
         
-        // Atualiza a sacola para aplicar o desconto de R$ 4,76 visualmente
+        // Atualiza a sacola para garantir que o desconto de R$ 4,76 apareça
         if (typeof renderizarSacola === 'function') {
             renderizarSacola();
         }
     }
 });
-
     
 </script>
 
@@ -1782,6 +1781,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
