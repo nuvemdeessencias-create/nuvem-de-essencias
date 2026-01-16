@@ -804,7 +804,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; margin-bottom:25px; line-height:1.4;">
             Crédito de R$ 0,00 resgatado com sucesso!
         </p>
-        <button onclick="window.fecharModalSucesso()" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+       <button id="btn-fechar-sucesso" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
     OK
 </button>
     </div>
@@ -1051,6 +1051,24 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         }, 500);
         setTimeout(() => clearInterval(aguardar), 5000);
     }
+
+// Listener direto para evitar erros de "not defined"
+document.addEventListener('click', function(e) {
+    if (e.target && e.target.id === 'btn-fechar-sucesso') {
+        console.log("Botão OK detectado pelo ID. Fechando...");
+        const modal = document.getElementById('modal-sucesso-resgate');
+        if (modal) {
+            modal.style.display = 'none'; // Fecha o modal
+        }
+        
+        // Atualiza a sacola para mostrar o desconto aplicado
+        if (typeof renderizarSacola === 'function') {
+            renderizarSacola();
+        }
+    }
+});
+
+    
 </script>
 
 
@@ -1768,6 +1786,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
