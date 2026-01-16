@@ -1004,15 +1004,15 @@ function mostrarSucessoResgate(valor) {
     }
 }
 
-// FORÇAR A FUNÇÃO A SER ENCONTRADA PELO BOTÃO
+// Altere para este formato exato:
 window.fecharModalSucesso = function() {
+    console.log("Botão OK clicado, fechando modal...");
     const modal = document.getElementById('modal-sucesso-resgate');
     if (modal) {
-        modal.style.display = 'none'; // Esconde o modal e libera a tela
+        modal.style.display = 'none';
     }
-
-    // Como você já testou e viu que o estorno funciona com F5, 
-    // podemos forçar uma atualização da sacola aqui para garantir:
+    
+    // Atualiza a sacola para garantir que o desconto apareça
     if (typeof renderizarSacola === 'function') {
         renderizarSacola();
     }
@@ -1854,6 +1854,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
