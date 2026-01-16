@@ -49,9 +49,9 @@ export default async function handler(req, res) {
         try {
             const itensLista = JSON.parse(metadata.itensPedido || "[]");
             const cpfLimpo = String(metadata.cpfFidelidade).replace(/\D/g, '');
+            const pontosParaSubtrair = parseInt(metadata.pontosUtilizados || 0);
 
             // SE O CLIENTE USOU PONTOS, SUBTRAI DO SALDO DELE AGORA
-            const pontosParaSubtrair = parseInt(metadata.pontosUtilizados || 0);
             if (pontosParaSubtrair > 0) {
                 const clienteRef = doc(db, "clientes", cpfLimpo);
                 await updateDoc(clienteRef, {
@@ -59,13 +59,20 @@ export default async function handler(req, res) {
                 });
             }
 
-            // SALVA O PEDIDO COM O FRETE E OS PONTOS RESGATADOS
+            // LÓGICA DE PROTEÇÃO: Calcula a base para novos pontos (Valor Pago - Frete)
+            // Isso evita que o cliente ganhe pontos sobre o valor que ele pagou usando pontos.
+            const valorPagoAsaas = Number(pagamento.valor);
+            const valorDoFrete = Number(metadata.valorFrete || 0);
+            const baseCalculo = Math.max(0, valorPagoAsaas - valorDoFrete);
+
+            // SALVA O PEDIDO NO FIREBASE
             await setDoc(doc(db, "pedidos", idPedidoGerado), {
                 cpf: cpfLimpo,
                 itens: itensLista,
-                valorTotal: pagamento.valor,
-                valorFrete: metadata.valorFrete || 0,
-                pontosResgatadosNoCheckout: pontosParaSubtrair, // CAMPO ESSENCIAL PARA DEVOLUÇÃO AUTOMÁTICA
+                valorTotal: valorPagoAsaas,
+                valorFrete: valorDoFrete,
+                pontosResgatadosNoCheckout: pontosParaSubtrair,
+                baseCalculoPontos: baseCalculo, // CAMPO PARA O WEBHOOK LER E NÃO GERAR PONTOS INFINITOS
                 status: "pendente",
                 dataCriacao: new Date().toISOString()
             });
