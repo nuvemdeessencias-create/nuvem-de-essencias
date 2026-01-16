@@ -132,7 +132,6 @@ function coletarDadosCheckout(metodoPagamento, event) {
         return;
     }
 
-    // Ajuste específico para o PIX se houver desconto de fidelidade
     let valorFinalFinal = valorTotalBase;
     if (metodoPagamento === 'PIX') {
         valorFinalFinal = (dadosCarrinho.valorTotalPix + freteSeguro) - descontoFidelidade;
@@ -148,16 +147,13 @@ function coletarDadosCheckout(metodoPagamento, event) {
         ml: item.ml
     }));
 
-   const checkoutData = {
-    cliente: {
-        nome: nomeInput,
-        email: document.getElementById('cliente_email').value,
-        cpfCnpj: cpfLimpo, // Isso aqui o Asaas usa para o cadastro
-        telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
-    },
-
-   // ADICIONE ESTA LINHA ABAIXO (Fora do objeto cliente)
-    externalReference: cpfLimpo, // <--- O Webhook vai ler daqui para dar os pontos    
+    const checkoutData = {
+        cliente: {
+            nome: nomeInput,
+            email: document.getElementById('cliente_email').value,
+            cpfCnpj: cpfLimpo,
+            telefone: document.getElementById('cliente_celular').value.replace(/\D/g, '')
+        },
         endereco: {
             cep: cepNoCadastro,
             rua: document.getElementById('end_rua').value,
@@ -173,8 +169,9 @@ function coletarDadosCheckout(metodoPagamento, event) {
         },
         metadata: { 
             itensPedido: JSON.stringify(resumoItensEstoque),
-            descontoFidelidadeAplicado: descontoFidelidade.toString(),
-            cpfFidelidade: localStorage.getItem('cpfCliente') || cpfLimpo
+            cpfFidelidade: cpfLimpo,
+            valorFrete: freteSeguro, // ENVIANDO O VALOR DO FRETE
+            pontosUtilizados: descontoFidelidade // ENVIANDO OS PONTOS USADOS
         }
     };
 
@@ -186,9 +183,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
-            // Limpa o desconto usado para não repetir na próxima compra
             localStorage.removeItem('descontoAtivo');
-            
             window.open(data.invoiceUrl, "_blank");
             
             const modalPrincipal = document.getElementById('modalCheckout');
