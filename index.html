@@ -822,6 +822,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    window.db = db;
 
     window.meusProdutos = [];
 
@@ -835,40 +836,41 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
     // --- RESGATE DE PONTOS (A FUNÇÃO QUE PRECISA ZERAR) ---
     window.aplicarDescontoPontos = async function() {
-        const cpfSalvo = localStorage.getItem('cpfCliente');
-        const elementoValor = document.getElementById('valor-desconto-pwa');
-        const labelPontos = document.getElementById('label-pontos-disponiveis');
+    window.aplicarDescontoPontos = async function() {
+    const cpfSalvo = localStorage.getItem('cpfCliente');
+    const labelPontos = document.getElementById('label-pontos-disponiveis');
+    const elementoValor = document.getElementById('valor-desconto-pwa');
 
-        if (!cpfSalvo || !elementoValor) {
-            alert("Erro: CPF não encontrado. Faça login novamente.");
-            return;
-        }
+    // Usamos o db que tornamos global lá em cima
+    if (!window.db || !cpfSalvo) {
+        alert("Erro de conexão. Por favor, recarregue a página.");
+        return;
+    }
 
-        const valorDescStr = elementoValor.innerText.replace(',', '.');
-        const valorNumerico = parseFloat(valorDescStr);
-        const cpfLimpo = cpfSalvo.replace(/\D/g, '');
+    const cpfLimpo = cpfSalvo.replace(/\D/g, '');
+    const valorDescStr = elementoValor.innerText.replace(',', '.');
+    const valorNumerico = parseFloat(valorDescStr);
 
-        try {
-            console.log("Tentando zerar pontos para o CPF:", cpfLimpo);
-            const clienteRef = doc(db, "clientes", cpfLimpo);
-            
-            // 1. ZERA NO FIREBASE PRIMEIRO (O mais importante)
-            await updateDoc(clienteRef, { pontos: 0 });
-            
-            // 2. SALVA O DESCONTO NO NAVEGADOR
-            localStorage.setItem('descontoAtivo', valorNumerico.toString());
-            
-            // 3. AVISA O USUÁRIO
-            alert(`✨ Crédito de R$ ${valorDescStr.replace('.', ',')} resgatado com sucesso!`);
+    try {
+        // IMPORTANTE: Importamos o 'doc' e 'updateDoc' de dentro do window se necessário
+        // Mas o ideal é que esta função esteja DENTRO do script module
+        const { doc, updateDoc } from await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+        
+        const clienteRef = doc(window.db, "clientes", cpfLimpo);
+        
+        // Zera o saldo no Firebase antes de qualquer outra coisa
+        await updateDoc(clienteRef, { pontos: 0 });
 
-            // 4. ATUALIZA A TELA
-            if (typeof renderizarSacola === 'function') renderizarSacola();
+        localStorage.setItem('descontoAtivo', valorNumerico.toString());
+        alert(`✨ Crédito de R$ ${valorDescStr.replace('.', ',')} resgatado com sucesso!`);
+        
+        if (typeof renderizarSacola === 'function') renderizarSacola();
 
-        } catch (error) {
-            console.error("ERRO CRÍTICO AO ZERAR PONTOS:", error);
-            alert("Não foi possível processar o resgate. Verifique sua conexão com a internet.");
-        }
-    };
+    } catch (error) {
+        console.error("Erro ao zerar no Firebase:", error);
+        alert("Falha técnica ao zerar pontos. Verifique sua conexão.");
+    }
+};
 
     // --- LOGIN MANUAL ---
     window.abrirModalLogin = async function() {
@@ -1645,6 +1647,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
