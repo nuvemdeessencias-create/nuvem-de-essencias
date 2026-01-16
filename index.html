@@ -9,6 +9,7 @@
   <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="#b89356">
     <link rel="apple-touch-icon" href="img/icon-192.png">
+    <link href="https://fonts.googleapis.com/css2?family=Playball&display=swap" rel="stylesheet">
     
     <style>
 /* 1. CONFIGURAÇÕES GERAIS E CORES */
@@ -650,30 +651,30 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
     <div class="header-actions" style="display: flex; align-items: center; gap: 10px;">
     
-<div id="status-pontos-container" style="display: flex; align-items: center; gap: 15px; margin-right: 15px;">
+<div id="status-pontos-container" style="display: flex; align-items: center; gap: 12px; margin-right: 15px;">
     <span id="msg-incentivo-login" style="
-        color: #00aaff; 
-        font-size: 16px; 
-        font-weight: 600; 
-        font-family: 'Dancing Script', 'Cursive', sans-serif;
-        font-style: italic;
+        color: #00b4ff; 
+        font-family: 'Playball', cursive;
+        font-size: 19px; 
+        font-weight: 400; 
         white-space: nowrap; 
         text-shadow: 
-            -1px -1px 0 #b89356,  
-             1px -1px 0 #b89356,
-            -1px  1px 0 #b89356, 
-             1px  1px 0 #b89356;
+            -1.5px -1.5px 0 #b89356,  
+             1.5px -1.5px 0 #b89356,
+            -1.5px  1.5px 0 #b89356, 
+             1.5px  1.5px 0 #b89356,
+             2px 2px 3px rgba(0,0,0,0.5); /* Sombra para efeito 3D */
         letter-spacing: 0.5px;
+        filter: drop-shadow(0px 0px 1px #b89356);
     ">
         Identifique-se e ganhe pontos nesta compra ✨
     </span>
 
     <button class="btn-login-header" onclick="abrirModalLogin()" 
-            style="background: #b89356; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 10px; white-space: nowrap; text-transform: uppercase; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">
+            style="background: #b89356; color: white; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 10px; white-space: nowrap; text-transform: uppercase;">
         ENTRAR
     </button>
 </div>
-
     <div class="cart-icon-container" onclick="toggleCart()" style="position: relative; cursor: pointer; background: #b89356; padding: 5px 12px; border-radius: 15px; display: flex; align-items: center;">
         <span style="font-size: 18px;">🛍️</span>
         <span id="cart-count" style="color: black; font-weight: bold; margin-left: 5px;">0</span>
@@ -1678,6 +1679,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
