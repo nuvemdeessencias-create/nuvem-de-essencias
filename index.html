@@ -764,16 +764,22 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     </div>
 </div>
 
-<div id="MODAL_SUCESSO_FINAL" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:10001; align-items:center; justify-content:center; backdrop-filter: blur(8px);">
-    <div style="background:#0d1b3e; border:2px solid #b89356; padding:40px 30px; border-radius:25px; width:90%; max-width:350px; text-align:center;">
-        <div style="font-size: 60px; margin-bottom: 20px;">✨</div>
-        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:30px; margin-bottom:15px;">Crédito Resgatado!</h2>
-        <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; line-height:1.5; margin-bottom:30px;">
-            Seu desconto foi aplicado com sucesso.
+<div id="modal-sucesso-resgate" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10001; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
+    <div style="background:#0d1b3e; border:2px solid #b89356; padding:40px 30px; border-radius:25px; width:90%; max-width:350px; text-align:center; position: relative;">
+        
+        <div onclick="window.fecharTudoAgora()" style="position: absolute; top: 15px; right: 20px; color: #b89356; font-size: 24px; font-weight: bold; cursor: pointer; padding: 5px;">
+            &times;
+        </div>
+
+        <div style="font-size: 50px; margin-bottom: 15px;">✨</div>
+        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:28px; margin-bottom:10px;">Resgate Concluído!</h2>
+        <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; margin-bottom:25px;">
+            Crédito resgatado com sucesso!
         </p>
-        <button onclick="window.fecharTudoAgora()" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold;">
-    OK
-</button>
+        
+        <button onclick="window.fecharTudoAgora()" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; text-transform:uppercase;">
+            OK
+        </button>
     </div>
 </div>
     
@@ -1014,26 +1020,31 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
 // FUNÇÃO PARA DESTRAVAR A TELA NA MARRA
 window.fecharTudoAgora = function() {
-    console.log("Fechando modal e sacola...");
-    
-    // 1. Esconde o modal pelo ID que está no seu print
-    const modal = document.getElementById('modal-sucesso-resgate');
-    if (modal) {
-        modal.style.display = 'none';
-    }
+    console.log("Forçando fechamento total...");
 
-    // 2. Fecha a sacola (cart-modal) para liberar a tela
+    // 1. Esconde o modal de sucesso
+    const modalSucesso = document.getElementById('modal-sucesso-resgate');
+    if (modalSucesso) modalSucesso.style.display = 'none';
+
+    // 2. Esconde o modal de CPF (caso esteja aberto)
+    const modalCPF = document.getElementById('modal-cpf-fidelidade');
+    if (modalCPF) modalCPF.style.display = 'none';
+
+    // 3. Fecha a sacola (removendo a classe e movendo para fora da tela)
     const sacola = document.getElementById('cart-modal');
     if (sacola) {
         sacola.classList.remove('active');
         sacola.style.right = '-100%';
     }
 
-    // 3. Remove qualquer fundo escuro travado
+    // 4. Remove o fundo escuro (overlay) se ele existir
     const overlay = document.querySelector('.cart-overlay');
     if (overlay) overlay.style.display = 'none';
 
-    console.log("Pronto! Tela liberada.");
+    // 5. Libera o scroll da página (caso tenha sido travado)
+    document.body.style.overflow = 'auto';
+
+    console.log("Sistema destravado.");
 };
     
 </script>
@@ -1752,6 +1763,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
