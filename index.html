@@ -923,46 +923,46 @@ window.aplicarDescontoPontos = async function() {
     const labelPontos = document.getElementById('label-pontos-disponiveis');
     const cpfSalvo = localStorage.getItem('cpfCliente');
 
-    if (!elementoValor || !labelPontos || !cpfSalvo) {
-        console.error("Dados insuficientes para resgate");
+    // Se não tiver o CPF, não temos como zerar no banco
+    if (!cpfSalvo || !labelPontos) {
+        alert("Erro: Faça login novamente para resgatar.");
         return;
     }
 
     const valorDescStr = elementoValor.innerText.replace(',', '.');
     const valorNumerico = parseFloat(valorDescStr);
-    
-    // Pegamos o CPF limpo para garantir que o caminho no Firebase esteja correto
+    const pontosParaSubtrair = parseInt(labelPontos.innerText);
+
+    // Garante que o CPF usado no Firebase seja apenas números (ex: 12345678900)
     const cpfLimpo = cpfSalvo.replace(/\D/g, '');
 
     if (valorNumerico <= 0) {
-        alert("Você não possui crédito suficiente para resgate.");
+        alert("Você não possui crédito suficiente.");
         return;
     }
 
     try {
-        // --- LÓGICA IGUAL À DO PRODUTO (OVERWRITE) ---
+        // --- LÓGICA DE SOBREPOSIÇÃO (IGUAL AO PRODUTO) ---
+        // Acessamos o documento do cliente e forçamos o saldo para 0
         const clienteRef = doc(db, "clientes", cpfLimpo);
-        
-        // Em vez de usar increment, forçamos o valor para 0 no banco de dados
         await updateDoc(clienteRef, {
             pontos: 0 
         });
 
-        // Salva localmente para o checkout usar
+        // 2. Salva o valor do desconto para o checkout subtrair do total
         localStorage.setItem('descontoAtivo', valorNumerico);
-        localStorage.setItem('pontosUtilizadosNestaCompra', labelPontos.innerText);
         
         alert(`✨ Crédito de R$ ${valorDescStr.replace('.', ',')} resgatado com sucesso!`);
 
-        // Fecha a sacola ou atualiza a renderização
+        // 3. Atualiza a sacola visualmente
         if (typeof renderizarSacola === 'function') {
             renderizarSacola(); 
         }
     } catch (error) {
-        console.error("Erro ao zerar pontos no Firebase:", error);
-        alert("Erro técnico: Não foi possível baixar os pontos no servidor.");
+        console.error("Erro ao zerar pontos:", error);
+        alert("Erro técnico ao baixar pontos no servidor.");
     }
-};      
+};
    // --- SÓ DEIXE ESTE BLOCO DE LOGIN AUTOMÁTICO ---
 document.addEventListener('DOMContentLoaded', () => {
     const cpfSalvo = localStorage.getItem('cpfCliente');
@@ -1723,6 +1723,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
