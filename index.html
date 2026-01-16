@@ -807,9 +807,9 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 <script src="promocoes.js"></script>
 <script src="checkout.js"></script>
 
-  <script type="module">
+<script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, setDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
@@ -827,85 +827,76 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
     // --- CARREGAMENTO DE PRODUTOS ---
     const q = query(collection(db, "produtos"), orderBy("ordem", "asc"));
-    
     onSnapshot(q, (snapshot) => {
-        window.meusProdutos = snapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-
-        console.log("Produtos carregados:", window.meusProdutos.length);
-        
-        if (typeof carregarProdutos === "function") {
-            carregarProdutos(window.meusProdutos);
-        }
+        window.meusProdutos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        if (typeof carregarProdutos === "function") carregarProdutos(window.meusProdutos);
         verificarLinkDireto();
     });
 
-window.abrirModalLogin = async function() {
-    const cpf = prompt("Digite seu CPF (apenas números) para acessar seu crédito:");
-    
-    if (!cpf || cpf.length !== 11 || isNaN(cpf)) {
-        alert("Digite um CPF válido com 11 números.");
-        return;
-    }
+    // --- RESGATE DE PONTOS (A FUNÇÃO QUE PRECISA ZERAR) ---
+    window.aplicarDescontoPontos = async function() {
+        const cpfSalvo = localStorage.getItem('cpfCliente');
+        const elementoValor = document.getElementById('valor-desconto-pwa');
+        const labelPontos = document.getElementById('label-pontos-disponiveis');
 
-    const clienteRef = doc(db, "clientes", cpf);
-
-    try {
-        const docSnap = await getDoc(clienteRef);
-        if (!docSnap.exists()) {
-            await setDoc(clienteRef, { pontos: 0, cpf: cpf, dataCriacao: new Date().toISOString() });
+        if (!cpfSalvo || !elementoValor) {
+            alert("Erro: CPF não encontrado. Faça login novamente.");
+            return;
         }
 
-        // --- MONITORAMENTO EM TEMPO REAL ATIVADO ---
+        const valorDescStr = elementoValor.innerText.replace(',', '.');
+        const valorNumerico = parseFloat(valorDescStr);
+        const cpfLimpo = cpfSalvo.replace(/\D/g, '');
+
+        try {
+            console.log("Tentando zerar pontos para o CPF:", cpfLimpo);
+            const clienteRef = doc(db, "clientes", cpfLimpo);
+            
+            // 1. ZERA NO FIREBASE PRIMEIRO (O mais importante)
+            await updateDoc(clienteRef, { pontos: 0 });
+            
+            // 2. SALVA O DESCONTO NO NAVEGADOR
+            localStorage.setItem('descontoAtivo', valorNumerico.toString());
+            
+            // 3. AVISA O USUÁRIO
+            alert(`✨ Crédito de R$ ${valorDescStr.replace('.', ',')} resgatado com sucesso!`);
+
+            // 4. ATUALIZA A TELA
+            if (typeof renderizarSacola === 'function') renderizarSacola();
+
+        } catch (error) {
+            console.error("ERRO CRÍTICO AO ZERAR PONTOS:", error);
+            alert("Não foi possível processar o resgate. Verifique sua conexão com a internet.");
+        }
+    };
+
+    // --- LOGIN MANUAL ---
+    window.abrirModalLogin = async function() {
+        const cpf = prompt("Digite seu CPF (apenas números) para acessar seu crédito:");
+        if (!cpf || cpf.length !== 11 || isNaN(cpf)) {
+            alert("Digite um CPF válido com 11 números.");
+            return;
+        }
+        const clienteRef = doc(db, "clientes", cpf);
+        try {
+            const docSnap = await getDoc(clienteRef);
+            if (!docSnap.exists()) {
+                await setDoc(clienteRef, { pontos: 0, cpf: cpf, dataCriacao: new Date().toISOString() });
+            }
+            ativarMonitoramento(cpf);
+        } catch (error) { console.error("Erro no login:", error); }
+    };
+
+    // --- LOGIN AUTOMÁTICO E MONITORAMENTO ---
+    function ativarMonitoramento(cpf) {
+        localStorage.setItem('cpfCliente', cpf);
+        const clienteRef = doc(db, "clientes", cpf);
         onSnapshot(clienteRef, (docAtualizado) => {
             if (docAtualizado.exists()) {
                 const dados = docAtualizado.data();
-                localStorage.setItem('cpfCliente', cpf);
-
-                // Atualiza o saldo de 500 pts no topo instantaneamente
                 const container = document.getElementById('status-pontos-container');
                 if(container) container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
                 
-                // Atualiza os dados de crédito (2%) na sacola
-                const areaDesconto = document.getElementById('area-desconto-pontos');
-                if(areaDesconto) {
-                    areaDesconto.style.display = 'block';
-                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
-                    
-                    const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
-                    document.getElementById('valor-desconto-pwa').innerText = valorCredito;
-                }
-            }
-        });
-    } catch (error) {
-        console.error("Erro no sistema:", error);
-    }
-};
-
-// --- FUNÇÃO PARA MANTER O CLIENTE LOGADO AO RECARREGAR A PÁGINA ---
-document.addEventListener('DOMContentLoaded', () => {
-    const cpfSalvo = localStorage.getItem('cpfCliente');
-    
-    // Se existir um CPF salvo, ele ativa o monitoramento de pontos na hora
-    if (cpfSalvo && cpfSalvo.length === 11) {
-        console.log("Cliente reconhecido: ativando pontos em tempo real...");
-        
-        // Chamamos a lógica de monitoramento sem pedir o prompt de novo
-        const clienteRef = doc(db, "clientes", cpfSalvo);
-        
-        onSnapshot(clienteRef, (docAtualizado) => {
-            if (docAtualizado.exists()) {
-                const dados = docAtualizado.data();
-                
-                // Atualiza o visor de 500 pts no topo
-                const container = document.getElementById('status-pontos-container');
-                if(container) {
-                    container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
-                }
-                
-                // Garante que a área de resgate na sacola apareça
                 const areaDesconto = document.getElementById('area-desconto-pontos');
                 if(areaDesconto) {
                     areaDesconto.style.display = 'block';
@@ -916,101 +907,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-});
 
-window.aplicarDescontoPontos = async function() {
-    const elementoValor = document.getElementById('valor-desconto-pwa');
-    const labelPontos = document.getElementById('label-pontos-disponiveis');
-    const cpfSalvo = localStorage.getItem('cpfCliente');
+    document.addEventListener('DOMContentLoaded', () => {
+        const cpfSalvo = localStorage.getItem('cpfCliente');
+        if (cpfSalvo && cpfSalvo.length === 11) ativarMonitoramento(cpfSalvo);
+    });
 
-    // Se não tiver o CPF, não temos como zerar no banco
-    if (!cpfSalvo || !labelPontos) {
-        alert("Erro: Faça login novamente para resgatar.");
-        return;
-    }
-
-    const valorDescStr = elementoValor.innerText.replace(',', '.');
-    const valorNumerico = parseFloat(valorDescStr);
-    const pontosParaSubtrair = parseInt(labelPontos.innerText);
-
-    // Garante que o CPF usado no Firebase seja apenas números (ex: 12345678900)
-    const cpfLimpo = cpfSalvo.replace(/\D/g, '');
-
-    if (valorNumerico <= 0) {
-        alert("Você não possui crédito suficiente.");
-        return;
-    }
-
-    try {
-        // --- LÓGICA DE SOBREPOSIÇÃO (IGUAL AO PRODUTO) ---
-        // Acessamos o documento do cliente e forçamos o saldo para 0
-        const clienteRef = doc(db, "clientes", cpfLimpo);
-        await updateDoc(clienteRef, {
-            pontos: 0 
-        });
-
-        // 2. Salva o valor do desconto para o checkout subtrair do total
-        localStorage.setItem('descontoAtivo', valorNumerico);
-        
-        alert(`✨ Crédito de R$ ${valorDescStr.replace('.', ',')} resgatado com sucesso!`);
-
-        // 3. Atualiza a sacola visualmente
-        if (typeof renderizarSacola === 'function') {
-            renderizarSacola(); 
-        }
-    } catch (error) {
-        console.error("Erro ao zerar pontos:", error);
-        alert("Erro técnico ao baixar pontos no servidor.");
-    }
-};
-   // --- SÓ DEIXE ESTE BLOCO DE LOGIN AUTOMÁTICO ---
-document.addEventListener('DOMContentLoaded', () => {
-    const cpfSalvo = localStorage.getItem('cpfCliente');
-    
-    if (cpfSalvo && cpfSalvo.length === 11) {
-        console.log("Recuperando sessão para o CPF:", cpfSalvo);
-        const clienteRef = doc(db, "clientes", cpfSalvo);
-        
-        onSnapshot(clienteRef, (docAtualizado) => {
-            if (docAtualizado.exists()) {
-                const dados = docAtualizado.data();
-                const container = document.getElementById('status-pontos-container');
-                if(container) {
-                    container.innerHTML = `<span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span>`;
-                }
-                const areaDesconto = document.getElementById('area-desconto-pontos');
-                if(areaDesconto) {
-                    areaDesconto.style.display = 'block';
-                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
-                    const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
-                    document.getElementById('valor-desconto-pwa').innerText = valorCredito;
-                }
+    function verificarLinkDireto() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const pDoLink = urlParams.get('p');
+        if (!pDoLink) return;
+        const aguardar = setInterval(() => {
+            if (window.meusProdutos && window.meusProdutos.length > 0) {
+                const produtoEncontrado = window.meusProdutos.find(item => {
+                    const nomeURL = item.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, '-');
+                    return nomeURL === pDoLink.toLowerCase();
+                });
+                if (produtoEncontrado) { clearInterval(aguardar); abrirDetalhes(produtoEncontrado); }
             }
-        });
+        }, 500);
+        setTimeout(() => clearInterval(aguardar), 10000);
     }
-});
-
-// Mantém apenas a função de link direto que você já tinha
-function verificarLinkDireto() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const pDoLink = urlParams.get('p');
-    if (!pDoLink) return;
-    const aguardar = setInterval(() => {
-        if (window.meusProdutos && window.meusProdutos.length > 0) {
-            const produtoEncontrado = window.meusProdutos.find(item => {
-                const nomeURL = item.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().replace(/\s+/g, '-');
-                return nomeURL === pDoLink.toLowerCase();
-            });
-            if (produtoEncontrado) {
-                clearInterval(aguardar);
-                abrirDetalhes(produtoEncontrado);
-            }
-        }
-    }, 500);
-    setTimeout(() => clearInterval(aguardar), 10000);
-}
-      
 </script>    
+
+
+
+    
 <script>
 function exibirAviso(mensagem, tipo = 'info') {
     const antigo = document.querySelector('.aviso-nuvem');
@@ -1723,6 +1645,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
