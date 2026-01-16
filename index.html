@@ -1048,16 +1048,16 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         setTimeout(() => clearInterval(aguardar), 5000);
     }
 
-// Listener direto para evitar erros de "not defined"
+// Este código ignora erros de "not defined" e fecha o modal pelo ID
 document.addEventListener('click', function(e) {
-    if (e.target && e.target.id === 'btn-fechar-sucesso') {
-        console.log("Botão OK detectado pelo ID. Fechando...");
+    if (e.target && e.target.id === 'btn-ok-sucesso-final') {
+        console.log("Clique detectado! Fechando modal...");
         const modal = document.getElementById('modal-sucesso-resgate');
         if (modal) {
-            modal.style.display = 'none'; // Fecha o modal
+            modal.style.display = 'none'; // Esconde a camada de bloqueio
         }
         
-        // Atualiza a sacola para mostrar o desconto aplicado
+        // Atualiza a sacola para aplicar o desconto de R$ 4,76 visualmente
         if (typeof renderizarSacola === 'function') {
             renderizarSacola();
         }
@@ -1782,6 +1782,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
