@@ -804,9 +804,9 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; margin-bottom:25px; line-height:1.4;">
             Crédito de R$ 0,00 resgatado com sucesso!
         </p>
-        <button onclick="fecharModalSucesso()" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
-            OK
-        </button>
+        <button onclick="window.fecharModalSucesso()" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:1px; box-shadow:0 4px 10px rgba(0,0,0,0.3);">
+    OK
+</button>
     </div>
 </div>
     
@@ -1004,19 +1004,15 @@ function mostrarSucessoResgate(valor) {
     }
 }
 
-// FORÇAR A FUNÇÃO A SER GLOBAL
+// FORÇAR A FUNÇÃO A SER ENCONTRADA PELO BOTÃO
 window.fecharModalSucesso = function() {
-    console.log("Tentando fechar o modal..."); // Isso aparecerá no console (F12)
     const modal = document.getElementById('modal-sucesso-resgate');
-    
     if (modal) {
-        modal.style.display = 'none';
-        console.log("Modal fechado com sucesso!");
-    } else {
-        console.error("Erro: Elemento 'modal-sucesso-resgate' não encontrado.");
+        modal.style.display = 'none'; // Esconde o modal e libera a tela
     }
 
-    // Opcional: Atualiza a sacola para mostrar o valor novo após fechar
+    // Como você já testou e viu que o estorno funciona com F5, 
+    // podemos forçar uma atualização da sacola aqui para garantir:
     if (typeof renderizarSacola === 'function') {
         renderizarSacola();
     }
@@ -1858,6 +1854,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
