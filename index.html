@@ -971,7 +971,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
                                 🔒 <span style="text-decoration: underline;">Sair</span>
                             </a>
                         </div>`;
-                } else {
+               } else {
                     container.innerHTML = `
                         <div style="text-align: right; line-height: 1.4;">
                             <span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span><br>
@@ -979,8 +979,16 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
                                 🔒 <span style="text-decoration: underline;">Sair / Trocar CPF</span>
                             </a>
                         </div>`;
-                }
-            }
+                } // <--- Esta fecha o "else"
+
+                // O EFEITO VAI AQUI (Ainda dentro do if container)
+                container.style.transition = "background-color 0.5s ease";
+                container.style.backgroundColor = "#1a2a4a";
+                setTimeout(() => {
+                    container.style.backgroundColor = "#0d1b3e";
+                }, 1000);
+
+            } // <--- ESTA É A CHAVE QUE FECHA O "if (container)"
             
             const areaDesconto = document.getElementById('area-desconto-pontos');
             if(areaDesconto) {
@@ -996,7 +1004,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 }
     // --- EVENTOS DE CLIQUE PARA OS BOTÕES (EVITA O ERRO "NOT DEFINED") ---
     document.addEventListener('click', function(e) {
-        if (e.target.id === 'btn-confirmar-cpf') confirmarCPFModal();
+       if (e.target.id === 'btn-confirmar-cpf') window.confirmarCPFModal();
         if (e.target.id === 'btn-fechar-cpf') document.getElementById('modal-cpf-fidelidade').style.display = 'none';
         if (e.target.id === 'btn-ok-sucesso') document.getElementById('modal-sucesso-resgate').style.display = 'none';
     });
@@ -1779,6 +1787,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
