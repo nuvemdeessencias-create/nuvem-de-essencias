@@ -1053,6 +1053,28 @@ window.fecharTudoAgora = function() {
     console.log("Modais fechados. Sacola preservada.");
 };
 
+    // FORÇAR A ABERTURA DA SACOLA (Correção de Travamento)
+window.toggleCart = function() {
+    const sacola = document.getElementById('cart-modal');
+    const overlay = document.querySelector('.cart-overlay');
+    
+    if (!sacola) return;
+
+    // Se a sacola estiver escondida, nós mostramos
+    if (!sacola.classList.contains('active')) {
+        sacola.style.right = "0px"; // Limpa o -100% anterior
+        sacola.classList.add('active');
+        if (overlay) overlay.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Trava o scroll do fundo
+    } else {
+        // Se já estiver aberta, nós fechamos
+        sacola.style.right = "-100%";
+        sacola.classList.remove('active');
+        if (overlay) overlay.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Libera o scroll
+    }
+};
+    
 // FUNÇÃO PARA DESLOGAR (LIMPAR CPF)
 window.deslogarCliente = function() {
     if (confirm("Deseja realmente sair deste CPF?")) {
@@ -1779,6 +1801,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
