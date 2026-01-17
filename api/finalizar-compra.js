@@ -1,94 +1,115 @@
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getFirestore, doc, setDoc, updateDoc, increment } from "firebase/firestore";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyA9_9_NfnhbUnKUrXHUw8f0IFptCjXRf6M",
+    authDomain: "nuvem-de-essencias.firebaseapp.com",
+    projectId: "nuvem-de-essencias",
+    storageBucket: "nuvem-de-essencias.firebasestorage.app",
+    messagingSenderId: "929136751660",
+    appId: "1:929136751660:web:408079a808e0918ede0d89"
+};
+
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const db = getFirestore(app);
+
 export default async function handler(req, res) {
-    // Bloqueia métodos que não sejam POST
     if (req.method !== 'POST') return res.status(405).send('Método não permitido');
 
-    // 1. CONFIGURAÇÃO DE AMBIENTE (DINÂMICA)
-    // O VERCEL_ENV identifica se o site é o oficial ou um link de teste/preview
     const isProduction = process.env.VERCEL_ENV === 'production';
+    const ASAAS_API_KEY = isProduction ? process.env.ASAAS_API_KEY_PROD : process.env.ASAAS_API_KEY_SANDBOX;
+    const ASAAS_URL = isProduction ? 'https://www.asaas.com/api/v3' : 'https://sandbox.asaas.com/api/v3';
 
-    // Puxa as chaves renomeadas conforme sua configuração na Vercel
-    const ASAAS_API_KEY = isProduction 
-        ? process.env.ASAAS_API_KEY_PROD  
-        : process.env.ASAAS_API_KEY_SANDBOX;
-
-    // Define a URL do Asaas (Real ou Sandbox)
-    const ASAAS_URL = isProduction 
-        ? 'https://www.asaas.com/api/v3'       
-        : 'https://sandbox.asaas.com/api/v3';
-
-    const { cliente, endereco, pagamento } = req.body;
+    const { cliente, endereco, pagamento, metadata } = req.body;
 
     try {
-        // 2. LÓGICA DE URL PARA O BOTÃO "IR PARA O SITE"
-        // Captura dinamicamente o link atual para evitar erro de "URL válida"
         const referer = req.headers.referer || "https://nuvem-de-essencias.vercel.app";
         const urlDinamica = referer.split('?')[0];
 
-        // 3. CRIAR OU LOCALIZAR CLIENTE NO ASAAS
+        // 1. Criar cliente no Asaas
         const customerRes = await fetch(`${ASAAS_URL}/customers`, {
             method: 'POST',
-            headers: { 
-                'access_token': ASAAS_API_KEY, 
-                'Content-Type': 'application/json'
-            },
+            headers: { 'access_token': ASAAS_API_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 name: cliente.nome,
                 email: cliente.email,
                 cpfCnpj: cliente.cpfCnpj,
                 mobilePhone: cliente.telefone,
-                notificationDisabled: true
+                notificationDisabled: false
             })
         });
 
         const customerData = await customerRes.json();
-        
-        // Se o Asaas retornar erro na criação do cliente (ex: CPF inválido)
-        if (customerData.errors) {
-            return res.status(400).json({ error: customerData.errors[0].description });
-        }
+        if (customerData.errors) return res.status(400).json({ error: customerData.errors[0].description });
 
-        // 4. MONTAR CORPO DO PAGAMENTO (CONFORME DOCUMENTAÇÃO ASAAS V3)
+        // 2. Definir a Referência Externa (ID do Pedido)
+        const idPedidoGerado = `PED-${Date.now()}`;
+
+        // --- SALVAR NA COLEÇÃO "pedidos" E ABATER PONTOS ---
+        try {
+            const itensLista = JSON.parse(metadata.itensPedido || "[]");
+            const cpfLimpo = String(metadata.cpfFidelidade).replace(/\D/g, '');
+            const pontosParaSubtrair = parseInt(metadata.pontosUtilizados || 0);
+
+            // SE O CLIENTE USOU PONTOS, SUBTRAI DO SALDO DELE AGORA
+            if (pontosParaSubtrair > 0) {
+                const clienteRef = doc(db, "clientes", cpfLimpo);
+                await updateDoc(clienteRef, {
+                    pontos: increment(-pontosParaSubtrair)
+                });
+            }
+
+            // LÓGICA DE PROTEÇÃO: Calcula a base para novos pontos (Valor Pago - Frete)
+            // Isso evita que o cliente ganhe pontos sobre o valor que ele pagou usando pontos.
+            const valorPagoAsaas = Number(pagamento.valor);
+            const valorDoFrete = Number(metadata.valorFrete || 0);
+            const baseCalculo = Math.max(0, valorPagoAsaas - valorDoFrete);
+
+            // SALVA O PEDIDO NO FIREBASE
+            await setDoc(doc(db, "pedidos", idPedidoGerado), {
+                cpf: cpfLimpo,
+                itens: itensLista,
+                valorTotal: valorPagoAsaas,
+                valorFrete: valorDoFrete,
+                pontosResgatadosNoCheckout: pontosParaSubtrair,
+                baseCalculoPontos: baseCalculo, // CAMPO PARA O WEBHOOK LER E NÃO GERAR PONTOS INFINITOS
+                status: "pendente",
+                dataCriacao: new Date().toISOString()
+            });
+            
+            console.log("Pedido processado no Firebase:", idPedidoGerado);
+        } catch (firebaseErr) {
+            console.error("Erro no Firebase (Pedido/Pontos):", firebaseErr.message);
+        }
+        // -------------------------------------------------------------
+
         const paymentBody = {
             customer: customerData.id,
             billingType: pagamento.metodo === 'PIX' ? 'PIX' : 'CREDIT_CARD',
-            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Vencimento em 24h
             value: pagamento.valor,
+            dueDate: new Date(Date.now() + 86400000).toISOString().split('T')[0],
             description: "Pedido Nuvem de Essências",
-            externalReference: `PED-${Date.now()}`,
-            
-            // Configura o retorno para a sua loja após o pagamento
-            callback: {
-                successUrl: urlDinamica, 
-                autoRedirect: false      // Exibe o botão "Ir para o site" no checkout do Asaas
-            }
+            externalReference: idPedidoGerado,
+            metadata: metadata,
+            callback: { successUrl: urlDinamica, autoRedirect: false }
         };
 
-        // 5. ENVIAR REQUISIÇÃO DE PAGAMENTO PARA O ASAAS
         const paymentRes = await fetch(`${ASAAS_URL}/payments`, {
             method: 'POST',
-            headers: { 
-                'access_token': ASAAS_API_KEY, 
-                'Content-Type': 'application/json'
-            },
+            headers: { 'access_token': ASAAS_API_KEY, 'Content-Type': 'application/json' },
             body: JSON.stringify(paymentBody)
         });
 
         const paymentData = await paymentRes.json();
+        if (paymentData.errors) return res.status(400).json({ error: paymentData.errors[0].description });
 
-        // Se o Asaas retornar erro no pagamento
-        if (paymentData.errors) {
-            return res.status(400).json({ error: paymentData.errors[0].description });
-        }
-
-        // 6. RETORNO DE SUCESSO PARA O CHECKOUT.JS
         return res.status(200).json({
             success: true,
-            invoiceUrl: paymentData.invoiceUrl // URL da fatura que será aberta em nova aba
+            invoiceUrl: paymentData.invoiceUrl 
         });
 
     } catch (error) {
         console.error("Erro crítico na API:", error);
-        return res.status(500).json({ error: "Erro interno no servidor ao processar o pagamento." });
+        return res.status(500).json({ error: "Erro interno no servidor." });
     }
 }
-
