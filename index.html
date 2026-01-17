@@ -952,7 +952,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     };
 
     // --- MONITORAMENTO (MELHORADO COM OPÇÃO DE CANCELAR) ---
-  window.ativarMonitoramento = function(cpf) {
+ window.ativarMonitoramento = function(cpf) {
     localStorage.setItem('cpfCliente', cpf);
     const clienteRef = doc(db, "clientes", cpf);
     onSnapshot(clienteRef, (docAtualizado) => {
@@ -964,16 +964,20 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
             if (container) {
                 if (dados.pontos === 0 && descontoAtivo) {
                     container.innerHTML = `
-                        <div style="text-align: right; line-height: 1.2;">
+                        <div style="text-align: right; line-height: 1.4;">
                             <span style="color: #b89356; font-weight: bold; font-size: 13px;">✨ Crédito em Uso</span><br>
-                            <a href="javascript:void(0)" onclick="window.cancelarResgate()" style="color: #ff4444; font-size: 10px; text-decoration: underline; margin-right: 8px;">Cancelar Resgate</a>
-                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; text-decoration: none;">🚪 Sair</a>
+                            <a href="javascript:void(0)" onclick="window.cancelarResgate()" style="color: #ff4444; font-size: 11px; text-decoration: underline; margin-right: 8px;">Cancelar Resgate</a>
+                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 11px; text-decoration: none;">
+                                🔒 <span style="text-decoration: underline;">Sair</span>
+                            </a>
                         </div>`;
                 } else {
                     container.innerHTML = `
-                        <div style="text-align: right; line-height: 1.2;">
+                        <div style="text-align: right; line-height: 1.4;">
                             <span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span><br>
-                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; text-decoration: none; border: 1px solid #444; padding: 2px 5px; border-radius: 4px; display: inline-block; margin-top: 4px;">🚪 Sair / Trocar CPF</a>
+                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 11px; text-decoration: none;">
+                                🔒 <span style="text-decoration: underline;">Sair / Trocar CPF</span>
+                            </a>
                         </div>`;
                 }
             }
@@ -1775,6 +1779,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
