@@ -123,11 +123,17 @@
     </div>
 </div>
 
-  <div id="admin-secao-fidelidade" style="background: #0d1b3e; padding: 20px; border-radius: 15px; border: 1px solid #b89356; margin-top: 20px; color: #fff;">
+ <div id="admin-secao-fidelidade" style="background: #0d1b3e; padding: 20px; border-radius: 15px; border: 1px solid #b89356; margin-top: 20px; color: #fff;">
     <h3 style="color: #d4af37; margin-bottom: 15px;">Gerenciar Pontos de Clientes</h3>
     
+    <div style="margin-bottom: 20px;">
+        <label style="font-size: 12px; color: #b89356;">BUSCAR POR CPF:</label>
+        <input type="text" id="busca-cpf-fidelidade" placeholder="Digite o CPF para filtrar..." 
+               style="width: 100%; margin-top: 5px; border-color: #b89356;" oninput="window.filtrarTabelaFidelidade()">
+    </div>
+    
     <div style="overflow-x: auto;">
-        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+        <table id="tabela-fidelidade-completa" style="width: 100%; border-collapse: collapse; text-align: left;">
             <thead>
                 <tr style="border-bottom: 1px solid #b89356; color: #b89356;">
                     <th style="padding: 10px;">CPF</th>
@@ -236,7 +242,21 @@ window.zerarPontosAdmin = async function(cpf) {
         }
     }
 };
+// FUNÇÃO PARA FILTRAR A TABELA EM TEMPO REAL
+window.filtrarTabelaFidelidade = function() {
+    const termo = document.getElementById('busca-cpf-fidelidade').value.toLowerCase();
+    const linhas = document.querySelectorAll('#tabela-clientes-fidelidade tr');
 
+    linhas.forEach(linha => {
+        const textoCpf = linha.cells[0].textContent.toLowerCase();
+        // Verifica se o CPF na linha contém o que foi digitado no campo de busca
+        if (textoCpf.includes(termo)) {
+            linha.style.display = "";
+        } else {
+            linha.style.display = "none";
+        }
+    });
+};
     // Tornar funções globais para os botões HTML funcionarem
     window.addVariacao = function(dados = null) {
         const container = document.getElementById('containerVariacoes');
