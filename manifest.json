@@ -1,0 +1,21 @@
+{
+  "name": "Nuvem de Essências",
+  "short_name": "NuvemEssencias",
+  "description": "Sinta o aroma dos sonhos e realce sua beleza!",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020b1f",
+  "theme_color": "#b89356",
+  "icons": [
+    {
+      "src": "img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "img/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
