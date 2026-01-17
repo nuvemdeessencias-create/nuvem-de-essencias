@@ -1032,33 +1032,25 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     }
 
 
-// FUNÇÃO PARA DESTRAVAR A TELA NA MARRA
+// FUNÇÃO PARA FECHAR APENAS OS MODAIS DE PONTOS
 window.fecharTudoAgora = function() {
-    console.log("Forçando fechamento total...");
+    console.log("Fechando modais de fidelidade...");
 
     // 1. Esconde o modal de sucesso
     const modalSucesso = document.getElementById('modal-sucesso-resgate');
     if (modalSucesso) modalSucesso.style.display = 'none';
 
-    // 2. Esconde o modal de CPF (caso esteja aberto)
+    // 2. Esconde o modal de CPF
     const modalCPF = document.getElementById('modal-cpf-fidelidade');
     if (modalCPF) modalCPF.style.display = 'none';
 
-    // 3. Fecha a sacola (removendo a classe e movendo para fora da tela)
-    const sacola = document.getElementById('cart-modal');
-    if (sacola) {
-        sacola.classList.remove('active');
-        sacola.style.right = '-100%';
-    }
-
-    // 4. Remove o fundo escuro (overlay) se ele existir
-    const overlay = document.querySelector('.cart-overlay');
-    if (overlay) overlay.style.display = 'none';
-
-    // 5. Libera o scroll da página (caso tenha sido travado)
+    // 3. Libera o scroll da página
     document.body.style.overflow = 'auto';
 
-    console.log("Sistema destravado.");
+    // NOTA: Removemos as linhas que mexiam no 'cart-modal' e na 'cart-overlay'
+    // Assim, a sacola não é mais "travada" por essa função.
+    
+    console.log("Modais fechados. Sacola preservada.");
 };
 
 // FUNÇÃO PARA DESLOGAR (LIMPAR CPF)
@@ -1787,6 +1779,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
