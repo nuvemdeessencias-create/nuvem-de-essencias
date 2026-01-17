@@ -123,6 +123,24 @@
     </div>
 </div>
 
+  <div id="admin-secao-fidelidade" style="background: #0d1b3e; padding: 20px; border-radius: 15px; border: 1px solid #b89356; margin-top: 20px; color: #fff;">
+    <h3 style="color: #d4af37; margin-bottom: 15px;">Gerenciar Pontos de Clientes</h3>
+    
+    <div style="overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 1px solid #b89356; color: #b89356;">
+                    <th style="padding: 10px;">CPF</th>
+                    <th style="padding: 10px;">Pontos Atuais</th>
+                    <th style="padding: 10px;">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-clientes-fidelidade">
+                </tbody>
+        </table>
+    </div>
+</div>  
+    
 <script type="module">
     // --- Autenticação Simples ---
     const chaveMestra = "RWExNTIwMjQ="; 
@@ -139,7 +157,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
         getFirestore, collection, addDoc, getDocs, deleteDoc, 
-        doc, updateDoc, getDoc, query, orderBy 
+        doc, updateDoc, getDoc, query, orderBy, onSnapshot 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -151,8 +169,41 @@
         appId: "1:929136751660:web:408079a808e0918ede0d89"
     };
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+   const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Adicione esta linha abaixo para que os botões de EDITAR e ZERAR funcionem:
+window.db = db;
+
+// --- ABAIXO VOCÊ COLA AS NOVAS FUNÇÕES ---
+
+function carregarListaFidelidade() {
+    const q = collection(db, "clientes"); // Note que tirei o 'window.' pois o 'db' está logo acima
+    onSnapshot(q, (snapshot) => {
+        const tbody = document.getElementById('tabela-clientes-fidelidade');
+        if (!tbody) return;
+        tbody.innerHTML = ""; 
+        snapshot.forEach((docSnap) => {
+            const cliente = docSnap.data();
+            const cpf = docSnap.id;
+            const pontos = cliente.pontos || 0;
+            const tr = document.createElement('tr');
+            tr.style.borderBottom = "1px solid rgba(184, 147, 86, 0.3)";
+            tr.innerHTML = `
+                <td style="padding: 10px;">${cpf}</td>
+                <td style="padding: 10px; font-weight: bold; color: #d4af37;">✨ ${pontos} pts</td>
+                <td style="padding: 10px;">
+                    <button onclick="window.editarPontosAdmin('${cpf}', ${pontos})" style="background: #b89356; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 5px;">Editar</button>
+                    <button onclick="window.zerarPontosAdmin('${cpf}')" style="background: #ff4444; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Zerar</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    });
+}
+
+// Chame a função para ela começar a trabalhar assim que a página abrir
+carregarListaFidelidade();
 
     // Tornar funções globais para os botões HTML funcionarem
     window.addVariacao = function(dados = null) {
@@ -281,6 +332,9 @@
     // Inicialização
     addVariacao();
     carregarProdutos();
+
+
+    
 </script>
 </body>
 </html>
