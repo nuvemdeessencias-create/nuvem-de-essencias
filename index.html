@@ -952,7 +952,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     };
 
     // --- MONITORAMENTO (MELHORADO COM OPÇÃO DE CANCELAR) ---
-  window.ativarMonitoramento = function(cpf) {
+window.ativarMonitoramento = function(cpf) {
     localStorage.setItem('cpfCliente', cpf);
     const clienteRef = doc(db, "clientes", cpf);
     onSnapshot(clienteRef, (docAtualizado) => {
@@ -964,20 +964,32 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
             if (container) {
                 if (dados.pontos === 0 && descontoAtivo) {
                     container.innerHTML = `
-                        <div style="text-align: right;">
+                        <div style="text-align: right; line-height: 1.2;">
                             <span style="color: #b89356; font-weight: bold; font-size: 13px;">✨ Crédito em Uso</span><br>
                             <a href="javascript:void(0)" onclick="window.cancelarResgate()" style="color: #ff4444; font-size: 10px; text-decoration: underline; margin-right: 8px;">Cancelar Resgate</a>
-                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; text-decoration: underline;">Sair</a>
+                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; text-decoration: none;">🚪 Sair</a>
                         </div>`;
                 } else {
                     container.innerHTML = `
-                        <div style="text-align: right;">
+                        <div style="text-align: right; line-height: 1.2;">
                             <span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span><br>
-                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; text-decoration: underline;">Sair / Trocar CPF</a>
+                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; text-decoration: none; border: 1px solid #444; padding: 2px 5px; border-radius: 4px; display: inline-block; margin-top: 4px;">🚪 Sair / Trocar CPF</a>
                         </div>`;
                 }
             }
             
+            const areaDesconto = document.getElementById('area-desconto-pontos');
+            if(areaDesconto) {
+                areaDesconto.style.display = dados.pontos > 0 ? 'block' : 'none';
+                if(document.getElementById('label-pontos-disponiveis')) 
+                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
+                const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
+                if(document.getElementById('valor-desconto-pwa')) 
+                    document.getElementById('valor-desconto-pwa').innerText = valorCredito;
+            }
+        }
+    });
+}
             const areaDesconto = document.getElementById('area-desconto-pontos');
             if(areaDesconto) {
                 areaDesconto.style.display = dados.pontos > 0 ? 'block' : 'none';
@@ -1052,10 +1064,11 @@ window.fecharTudoAgora = function() {
 
 // FUNÇÃO PARA DESLOGAR (LIMPAR CPF)
 window.deslogarCliente = function() {
-    if (confirm("Deseja sair e remover seu CPF deste navegador?")) {
+    if (confirm("Deseja realmente sair deste CPF?")) {
         localStorage.removeItem('cpfCliente');
         localStorage.removeItem('descontoAtivo');
-        window.location.reload(); // Recarrega para limpar tudo da tela
+        console.log("Sessão encerrada pelo usuário.");
+        window.location.reload(); // Recarrega para voltar à estaca zero
     }
 };
     
@@ -1775,6 +1788,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
