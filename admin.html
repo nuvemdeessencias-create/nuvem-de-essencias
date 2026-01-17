@@ -205,6 +205,38 @@ function carregarListaFidelidade() {
 // Chame a função para ela começar a trabalhar assim que a página abrir
 carregarListaFidelidade();
 
+// --- FUNÇÕES DE GERENCIAMENTO DE PONTOS ---
+
+window.editarPontosAdmin = async function(cpf, pontosAtuais) {
+    const novoValor = prompt(`CPF: ${cpf}\nPontos atuais: ${pontosAtuais}\n\nDigite o NOVO valor total de pontos:`, pontosAtuais);
+    
+    if (novoValor !== null && novoValor !== "") {
+        try {
+            // Usamos window.db para garantir que ele encontre a referência
+            const clienteRef = doc(window.db, "clientes", cpf);
+            await updateDoc(clienteRef, { pontos: parseInt(novoValor) });
+            alert("✅ Pontos atualizados com sucesso!");
+            // O onSnapshot cuidará de atualizar a tabela automaticamente
+        } catch (e) {
+            console.error("Erro ao editar:", e);
+            alert("❌ Erro ao atualizar pontos.");
+        }
+    }
+};
+
+window.zerarPontosAdmin = async function(cpf) {
+    if (confirm(`⚠️ Tem certeza que deseja ZERAR os pontos do CPF ${cpf}?`)) {
+        try {
+            const clienteRef = doc(window.db, "clientes", cpf);
+            await updateDoc(clienteRef, { pontos: 0 });
+            alert("✨ Pontos zerados!");
+        } catch (e) {
+            console.error("Erro ao zerar:", e);
+            alert("❌ Erro ao zerar.");
+        }
+    }
+};
+
     // Tornar funções globais para os botões HTML funcionarem
     window.addVariacao = function(dados = null) {
         const container = document.getElementById('containerVariacoes');
