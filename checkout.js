@@ -180,42 +180,36 @@ function coletarDadosCheckout(metodoPagamento, event) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(checkoutData)
     })
-    .then(async res => {
+   .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
             
-            // --- INÍCIO DO AJUSTE DE FIDELIDADE ---
+            // 1. Atualiza a interface da loja (Lupa/Saldo) antes de abrir o link
             const cpfS = localStorage.getItem('cpfCliente');
-            // Força a interface a atualizar para o estado dourado imediatamente
             if(cpfS && typeof window.ativarMonitoramento === 'function') {
                 window.ativarMonitoramento(cpfS.replace(/\D/g, ''));
             }
+            
+            // 2. Limpa o marcador de desconto do navegador
             localStorage.removeItem('descontoAtivo');
-            // --- FIM DO AJUSTE ---
 
+            // 3. Abre o link do Asaas
             window.open(data.invoiceUrl, "_blank");
             
+            // 4. Mostra o modal de sucesso que você já tem
             const modalPrincipal = document.getElementById('modalCheckout');
             if (modalPrincipal) {
                 modalPrincipal.innerHTML = `
                     <div style="display: flex; align-items: center; justify-content: center; width: 100%; height: 100vh; background: rgba(2, 11, 31, 0.95); position: fixed; top: 0; left: 0; z-index: 9999;">
-                        <div style="background: #020b1f; color: white; padding: 40px 30px; border-radius: 15px; border: 1px solid #b89356; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                        <div style="background: #020b1f; color: white; padding: 40px 30px; border-radius: 15px; border: 1px solid #b89356; max-width: 400px; width: 90%; text-align: center;">
                             <div style="font-size: 60px; color: #b89356; margin-bottom: 20px;">✔️</div>
-                            <h2 style="color: #b89356; font-family: serif; margin-bottom: 15px; font-size: 24px;">PEDIDO GERADO</h2>
-                            <p style="font-size: 15px; color: #d1d1d1; line-height: 1.6; margin-bottom: 30px;">
-                                A página de pagamento foi aberta em uma nova guia.<br>
-                                <span style="color: #b89356;">Pague e baixe seu comprovante por lá.</span>
-                            </p>
-                            <div style="border-top: 1px solid #b8935633; padding-top: 25px;">
-                                <p style="font-size: 13px; font-weight: bold; margin-bottom: 15px;">JÁ FINALIZOU O PAGAMENTO?</p>
-                                <button onclick="voltarParaLoja()"  
-                                        style="background: #b89356; color: white; border: none; padding: 16px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer;">
-                                    LIMPAR SACOLA E VOLTAR
-                                </button>
-                            </div>
+                            <h2 style="color: #b89356; font-family: serif; margin-bottom: 15px;">PEDIDO GERADO</h2>
+                            <p style="color: #d1d1d1; margin-bottom: 30px;">O pagamento foi aberto em uma nova guia.</p>
+                            <button onclick="voltarParaLoja()" style="background: #b89356; color: white; border: none; padding: 16px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer;">
+                                LIMPAR SACOLA E VOLTAR
+                            </button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
             }
         } else {
             throw new Error(data.error || "Erro no processamento");
@@ -229,27 +223,23 @@ function coletarDadosCheckout(metodoPagamento, event) {
     });
 
 async function voltarParaLoja() {
-    // --- TRAVA DE SEGURANÇA: LIMPEZA DEFINITIVA NO FIREBASE ---
     const cpf = localStorage.getItem('cpfCliente');
+    
+    // Tenta limpar o Firebase antes de recarregar
     if (cpf && window.db) {
         try {
             const cpfLimpo = cpf.replace(/\D/g, '');
+            // Usamos a referência global do Firebase para não dar erro de importação
             const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
             const clienteRef = doc(window.db, "clientes", cpfLimpo);
             
-            // Zera o pendente para ele não conseguir "cancelar" e recuperar pontos
             await updateDoc(clienteRef, { "resgatePendente": 0 });
-            
-            console.log("Fidelidade: Pontos baixados com sucesso no encerramento.");
         } catch (e) {
-            console.error("Erro ao baixar pontos:", e);
+            console.error("Erro na limpeza de segurança:", e);
         }
     }
 
-    // Limpezas de Navegador
     localStorage.removeItem('sacola');
     localStorage.removeItem('descontoAtivo');
-    
-    // Recarrega a loja limpa
     window.location.reload();
 }
