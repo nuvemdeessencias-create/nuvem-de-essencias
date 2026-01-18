@@ -881,6 +881,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     });
 
   // --- RESGATE DE PONTOS (VERSÃO PROTEGIDA) ---
+// --- RESGATE DE PONTOS (CORRIGIDO) ---
 window.aplicarDescontoPontos = async function() {
     const cpfSalvo = localStorage.getItem('cpfCliente');
     const elementoValor = document.getElementById('valor-desconto-pwa');
@@ -897,14 +898,19 @@ window.aplicarDescontoPontos = async function() {
         return;
     }
 
-   try {
-       const clienteRef = doc(db, "clientes", cpfLimpo);
-await updateDoc(clienteRef, { 
-    "resgatePendente": 0 // Zera o pendente para ele não conseguir "cancelar" e ganhar pontos de volta
-});
-localStorage.removeItem('descontoAtivo');
+    try {
+        const clienteRef = doc(db, "clientes", cpfLimpo);
 
-        // --- PASSO 3: INTERFACE ---
+        // PASSO 1: Move os pontos do saldo para o PENDENTE
+        await updateDoc(clienteRef, { 
+            "pontos": 0, 
+            "resgatePendente": pontosAtuais 
+        });
+
+        // PASSO 2: Ativa o controle no navegador
+        localStorage.setItem('descontoAtivo', 'true');
+
+        // PASSO 3: INTERFACE
         const msgSucesso = document.getElementById('texto-sucesso-resgate');
         if (msgSucesso) {
             msgSucesso.innerHTML = `Crédito de <b>R$ ${valorNumerico.toFixed(2).replace('.', ',')}</b> aplicado!`;
@@ -913,15 +919,15 @@ localStorage.removeItem('descontoAtivo');
         const modal = document.getElementById('modal-sucesso-resgate');
         if (modal) modal.style.display = 'flex';
 
+        // Atualiza a sacola para aplicar o desconto no TOTAL
         if (typeof renderizarSacola === 'function') renderizarSacola();
         
     } catch (error) {
         console.error("Erro no resgate:", error);
-        localStorage.removeItem('descontoAtivo');
         alert("Erro ao processar resgate.");
     }
 };
-
+    
     // --- NOVA FUNÇÃO: RECUPERAR PONTOS SE DESISTIR ---
 window.cancelarResgate = async function() {
     const cpf = localStorage.getItem('cpfCliente');
@@ -1697,14 +1703,47 @@ function selecionarFrete(nome, valor, elemento) {
     elemento.style.borderColor = '#b89356';
     atualizarSacola();
 }
-function finalizarWhatsApp() {
+async function finalizarWhatsApp() {
     if (sacola.length === 0) return alert("Sacola vazia!");
+
+    // --- TRAVA DE SEGURANÇA: BAIXA DOS PONTOS ---
+    const cpf = localStorage.getItem('cpfCliente');
+    if (cpf) {
+        try {
+            const cpfLimpo = cpf.replace(/\D/g, '');
+            const clienteRef = doc(db, "clientes", cpfLimpo);
+            
+            // Bloqueia permanentemente o uso desses pontos no Firebase
+            await updateDoc(clienteRef, { "resgatePendente": 0 });
+            
+            // Remove o controle do navegador para a interface voltar ao normal
+            localStorage.removeItem('descontoAtivo');
+            
+            // Atualiza a Lupa e o texto lateral para "Saldo" imediatamente
+            if (typeof window.ativarMonitoramento === 'function') {
+                window.ativarMonitoramento(cpfLimpo);
+            }
+            
+            console.log("Segurança: Resgate pendente zerado com sucesso.");
+        } catch (e) {
+            console.error("Erro ao baixar pontos no checkout:", e);
+            // Seguimos com o pedido mesmo se houver erro para não perder a venda
+        }
+    }
+
+    // --- MONTAGEM DA MENSAGEM ---
     let texto = "*PEDIDO NUVEM DE ESSÊNCIAS*\n\n";
     sacola.forEach(i => {
         texto += `• *${i.nome}* (${i.ml})\n  Qtd: ${i.qtd} | ${i.tipoPagamento}\n  Valor: R$ ${formatarMoeda(i.preco * i.qtd)}\n\n`;
     });
+
     texto += valorFreteGlobal > 0 ? `*Frete:* ${nomeFreteGlobal} (R$ ${formatarMoeda(valorFreteGlobal)})\n` : `*Frete:* A combinar\n`;
-    texto += `*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
+    
+    // Pega o valor total atualizado que está no HTML
+    const valorTotal = document.getElementById('cart-total').innerText;
+    texto += `*TOTAL: R$ ${valorTotal}*`;
+
+    // --- ABERTURA DO WHATSAPP ---
     window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
 }
 
@@ -1860,6 +1899,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
