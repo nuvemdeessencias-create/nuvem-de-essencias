@@ -680,12 +680,20 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
 <div id="modal-cpf-fidelidade" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
     <div style="background:#0d1b3e; border:2px solid #b89356; padding:30px; border-radius:20px; width:90%; max-width:400px; text-align:center; box-shadow:0 0 30px rgba(184,147,86,0.4);">
-        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:28px; margin-bottom:10px;">Programa de Pontos ✨</h2>
-        <p style="color:#fff; font-size:14px; margin-bottom:15px;">Digite seu CPF para consultar:</p>
-        <input type="tel" id="input-cpf-modal" placeholder="000.000.000-00" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #b89356; background: rgba(255,255,255,0.1); color: #fff; text-align: center; font-size: 18px; outline: none;">
-        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
-            <button id="btn-fechar-cpf" style="background:transparent; color:#fff; border:1px solid #fff; padding:10px 20px; border-radius:20px; cursor:pointer; font-size:12px; text-transform:uppercase;">Cancelar</button>
-            <button id="btn-confirmar-cpf" onclick="window.confirmarCPFModal()" style="background:#b89356; color:#fff; border:none; padding:10px 25px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:12px; text-transform:uppercase;">Acessar Créditos</button>
+        
+        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:28px; margin-bottom:10px; text-align: center;">Programa de Pontos ✨</h2>
+        <p style="color:#fff; font-size:14px; margin-bottom:15px; text-align: center;">Digite seu CPF para consultar:</p>
+        
+        <input type="tel" id="input-cpf-modal" placeholder="000.000.000-00" 
+            style="width: 100%; max-width: 300px; padding: 12px; margin: 0 auto 20px auto; display: block; border-radius: 10px; border: 1px solid #b89356; background: rgba(255,255,255,0.1); color: #fff; text-align: center; font-size: 18px; outline: none; box-sizing: border-box;">
+        
+        <div style="display: flex; gap: 10px; justify-content: center; align-items: center; width: 100%;">
+            <button id="btn-fechar-cpf" style="background:transparent; color:#fff; border:1px solid #fff; padding:10px 20px; border-radius:20px; cursor:pointer; font-size:12px; text-transform:uppercase; min-width: 100px;">
+                Cancelar
+            </button>
+            <button id="btn-confirmar-cpf" onclick="window.confirmarCPFModal()" style="background:#b89356; color:#fff; border:none; padding:10px 20px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:12px; text-transform:uppercase; min-width: 150px;">
+                Acessar Créditos
+            </button>
         </div>
     </div>
 </div>
@@ -1731,6 +1739,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
