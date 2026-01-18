@@ -175,7 +175,7 @@ function coletarDadosCheckout(metodoPagamento, event) {
         }
     };
 
-    fetch('/api/finalizar-compra', {
+   fetch('/api/finalizar-compra', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(checkoutData)
@@ -183,7 +183,16 @@ function coletarDadosCheckout(metodoPagamento, event) {
     .then(async res => {
         const data = await res.json();
         if (res.ok && data.invoiceUrl) {
+            
+            // --- INÍCIO DO AJUSTE DE FIDELIDADE ---
+            const cpfS = localStorage.getItem('cpfCliente');
+            // Força a interface a atualizar para o estado dourado imediatamente
+            if(cpfS && typeof window.ativarMonitoramento === 'function') {
+                window.ativarMonitoramento(cpfS.replace(/\D/g, ''));
+            }
             localStorage.removeItem('descontoAtivo');
+            // --- FIM DO AJUSTE ---
+
             window.open(data.invoiceUrl, "_blank");
             
             const modalPrincipal = document.getElementById('modalCheckout');
@@ -218,7 +227,6 @@ function coletarDadosCheckout(metodoPagamento, event) {
         btnAcao.disabled = false;
         parcelaConfirmada = false;
     });
-}
 
 async function voltarParaLoja() {
     // --- TRAVA DE SEGURANÇA: LIMPEZA DEFINITIVA NO FIREBASE ---
