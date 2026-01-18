@@ -975,6 +975,7 @@ window.aplicarDescontoPontos = async function() {
     };
 
     // --- MONITORAMENTO (MELHORADO COM OPÇÃO DE CANCELAR) ---
+// --- MONITORAMENTO (VERSÃO FINAL SEM BUGS DE VISIBILIDADE) ---
 window.ativarMonitoramento = function(cpf) {
     localStorage.setItem('cpfCliente', cpf);
     const clienteRef = doc(db, "clientes", cpf);
@@ -984,18 +985,17 @@ window.ativarMonitoramento = function(cpf) {
             const dados = docAtualizado.data();
             const descontoAtivo = localStorage.getItem('descontoAtivo');
 
-            // 1. Atualiza o número e a palavra PONTOS dentro da lupa
+            // 1. Atualiza a Lupa
             const elementoPontos = document.getElementById('valorPontosLupa');
             const elementoLabel = document.getElementById('label-lupa');
-            
             if (elementoPontos) elementoPontos.innerText = dados.pontos;
             if (elementoLabel) elementoLabel.innerText = "PONTOS";
 
-            // 2. RECUPERAÇÃO DA LÓGICA DE CANCELAMENTO (Para evitar saldo negativo)
+            // 2. Lógica de Texto Lateral e Botão Cancelar
             const msgIncentivo = document.getElementById('msg-incentivo-login');
             if (msgIncentivo) {
-                // Se o saldo estiver negativo ou pontos forem 0 E houver desconto ativo no navegador
-                if ((dados.pontos <= 0) && descontoAtivo) {
+                // PRIORIDADE: Se houver desconto ativo, mostra CANCELAR independente do saldo
+                if (descontoAtivo) {
                     msgIncentivo.innerHTML = `
                         <div style="text-align: right; line-height: 1.2;">
                             <span style="color: #ff4444; font-weight: bold; font-size: 13px;">✨ Crédito em Uso</span><br>
@@ -1003,7 +1003,6 @@ window.ativarMonitoramento = function(cpf) {
                             <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; margin-left: 8px;">🔒 Sair</a>
                         </div>`;
                 } else {
-                    // Estado normal logado
                     msgIncentivo.innerHTML = `
                         <div style="text-align: right; line-height: 1.2;">
                             <span style="color: #d4af37; font-family: 'Playball', cursive; font-size: 18px;">Seu Saldo ✨</span><br>
@@ -1014,16 +1013,21 @@ window.ativarMonitoramento = function(cpf) {
                 }
             }
 
-            // 3. Atualização da área de desconto no checkout
+            // 3. Área de Resgate no Checkout (Botão Aplicar)
             const areaDesconto = document.getElementById('area-desconto-pontos');
             if(areaDesconto) {
-                areaDesconto.style.display = dados.pontos > 0 ? 'block' : 'none';
-                if(document.getElementById('label-pontos-disponiveis')) 
-                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
-                
-                const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
-                if(document.getElementById('valor-desconto-pwa')) 
-                    document.getElementById('valor-desconto-pwa').innerText = valorCredito;
+                // SÓ mostra o botão de "APLICAR" se tiver pontos E não tiver um desconto já ativo
+                if (dados.pontos > 0 && !descontoAtivo) {
+                    areaDesconto.style.display = 'block';
+                    if(document.getElementById('label-pontos-disponiveis')) 
+                        document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
+                    
+                    const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
+                    if(document.getElementById('valor-desconto-pwa')) 
+                        document.getElementById('valor-desconto-pwa').innerText = valorCredito;
+                } else {
+                    areaDesconto.style.display = 'none';
+                }
             }
         }
     });
@@ -1827,6 +1831,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
