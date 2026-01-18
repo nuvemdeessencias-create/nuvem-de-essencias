@@ -754,11 +754,28 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
 <div id="modal-cpf-fidelidade" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
     <div style="background:#0d1b3e; border:2px solid #b89356; padding:30px; border-radius:20px; width:90%; max-width:400px; text-align:center; box-shadow:0 0 30px rgba(184,147,86,0.4);">
-        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:32px; margin-bottom:15px;">Programa de Pontos ✨</h2>
-        <p style="color:#fff; font-size:14px; margin-bottom:20px;">Digite seu CPF para acessar seus créditos:</p>
-       <input type="tel" id="input-cpf-modal" placeholder="000.000.000-00" 
-    style="width: 100%; max-width: 280px; padding: 12px; margin: 20px auto; display: block; border-radius: 10px; border: 1px solid #b89356; background: rgba(255,255,255,0.1); color: #fff; text-align: center; font-size: 18px; outline: none; box-sizing: border-box;">
-            <button id="btn-fechar-cpf" style="background:transparent; color:#fff; border:1px solid #fff; padding:10px 20px; border-radius:20px; cursor:pointer; font-size:12px; text-transform:uppercase;">Cancelar</button>
+        
+        <div id="visual-lupa-topo" style="display: flex; flex-direction: column; align-items: center; margin-bottom: 20px;">
+            <div style="position: relative; width: 100px; height: 100px;">
+                <div style="width: 85px; height: 85px; border-radius: 50%; background: linear-gradient(145deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); padding: 6px; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.5); border: 1px solid #8a6d3b;">
+                    <div style="width: 100%; height: 100%; background: rgba(255, 255, 255, 0.1); border-radius: 50%; backdrop-filter: blur(2px); display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+                        <span style="font-size: 8px; font-weight: bold; color: #fcf6ba; letter-spacing: 1px;">PONTOS</span>
+                        <strong id="valorPontosLupa" style="font-size: 22px; color: #fff; text-shadow: 2px 2px 4px rgba(0,0,0,0.8);">--</strong>
+                        <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.2), transparent); transform: rotate(35deg); pointer-events: none;"></div>
+                    </div>
+                </div>
+                <div style="position: absolute; bottom: 5px; right: 5px; width: 12px; height: 35px; background: linear-gradient(90deg, #bf953f, #fcf6ba, #aa771c); transform: rotate(-45deg); border-radius: 0 0 5px 5px; border: 1px solid #8a6d3b;"></div>
+            </div>
+        </div>
+
+        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:28px; margin-bottom:10px;">Programa de Pontos ✨</h2>
+        <p style="color:#fff; font-size:14px; margin-bottom:15px;">Digite seu CPF para consultar:</p>
+        
+        <input type="tel" id="input-cpf-modal" placeholder="000.000.000-00" 
+            style="width: 100%; max-width: 280px; padding: 12px; margin: 10px auto; display: block; border-radius: 10px; border: 1px solid #b89356; background: rgba(255,255,255,0.1); color: #fff; text-align: center; font-size: 18px; outline: none; box-sizing: border-box;">
+        
+        <div style="margin-top: 20px;">
+            <button id="btn-fechar-cpf" style="background:transparent; color:#fff; border:1px solid #fff; padding:10px 20px; border-radius:20px; cursor:pointer; font-size:12px; text-transform:uppercase; margin-right: 10px;">Cancelar</button>
             <button id="btn-confirmar-cpf" style="background:#b89356; color:#fff; border:none; padding:10px 25px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:12px; text-transform:uppercase;">Acessar Créditos</button>
         </div>
     </div>
@@ -931,7 +948,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         document.getElementById('modal-cpf-fidelidade').style.display = 'flex';
     };
 
-    window.confirmarCPFModal = async function() {
+   window.confirmarCPFModal = async function() {
         const input = document.getElementById('input-cpf-modal');
         const cpf = input.value.replace(/\D/g, '');
         
@@ -946,20 +963,37 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
             if (!docSnap.exists()) {
                 await setDoc(clienteRef, { pontos: 0, cpf: cpf, dataCriacao: new Date().toISOString() });
             }
+            
+            // ATUALIZA A LUPA ANTES DE FECHAR O MODAL
+            const saldoInicial = docSnap.exists() ? docSnap.data().pontos : 0;
+            if(document.getElementById('valorPontosLupa')) {
+                document.getElementById('valorPontosLupa').innerText = saldoInicial;
+            }
+
             ativarMonitoramento(cpf);
-            document.getElementById('modal-cpf-fidelidade').style.display = 'none';
+            // document.getElementById('modal-cpf-fidelidade').style.display = 'none'; // Se quiser que o modal feche, mantenha esta linha.
         } catch (e) { console.error(e); }
     };
-
     // --- MONITORAMENTO (MELHORADO COM OPÇÃO DE CANCELAR) ---
  window.ativarMonitoramento = function(cpf) {
-    localStorage.setItem('cpfCliente', cpf);
-    const clienteRef = doc(db, "clientes", cpf);
-    onSnapshot(clienteRef, (docAtualizado) => {
-        if (docAtualizado.exists()) {
-            const dados = docAtualizado.data();
+        localStorage.setItem('cpfCliente', cpf);
+        const clienteRef = doc(db, "clientes", cpf);
+        onSnapshot(clienteRef, (docAtualizado) => {
+            if (docAtualizado.exists()) {
+                const dados = docAtualizado.data();
+
+                // --- ATUALIZAÇÃO DA LUPA DOURADA ---
+                const lupaDisplay = document.getElementById('valorPontosLupa');
+                if (lupaDisplay) {
+                    lupaDisplay.innerText = dados.pontos;
+                    // Efeito visual de pulso quando o ponto mudar
+                    lupaDisplay.parentElement.style.transform = "scale(1.1)";
+                    setTimeout(() => { lupaDisplay.parentElement.style.transform = "scale(1)"; }, 300);
+                }
+                // -----------------------------------
+            
             const container = document.getElementById('status-pontos-container');
-            const descontoAtivo = localStorage.getItem('descontoAtivo');
+                const descontoAtivo = localStorage.getItem('descontoAtivo');
 
             if (container) {
                 if (dados.pontos === 0 && descontoAtivo) {
@@ -1801,6 +1835,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
