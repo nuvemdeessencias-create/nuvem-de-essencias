@@ -656,21 +656,21 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         Identifique-se e ganhe pontos nesta compra ✨
     </span>
 
-    <div id="lupa-trigger" onclick="window.abrirModalLogin()" style="cursor:pointer; position: relative; width: 80px; height: 75px; display: flex; align-items: center; justify-content: center;">
+    <div id="lupa-trigger" onclick="window.abrirModalLogin()" style="cursor:pointer; position: relative; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center;">
         
-        <div style="position: absolute; bottom: 2px; right: 5px; width: 10px; height: 38px; background: linear-gradient(90deg, #7a1212, #c41e1e, #7a1212); transform: rotate(-45deg); border-radius: 2px 2px 5px 5px; border: 1.5px solid #4a0a0a; z-index: 1; transform-origin: top left;">
-            <div style="position: absolute; bottom: -2px; left: -1.5px; width: 10px; height: 6px; background: linear-gradient(145deg, #bf953f, #fcf6ba, #aa771c); border: 1px solid #8a6d3b; border-radius: 0 0 3px 3px;"></div>
-        </div>
-
-        <div style="width: 52px; height: 52px; border-radius: 50%; background: linear-gradient(145deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); padding: 4px; display: flex; align-items: center; justify-content: center; border: 1.5px solid #8a6d3b; position: relative; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.4);">
-            <div style="width: 100%; height: 100%; background: radial-gradient(circle at 30% 30%, #1e2d50, #0d1b3e); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; box-shadow: inset 0 0 8px #000;">
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(145deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); padding: 3px; display: flex; align-items: center; justify-content: center; border: 1.5px solid #8a6d3b; position: relative; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.4);">
+            <div style="width: 100%; height: 100%; background: radial-gradient(circle at 30% 30%, #1e2d50, #0d1b3e); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
                 <strong id="valorPontosLupa" style="font-size: 15px; color: #fff; text-shadow: 1px 1px 2px #000;">?</strong>
                 <span id="label-lupa" style="font-size: 7px; font-weight: bold; color: #d4af37; letter-spacing: 0.5px; text-transform: uppercase;">Login</span>
             </div>
         </div>
+
+        <div style="position: absolute; top: 38px; left: 38px; width: 10px; height: 35px; background: linear-gradient(90deg, #7a1212, #c41e1e, #7a1212); transform: rotate(-45deg); border-radius: 0 0 5px 5px; border: 1.5px solid #4a0a0a; z-index: 1; transform-origin: top center;">
+            <div style="position: absolute; bottom: -2px; left: -1.5px; width: 10px; height: 6px; background: linear-gradient(145deg, #bf953f, #fcf6ba, #aa771c); border: 1px solid #8a6d3b; border-radius: 0 0 3px 3px;"></div>
+        </div>
     </div>
 
-    <button class="btn-login-header" onclick="window.abrirModalLogin()" style="background: #b89356; color: white; border: none; padding: 7px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase; transition: 0.3s;">
+    <button id="btn-entrar-topo" class="btn-login-header" onclick="window.abrirModalLogin()" style="background: #b89356; color: white; border: none; padding: 7px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 11px; text-transform: uppercase;">
         ENTRAR
     </button>
 </div>
@@ -1805,6 +1805,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
