@@ -651,25 +651,25 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
     <div class="header-actions" style="display: flex; align-items: center; gap: 10px;">
     
-<div id="status-pontos-container" style="display: flex; align-items: center; gap: 10px; margin-right: 10px;">
-    <span id="msg-incentivo-login" style="
-        color: #d4af37; 
-        font-family: 'Playball', cursive;
-        font-size: 19px; 
-        font-weight: 400; 
-        white-space: nowrap; 
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
-        letter-spacing: 0.3px;
-    ">
+<div id="status-pontos-container" style="display: flex; align-items: center; gap: 15px; margin-right: 10px;">
+    <span id="msg-incentivo-login" style="color: #d4af37; font-family: 'Playball', cursive; font-size: 19px; font-weight: 400; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);">
         Identifique-se e ganhe pontos nesta compra ✨
     </span>
 
-    <button class="btn-login-header" onclick="abrirModalLogin()" 
-            style="background: #b89356; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 10px; white-space: nowrap; text-transform: uppercase;">
-        ENTRAR
-    </button>
-</div>
+    <div id="lupa-trigger" onclick="window.abrirModalLogin()" style="cursor:pointer; position: relative; width: 85px; height: 85px; display: flex; align-items: center; justify-content: center; transition: transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+        
+        <div style="width: 54px; height: 54px; border-radius: 50%; background: linear-gradient(145deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); padding: 3px; display: flex; align-items: center; justify-content: center; border: 1.5px solid #8a6d3b; position: relative; z-index: 2; box-shadow: 0 4px 10px rgba(0,0,0,0.4);">
+            <div style="width: 100%; height: 100%; background: radial-gradient(circle at 30% 30%, #1e2d50, #0d1b3e); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
+                <strong id="valorPontosLupa" style="font-size: 16px; color: #fff; text-shadow: 1px 1px 2px #000; font-family: sans-serif;">?</strong>
+                <span id="label-lupa" style="font-size: 8px; font-weight: bold; color: #d4af37; letter-spacing: 0.5px; text-transform: uppercase;">LOGIN</span>
+            </div>
+        </div>
 
+        <div style="position: absolute; top: 42px; left: 42px; width: 11px; height: 45px; background: linear-gradient(90deg, #7a1212, #c41e1e, #7a1212); transform: rotate(-45deg); border-radius: 0 0 5px 5px; border: 1.5px solid #4a0a0a; z-index: 1; transform-origin: top center;">
+            <div style="position: absolute; bottom: -1px; left: -1.5px; width: 11px; height: 7px; background: linear-gradient(145deg, #bf953f, #fcf6ba, #aa771c); border: 1px solid #8a6d3b; border-radius: 0 0 4px 4px;"></div>
+        </div>
+    </div>
+</div>
   
     <div class="cart-icon-container" onclick="toggleCart()" style="position: relative; cursor: pointer; background: #b89356; padding: 5px 12px; border-radius: 15px; display: flex; align-items: center;">
         <span style="font-size: 18px;">🛍️</span>
@@ -855,7 +855,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
-        getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, setDoc, updateDoc 
+        getFirestore, collection, query, orderBy, onSnapshot, doc, getDoc, setDoc, updateDoc, increment 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const firebaseConfig = {
@@ -880,52 +880,75 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         verificarLinkDireto();
     });
 
-    // --- RESGATE DE PONTOS (COM MODAL BONITO) ---
-    window.aplicarDescontoPontos = async function() {
-        const cpfSalvo = localStorage.getItem('cpfCliente');
-        const elementoValor = document.getElementById('valor-desconto-pwa');
-        if (!cpfSalvo || !window.db) return;
+  // --- RESGATE DE PONTOS (VERSÃO PROTEGIDA) ---
+window.aplicarDescontoPontos = async function() {
+    const cpfSalvo = localStorage.getItem('cpfCliente');
+    const elementoValor = document.getElementById('valor-desconto-pwa');
+    const labelPontos = document.getElementById('label-pontos-disponiveis'); // Pega os pontos da tela
 
-        const cpfLimpo = cpfSalvo.replace(/\D/g, '');
-        const valorNumerico = parseFloat(elementoValor.innerText.replace(',', '.'));
+    if (!cpfSalvo || !window.db || !elementoValor) return;
 
-        try {
-            const clienteRef = doc(window.db, "clientes", cpfLimpo);
-            await updateDoc(clienteRef, { "pontos": 0 }); // Zera no Firebase
-            
-            localStorage.setItem('descontoAtivo', valorNumerico.toString());
+    const cpfLimpo = cpfSalvo.replace(/\D/g, '');
+    const valorNumerico = parseFloat(elementoValor.innerText.replace(',', '.'));
+    const pontosAtuais = parseInt(labelPontos ? labelPontos.innerText : "0");
 
-            // Abre o modal de sucesso em vez do alert() antigo
-            document.getElementById('texto-sucesso-resgate').innerHTML = `Crédito de <b>R$ ${valorNumerico.toFixed(2).replace('.', ',')}</b> aplicado!`;
-            document.getElementById('modal-sucesso-resgate').style.display = 'flex';
+    // --- TRAVA DE SEGURANÇA  ---
+    if (pontosAtuais <= 0) {
+        alert("Você não possui pontos suficientes para resgate!");
+        return;
+    }
 
-            if (typeof renderizarSacola === 'function') renderizarSacola();
-        } catch (error) {
-            console.error("Erro no resgate:", error);
+    try {
+        const clienteRef = doc(window.db, "clientes", cpfLimpo);
+        
+        // Em vez de calcular, forçamos o valor para 0 de forma segura
+        await updateDoc(clienteRef, { "pontos": 0 }); 
+        
+        localStorage.setItem('descontoAtivo', valorNumerico.toString());
+
+        // Abre o modal de sucesso
+        const msgSucesso = document.getElementById('texto-sucesso-resgate');
+        if (msgSucesso) {
+            msgSucesso.innerHTML = `Crédito de <b>R$ ${valorNumerico.toFixed(2).replace('.', ',')}</b> aplicado!`;
         }
-    };
+        document.getElementById('modal-sucesso-resgate').style.display = 'flex';
+
+        if (typeof renderizarSacola === 'function') renderizarSacola();
+    } catch (error) {
+        console.error("Erro no resgate:", error);
+        alert("Erro ao processar resgate. Tente novamente.");
+    }
+};
 
     // --- NOVA FUNÇÃO: RECUPERAR PONTOS SE DESISTIR ---
-    window.cancelarResgate = async function() {
-        const cpf = localStorage.getItem('cpfCliente');
-        const valorDesconto = localStorage.getItem('descontoAtivo');
-        if (!cpf || !valorDesconto) return;
+ window.cancelarResgate = async function() {
+    const cpf = localStorage.getItem('cpfCliente');
+    const valorDesconto = localStorage.getItem('descontoAtivo');
+    
+    if (!cpf || !valorDesconto) return;
 
-        // Converte o valor de volta para pontos (R$ 1,00 = 50 pts)
-        const pontosParaDevolver = Math.round(parseFloat(valorDesconto) / 0.02);
+    // Converte o valor de volta para pontos (R$ 1,00 = 50 pts)
+    const pontosParaDevolver = Math.round(parseFloat(valorDesconto) / 0.02);
 
-        try {
-            const clienteRef = doc(db, "clientes", cpf.replace(/\D/g, ''));
-            await updateDoc(clienteRef, { "pontos": pontosParaDevolver });
-            
-            localStorage.removeItem('descontoAtivo'); // Remove o desconto do carrinho
-            if (typeof renderizarSacola === 'function') renderizarSacola();
-            alert("Pontos devolvidos ao seu saldo! ✨");
-        } catch (e) {
-            console.error("Erro ao devolver pontos:", e);
-        }
-    };
+    try {
+        const cpfLimpo = cpf.replace(/\D/g, '');
+        const clienteRef = doc(db, "clientes", cpfLimpo);
 
+        // USANDO INCREMENT: Ele soma ao valor atual, evitando saldo negativo ou perda de pontos
+        await updateDoc(clienteRef, { 
+            "pontos": increment(pontosParaDevolver) 
+        });
+        
+        localStorage.removeItem('descontoAtivo'); // Limpa o desconto
+        
+        if (typeof renderizarSacola === 'function') renderizarSacola();
+        
+        alert("Pontos devolvidos ao seu saldo! ✨");
+    } catch (e) {
+        console.error("Erro ao devolver pontos:", e);
+        alert("Erro ao recuperar pontos. Tente novamente.");
+    }
+};
     // --- LOGIN COM MODAL (SUBSTITUI O PROMPT) ---
     window.abrirModalLogin = () => {
         document.getElementById('modal-cpf-fidelidade').style.display = 'flex';
@@ -952,52 +975,59 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
     };
 
     // --- MONITORAMENTO (MELHORADO COM OPÇÃO DE CANCELAR) ---
- window.ativarMonitoramento = function(cpf) {
+// --- MONITORAMENTO (VERSÃO FINAL SEM BUGS DE VISIBILIDADE) ---
+window.ativarMonitoramento = function(cpf) {
     localStorage.setItem('cpfCliente', cpf);
     const clienteRef = doc(db, "clientes", cpf);
+    
     onSnapshot(clienteRef, (docAtualizado) => {
         if (docAtualizado.exists()) {
             const dados = docAtualizado.data();
-            const container = document.getElementById('status-pontos-container');
             const descontoAtivo = localStorage.getItem('descontoAtivo');
 
-            if (container) {
-                if (dados.pontos === 0 && descontoAtivo) {
-                    container.innerHTML = `
-                        <div style="text-align: right; line-height: 1.4;">
-                            <span style="color: #b89356; font-weight: bold; font-size: 13px;">✨ Crédito em Uso</span><br>
-                            <a href="javascript:void(0)" onclick="window.cancelarResgate()" style="color: #ff4444; font-size: 11px; text-decoration: underline; margin-right: 8px;">Cancelar Resgate</a>
-                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 11px; text-decoration: none;">
-                                🔒 <span style="text-decoration: underline;">Sair</span>
-                            </a>
+            // 1. Atualiza a Lupa
+            const elementoPontos = document.getElementById('valorPontosLupa');
+            const elementoLabel = document.getElementById('label-lupa');
+            if (elementoPontos) elementoPontos.innerText = dados.pontos;
+            if (elementoLabel) elementoLabel.innerText = "PONTOS";
+
+            // 2. Lógica de Texto Lateral e Botão Cancelar
+            const msgIncentivo = document.getElementById('msg-incentivo-login');
+            if (msgIncentivo) {
+                // PRIORIDADE: Se houver desconto ativo, mostra CANCELAR independente do saldo
+                if (descontoAtivo) {
+                    msgIncentivo.innerHTML = `
+                        <div style="text-align: right; line-height: 1.2;">
+                            <span style="color: #ff4444; font-weight: bold; font-size: 13px;">✨ Crédito em Uso</span><br>
+                            <a href="javascript:void(0)" onclick="window.cancelarResgate()" style="color: #ff4444; font-size: 10px; text-decoration: underline; font-weight: bold;">VOLTAR PONTOS (CANCELAR)</a>
+                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; margin-left: 8px;">🔒 Sair</a>
                         </div>`;
-               } else {
-                    container.innerHTML = `
-                        <div style="text-align: right; line-height: 1.4;">
-                            <span style="color: #b89356; font-weight: bold; font-size: 14px;">✨ ${dados.pontos} pts</span><br>
-                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 11px; text-decoration: none;">
+                } else {
+                    msgIncentivo.innerHTML = `
+                        <div style="text-align: right; line-height: 1.2;">
+                            <span style="color: #d4af37; font-family: 'Playball', cursive; font-size: 18px;">Seu Saldo ✨</span><br>
+                            <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; text-decoration: none;">
                                 🔒 <span style="text-decoration: underline;">Sair / Trocar CPF</span>
                             </a>
                         </div>`;
-                } // <--- Esta fecha o "else"
+                }
+            }
 
-                // O EFEITO VAI AQUI (Ainda dentro do if container)
-                container.style.transition = "background-color 0.5s ease";
-                container.style.backgroundColor = "#1a2a4a";
-                setTimeout(() => {
-                    container.style.backgroundColor = "#0d1b3e";
-                }, 1000);
-
-            } // <--- ESTA É A CHAVE QUE FECHA O "if (container)"
-            
+            // 3. Área de Resgate no Checkout (Botão Aplicar)
             const areaDesconto = document.getElementById('area-desconto-pontos');
             if(areaDesconto) {
-                areaDesconto.style.display = dados.pontos > 0 ? 'block' : 'none';
-                if(document.getElementById('label-pontos-disponiveis')) 
-                    document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
-                const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
-                if(document.getElementById('valor-desconto-pwa')) 
-                    document.getElementById('valor-desconto-pwa').innerText = valorCredito;
+                // SÓ mostra o botão de "APLICAR" se tiver pontos E não tiver um desconto já ativo
+                if (dados.pontos > 0 && !descontoAtivo) {
+                    areaDesconto.style.display = 'block';
+                    if(document.getElementById('label-pontos-disponiveis')) 
+                        document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
+                    
+                    const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
+                    if(document.getElementById('valor-desconto-pwa')) 
+                        document.getElementById('valor-desconto-pwa').innerText = valorCredito;
+                } else {
+                    areaDesconto.style.display = 'none';
+                }
             }
         }
     });
@@ -1801,6 +1831,13 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
 
