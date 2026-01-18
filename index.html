@@ -645,105 +645,34 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 </head>
 <body>
 
-   <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;">
-    
+  <header style="display: flex; justify-content: space-between; align-items: center; padding: 10px 20px;">
     <img src="img/logo.png" alt="NUVEM DE ESSÊNCIAS" class="logo-img" style="max-height: 50px;">
 
     <div class="header-actions" style="display: flex; align-items: center; gap: 10px;">
-    
-<div id="status-pontos-container" style="display: flex; align-items: center; gap: 12px; margin-right: 10px;">
-    <span id="msg-incentivo-login" style="color: #d4af37; font-family: 'Playball', cursive; font-size: 19px; font-weight: 400; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); letter-spacing: 0.3px;">
-        Identifique-se e ganhe pontos nesta compra ✨
-    </span>
+        <div id="status-pontos-container" style="display: flex; align-items: center; gap: 12px; margin-right: 10px;">
+            <span id="msg-incentivo-login" style="color: #d4af37; font-family: 'Playball', cursive; font-size: 19px; font-weight: 400; white-space: nowrap; text-shadow: 1px 1px 2px rgba(0,0,0,0.7); letter-spacing: 0.3px;">
+                Identifique-se e ganhe pontos nesta compra ✨
+            </span>
 
-    <div id="lupa-trigger" onclick="window.abrirModalLogin()" style="cursor:pointer; position: relative; width: 65px; height: 65px; display: flex; align-items: center; justify-content: center; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(145deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); padding: 4px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid #8a6d3b;">
-            <div style="width: 100%; height: 100%; background: rgba(13, 27, 62, 0.9); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; position: relative;">
-                <strong id="valorPontosLupa" style="font-size: 14px; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">?</strong>
-                <span id="label-lupa" style="font-size: 7px; font-weight: bold; color: #d4af37;">LOGIN</span>
-                <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent); transform: rotate(35deg); pointer-events: none;"></div>
+            <div id="lupa-trigger" onclick="window.abrirModalLogin()" style="cursor:pointer; position: relative; width: 65px; height: 65px; display: flex; align-items: center; justify-content: center; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(145deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); padding: 4px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid #8a6d3b;">
+                    <div style="width: 100%; height: 100%; background: rgba(13, 27, 62, 0.9); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; position: relative;">
+                        <strong id="valorPontosLupa" style="font-size: 14px; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">?</strong>
+                        <span id="label-lupa" style="font-size: 7px; font-weight: bold; color: #d4af37;">LOGIN</span>
+                    </div>
+                </div>
+                <div style="position: absolute; bottom: 8px; right: 8px; width: 7px; height: 22px; background: linear-gradient(90deg, #bf953f, #fcf6ba, #aa771c); transform: rotate(-45deg); border-radius: 0 0 4px 4px; border: 1px solid #8a6d3b;"></div>
             </div>
         </div>
-        <div style="position: absolute; bottom: 8px; right: 8px; width: 7px; height: 22px; background: linear-gradient(90deg, #bf953f, #fcf6ba, #aa771c); transform: rotate(-45deg); border-radius: 0 0 4px 4px; border: 1px solid #8a6d3b;"></div>
+        
+        <div class="cart-icon-container" onclick="toggleCart()" style="position: relative; cursor: pointer; background: #b89356; padding: 5px 12px; border-radius: 15px; display: flex; align-items: center;">
+            <span style="font-size: 18px;">🛍️</span>
+            <span id="cart-count" style="color: black; font-weight: bold; margin-left: 5px;">0</span>
+        </div>
     </div>
-</div>
-  
-    <div class="cart-icon-container" onclick="toggleCart()" style="position: relative; cursor: pointer; background: #b89356; padding: 5px 12px; border-radius: 15px; display: flex; align-items: center;">
-        <span style="font-size: 18px;">🛍️</span>
-        <span id="cart-count" style="color: black; font-weight: bold; margin-left: 5px;">0</span>
-    </div>
-
-</div>
 </header>
 
-<div id="cart-modal" class="cart-modal">
-    <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #eee; background: white; flex-shrink: 0;">
-        <h3 style="margin:0; color: #333;">Sua Sacola</h3>
-        <span style="cursor:pointer; font-size: 28px; color: #333;" onclick="toggleCart()">×</span>
-    </div>
-
-    <div id="container-trava-aviso" style="padding: 0 20px; background: white; flex-shrink: 0;">
-        <div id="aviso-interno-sacola" style="display:none; background: #fff9f0; border: 1px solid #b89356; color: #020b1f; padding: 12px; margin-top: 15px; border-radius: 8px; font-size: 13px; align-items: center; gap: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-            <span style="font-size: 18px;">⚠️</span>
-            <span><b>Frete Pendente:</b> Recalcule o frete para atualizar o total.</span>
-        </div>
-    </div>
-
-    <div id="cart-scroll-area" style="flex-grow: 1; overflow-y: auto;">
-        <div id="cart-items">
-            </div>
-
-        <div style="font-family: 'Inter', sans-serif; margin-top: 20px; border-top: 1px solid #eee; padding-top: 20px;">
-            <h3 style="font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: #1a1a1a;">ENTREGA</h3>
-            <p style="font-size: 13px; color: #666; margin-bottom: 15px;">Insira o CEP para calcular valor e prazo</p>
-            
-            <div style="display: flex; height: 45px; border: 1px solid #ccc; border-radius: 4px; overflow: hidden; margin-bottom: 10px;">
-                <input type="text" id="cep-cliente" placeholder="Digite o CEP">
-                <button onclick="calcularFrete()" style="background: #1a1a1a; color: white; border: none; padding: 0 25px; font-size: 12px; font-weight: 700; cursor: pointer; text-transform: uppercase;">
-                    CALCULAR
-                </button>
-            </div>
-            <div style="margin-bottom: 15px;">
-    <a href="https://buscacepinter.correios.com.br/app/endereco/index.php" 
-       target="_blank" 
-       rel="noopener noreferrer" 
-       style="font-size: 12px; color: #666; text-decoration: underline; font-family: sans-serif;">
-       Não sei o meu CEP
-    </a>
-</div>
-            
-            <div id="opcoes-frete"></div>
-        </div>
-    </div>
-
-   <div class="cart-footer">
-    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; font-weight: bold; color: #333; font-size: 18px;">
-        <span>Total:</span>
-        <span>R$ <span id="cart-total">0,00</span></span>
-    </div>
-
-   <div id="area-desconto-pontos" style="background: #020b1f; padding: 15px; border-radius: 8px; margin: 15px 0; border: 1px solid #b8935633; display: none;">
-    <p style="font-size: 12px; color: #ccc; margin: 0;">Você tem: <span id="label-pontos-disponiveis" style="color: #b89356; font-weight: bold;">0</span> pontos</p>
-    <p style="font-size: 15px; color: #b89356; font-weight: bold; margin: 8px 0;">Crédito disponível: R$ <span id="valor-desconto-pwa">0,00</span></p>
-    
-    <button onclick="aplicarDescontoPontos()" 
-            style="width: 100%; background: #b89356; color: white; border: none; padding: 12px; border-radius: 5px; cursor: pointer; font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px;">
-        RESGATAR MEU CRÉDITO ✨
-    </button>
-</div>
-
-   <button class="btn-checkout-asaas" onclick="abrirCheckoutAsaas('PIX', event)" style="width: 100%; background: #2e7d32; color: white; padding: 15px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; margin-bottom: 10px; font-size: 16px;">
-    💳 FINALIZAR PAGAMENTO
-</button>
-
-    <button class="btn-whats-secundario" onclick="finalizarWhatsApp()" style="width: 100%; background: #25d366; color: white; padding: 10px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px;">
-        <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" width="16" height="16">
-        Pedir pelo WhatsApp
-    </button>
-</div>
-</div> 
-    
-    <div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; margin-bottom: 20px; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
+<div style="border-top: 2.5px solid #b89356; border-bottom: 2.5px solid #b89356; padding: 12px 0; margin-bottom: 20px; text-align: center; background-color: rgba(184, 147, 86, 0.05);">
     <p style="color: #ffffff; font-size: 14px; margin: 0; font-weight: bold; letter-spacing: 0.5px;">
         ✨ Sinta o aroma dos sonhos e realce sua beleza! ✨
     </p>
@@ -751,48 +680,24 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 
 <div id="modal-cpf-fidelidade" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10000; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
     <div style="background:#0d1b3e; border:2px solid #b89356; padding:30px; border-radius:20px; width:90%; max-width:400px; text-align:center; box-shadow:0 0 30px rgba(184,147,86,0.4);">
-        <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:32px; margin-bottom:15px;">Programa de Pontos ✨</h2>
-        <p style="color:#fff; font-size:14px; margin-bottom:20px;">Digite seu CPF para acessar seus créditos:</p>
-        <input type="tel" id="input-cpf-modal" placeholder="000.000.000-00" style="width: 100%; max-width: 280px; padding: 12px; margin: 20px auto; display: block; border-radius: 10px; border: 1px solid #b89356; background: rgba(255,255,255,0.1); color: #fff; text-align: center; font-size: 18px; outline: none; box-sizing: border-box;">
-        <div style="display: flex; justify-content: center; gap: 10px;">
-            <button id="btn-fechar-cpf" style="background:transparent; color:#fff; border:1px solid #fff; padding:10px 20px; border-radius:20px; cursor:pointer; font-size:12px; text-transform:uppercase;">Cancelar</button>
-            <button id="btn-confirmar-cpf" style="background:#b89356; color:#fff; border:none; padding:10px 25px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:12px; text-transform:uppercase;">Acessar Créditos</button>
-        </div>
-    </div>
-</div>
-
         <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:28px; margin-bottom:10px;">Programa de Pontos ✨</h2>
         <p style="color:#fff; font-size:14px; margin-bottom:15px;">Digite seu CPF para consultar:</p>
-        
-        <input type="tel" id="input-cpf-modal" placeholder="000.000.000-00" 
-            style="width: 100%; max-width: 280px; padding: 12px; margin: 10px auto; display: block; border-radius: 10px; border: 1px solid #b89356; background: rgba(255,255,255,0.1); color: #fff; text-align: center; font-size: 18px; outline: none; box-sizing: border-box;">
-        
-        <div style="margin-top: 20px;">
-            <button id="btn-fechar-cpf" style="background:transparent; color:#fff; border:1px solid #fff; padding:10px 20px; border-radius:20px; cursor:pointer; font-size:12px; text-transform:uppercase; margin-right: 10px;">Cancelar</button>
-            <button id="btn-confirmar-cpf" style="background:#b89356; color:#fff; border:none; padding:10px 25px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:12px; text-transform:uppercase;">Acessar Créditos</button>
+        <input type="tel" id="input-cpf-modal" placeholder="000.000.000-00" style="width: 100%; padding: 12px; border-radius: 10px; border: 1px solid #b89356; background: rgba(255,255,255,0.1); color: #fff; text-align: center; font-size: 18px; outline: none;">
+        <div style="margin-top: 20px; display: flex; justify-content: center; gap: 10px;">
+            <button id="btn-fechar-cpf" style="background:transparent; color:#fff; border:1px solid #fff; padding:10px 20px; border-radius:20px; cursor:pointer; font-size:12px; text-transform:uppercase;">Cancelar</button>
+            <button id="btn-confirmar-cpf" onclick="window.confirmarCPFModal()" style="background:#b89356; color:#fff; border:none; padding:10px 25px; border-radius:20px; cursor:pointer; font-weight:bold; font-size:12px; text-transform:uppercase;">Acessar Créditos</button>
         </div>
     </div>
 </div>
 
 <div id="modal-sucesso-resgate" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:10001; align-items:center; justify-content:center; backdrop-filter: blur(5px);">
-    <div style="background:#0d1b3e; border:2px solid #b89356; padding:40px 30px; border-radius:25px; width:90%; max-width:350px; text-align:center; position: relative;">
-        
-        <div onclick="window.fecharTudoAgora()" style="position: absolute; top: 15px; right: 20px; color: #b89356; font-size: 24px; font-weight: bold; cursor: pointer; padding: 5px;">
-            &times;
-        </div>
-
+    <div style="background:#0d1b3e; border:2px solid #b89356; padding:40px 30px; border-radius:25px; width:90%; max-width:350px; text-align:center;">
         <div style="font-size: 50px; margin-bottom: 15px;">✨</div>
         <h2 style="color:#d4af37; font-family:'Playball', cursive; font-size:28px; margin-bottom:10px;">Resgate Concluído!</h2>
-        <p id="texto-sucesso-resgate" style="color:#fff; font-size:16px; margin-bottom:25px;">
-            Crédito resgatado com sucesso!
-        </p>
-        
-        <button onclick="window.fecharTudoAgora()" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; text-transform:uppercase;">
-            OK
-        </button>
+        <p style="color:#fff; font-size:16px; margin-bottom:25px;">Crédito resgatado com sucesso!</p>
+        <button onclick="window.fecharTudoAgora()" style="background:#b89356; color:#fff; border:none; padding:12px 40px; border-radius:25px; cursor:pointer; font-weight:bold; text-transform:uppercase;">OK</button>
     </div>
-</div>
-    
+</div>    
 <div class="filtros-container">
     <div class="busca-grupo">
         <select id="filtroMarca" onchange="filtrar()">
@@ -1826,6 +1731,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
