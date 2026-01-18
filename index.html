@@ -884,7 +884,7 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
 window.aplicarDescontoPontos = async function() {
     const cpfSalvo = localStorage.getItem('cpfCliente');
     const elementoValor = document.getElementById('valor-desconto-pwa');
-    const labelPontos = document.getElementById('label-pontos-disponiveis'); // Pega os pontos da tela
+    const labelPontos = document.getElementById('label-pontos-disponiveis');
 
     if (!cpfSalvo || !window.db || !elementoValor) return;
 
@@ -892,31 +892,36 @@ window.aplicarDescontoPontos = async function() {
     const valorNumerico = parseFloat(elementoValor.innerText.replace(',', '.'));
     const pontosAtuais = parseInt(labelPontos ? labelPontos.innerText : "0");
 
-    // --- TRAVA DE SEGURANÇA  ---
     if (pontosAtuais <= 0) {
         alert("Você não possui pontos suficientes para resgate!");
         return;
     }
 
     try {
-        const clienteRef = doc(window.db, "clientes", cpfLimpo);
-        
-        // Em vez de calcular, forçamos o valor para 0 de forma segura
-        await updateDoc(clienteRef, { "pontos": 0 }); 
-        
+        // --- PASSO 1: SALVA NO NAVEGADOR PRIMEIRO ---
+        // Fazendo isso antes, o monitoramento já vai ler o valor correto
         localStorage.setItem('descontoAtivo', valorNumerico.toString());
 
-        // Abre o modal de sucesso
+        // --- PASSO 2: ATUALIZA O FIREBASE ---
+        const clienteRef = doc(window.db, "clientes", cpfLimpo);
+        await updateDoc(clienteRef, { "pontos": 0 }); 
+
+        // --- PASSO 3: INTERFACE ---
         const msgSucesso = document.getElementById('texto-sucesso-resgate');
         if (msgSucesso) {
             msgSucesso.innerHTML = `Crédito de <b>R$ ${valorNumerico.toFixed(2).replace('.', ',')}</b> aplicado!`;
         }
-        document.getElementById('modal-sucesso-resgate').style.display = 'flex';
+        
+        const modal = document.getElementById('modal-sucesso-resgate');
+        if (modal) modal.style.display = 'flex';
 
         if (typeof renderizarSacola === 'function') renderizarSacola();
+        
     } catch (error) {
         console.error("Erro no resgate:", error);
-        alert("Erro ao processar resgate. Tente novamente.");
+        // Se der erro no Firebase, removemos o item para não bugar a tela
+        localStorage.removeItem('descontoAtivo');
+        alert("Erro ao processar resgate.");
     }
 };
 
@@ -1831,6 +1836,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
