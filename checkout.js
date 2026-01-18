@@ -202,33 +202,6 @@ function coletarDadosCheckout(metodoPagamento, event) {
     });
 }
 
-// --- FUNÇÃO WHATSAPP COM TRAVA DE SEGURANÇA ---
-async function finalizarWhatsApp() {
-    if (sacola.length === 0) return alert("Sacola vazia!");
-
-    const cpf = localStorage.getItem('cpfCliente');
-    if (cpf && window.db) {
-        try {
-            const cpfLimpo = cpf.replace(/\D/g, '');
-            const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
-            const clienteRef = doc(window.db, "clientes", cpfLimpo);
-            await updateDoc(clienteRef, { "resgatePendente": 0 });
-            localStorage.removeItem('descontoAtivo');
-            if (typeof window.ativarMonitoramento === 'function') window.ativarMonitoramento(cpfLimpo);
-        } catch (e) {
-            console.error("Erro segurança WhatsApp:", e);
-        }
-    }
-
-    let texto = "*PEDIDO NUVEM DE ESSÊNCIAS*\n\n";
-    sacola.forEach(i => {
-        texto += `• *${i.nome}* (${i.ml})\n  Qtd: ${i.qtd} | ${i.tipoPagamento}\n  Valor: R$ ${formatarMoeda(i.preco * i.qtd)}\n\n`;
-    });
-    texto += valorFreteGlobal > 0 ? `*Frete:* ${nomeFreteGlobal} (R$ ${formatarMoeda(valorFreteGlobal)})\n` : `*Frete:* A combinar\n`;
-    texto += `*TOTAL: R$ ${document.getElementById('cart-total').innerText}*`;
-    window.open(`https://wa.me/5563992576211?text=${encodeURIComponent(texto)}`, '_blank');
-}
-
 async function voltarParaLoja() {
     const cpf = localStorage.getItem('cpfCliente');
     if (cpf && window.db) {
