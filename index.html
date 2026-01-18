@@ -897,14 +897,18 @@ window.aplicarDescontoPontos = async function() {
         return;
     }
 
-    try {
-        // --- PASSO 1: SALVA NO NAVEGADOR PRIMEIRO ---
-        // Fazendo isso antes, o monitoramento já vai ler o valor correto
+   try {
+        const clienteRef = doc(window.db, "clientes", cpfLimpo);
+
+        // --- PASSO 1: SALVA NO NAVEGADOR ---
         localStorage.setItem('descontoAtivo', valorNumerico.toString());
 
-        // --- PASSO 2: ATUALIZA O FIREBASE ---
-        const clienteRef = doc(window.db, "clientes", cpfLimpo);
-        await updateDoc(clienteRef, { "pontos": 0 }); 
+        // --- PASSO 2: ATUALIZA O FIREBASE (COM O CAMPO DE SEGURANÇA) ---
+        // Aqui nós zeramos os pontos mas salvamos quanto foi retirado para não perder
+        await updateDoc(clienteRef, { 
+            "pontos": 0,
+            "resgatePendente": pontosAtuais 
+        }); 
 
         // --- PASSO 3: INTERFACE ---
         const msgSucesso = document.getElementById('texto-sucesso-resgate');
@@ -919,39 +923,39 @@ window.aplicarDescontoPontos = async function() {
         
     } catch (error) {
         console.error("Erro no resgate:", error);
-        // Se der erro no Firebase, removemos o item para não bugar a tela
         localStorage.removeItem('descontoAtivo');
         alert("Erro ao processar resgate.");
     }
 };
 
     // --- NOVA FUNÇÃO: RECUPERAR PONTOS SE DESISTIR ---
- window.cancelarResgate = async function() {
+window.cancelarResgate = async function() {
     const cpf = localStorage.getItem('cpfCliente');
-    const valorDesconto = localStorage.getItem('descontoAtivo');
-    
-    if (!cpf || !valorDesconto) return;
-
-    // Converte o valor de volta para pontos (R$ 1,00 = 50 pts)
-    const pontosParaDevolver = Math.round(parseFloat(valorDesconto) / 0.02);
+    if (!cpf) return;
 
     try {
         const cpfLimpo = cpf.replace(/\D/g, '');
         const clienteRef = doc(db, "clientes", cpfLimpo);
+        
+        // Buscamos o documento para saber quanto devolver
+        const docSnap = await getDoc(clienteRef);
+        if (docSnap.exists()) {
+            const dados = docSnap.data();
+            const pontosParaDevolver = dados.resgatePendente || 0;
 
-        // USANDO INCREMENT: Ele soma ao valor atual, evitando saldo negativo ou perda de pontos
-        await updateDoc(clienteRef, { 
-            "pontos": increment(pontosParaDevolver) 
-        });
+            if (pontosParaDevolver > 0) {
+                await updateDoc(clienteRef, { 
+                    "pontos": increment(pontosParaDevolver),
+                    "resgatePendente": 0 // Limpa o pendente
+                });
+            }
+        }
         
-        localStorage.removeItem('descontoAtivo'); // Limpa o desconto
-        
+        localStorage.removeItem('descontoAtivo');
         if (typeof renderizarSacola === 'function') renderizarSacola();
-        
         alert("Pontos devolvidos ao seu saldo! ✨");
     } catch (e) {
-        console.error("Erro ao devolver pontos:", e);
-        alert("Erro ao recuperar pontos. Tente novamente.");
+        console.error("Erro ao devolver:", e);
     }
 };
     // --- LOGIN COM MODAL (SUBSTITUI O PROMPT) ---
@@ -1836,6 +1840,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
