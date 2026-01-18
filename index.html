@@ -656,14 +656,19 @@ footer { padding: 30px; text-align: center; color: #888; font-size: 12px; border
         Identifique-se e ganhe pontos nesta compra ✨
     </span>
 
-    <div id="lupa-trigger" onclick="window.abrirModalLogin()" style="cursor:pointer; position: relative; width: 65px; height: 65px; display: flex; align-items: center; justify-content: center; transition: transform 0.3s;">
-        <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(145deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); padding: 3px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1px solid #8a6d3b; position: relative; z-index: 2;">
+    <div id="lupa-trigger" onclick="window.abrirModalLogin()" style="cursor:pointer; position: relative; width: 75px; height: 75px; display: flex; align-items: center; justify-content: center; transition: transform 0.3s;" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+        
+        <div style="position: absolute; bottom: 5px; right: 5px; width: 9px; height: 32px; background: linear-gradient(90deg, #7a1212, #c41e1e, #7a1212); transform: rotate(-45deg); border-radius: 2px 2px 4px 4px; border: 1.5px solid #4a0a0a; z-index: 1; transform-origin: top left; margin-left: 15px; margin-top: 15px;">
+            <div style="position: absolute; bottom: -2px; left: -1.5px; width: 9px; height: 5px; background: linear-gradient(145deg, #bf953f, #fcf6ba, #aa771c); border: 1px solid #8a6d3b; border-radius: 0 0 3px 3px;"></div>
+        </div>
+
+        <div style="width: 50px; height: 50px; border-radius: 50%; background: linear-gradient(145deg, #bf953f, #fcf6ba, #b38728, #fbf5b7, #aa771c); padding: 3px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.5); border: 1.5px solid #8a6d3b; position: relative; z-index: 2;">
+            
             <div style="width: 100%; height: 100%; background: rgba(13, 27, 62, 0.95); border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden;">
-                <strong id="valorPontosLupa" style="font-size: 14px; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">?</strong>
+                <strong id="valorPontosLupa" style="font-size: 15px; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">?</strong>
                 <span id="label-lupa" style="font-size: 7px; font-weight: bold; color: #d4af37; letter-spacing: 0.5px;">LOGIN</span>
             </div>
         </div>
-        <div style="position: absolute; bottom: 8px; right: 8px; width: 7px; height: 20px; background: linear-gradient(90deg, #bf953f, #fcf6ba, #aa771c); transform: rotate(-45deg); border-radius: 0 0 4px 4px; border: 1px solid #8a6d3b; z-index: 1;"></div>
     </div>
 
     <button class="btn-login-header" onclick="window.abrirModalLogin()" style="background: #b89356; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; font-weight: bold; font-size: 10px; white-space: nowrap; text-transform: uppercase;">
