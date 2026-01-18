@@ -943,7 +943,6 @@ window.cancelarResgate = async function() {
             const pontosParaDevolver = dados.resgatePendente || 0;
 
             if (pontosParaDevolver > 0) {
-                // Devolve os pontos e LIMPA o resgatePendente no Firebase
                 await updateDoc(clienteRef, { 
                     "pontos": increment(pontosParaDevolver),
                     "resgatePendente": 0 
@@ -951,9 +950,12 @@ window.cancelarResgate = async function() {
             }
         }
         
-        // LIMPA o navegador para a mensagem sumir
-        localStorage.removeItem('descontoAtivo');
+        // --- O SEGREDO ESTÁ AQUI ---
+        localStorage.removeItem('descontoAtivo'); 
         
+        // Chamamos o monitoramento de volta para ele redesenhar a tela sem o "Crédito em Uso"
+        window.ativarMonitoramento(cpfLimpo); 
+
         if (typeof renderizarSacola === 'function') renderizarSacola();
         alert("Pontos devolvidos ao seu saldo! ✨");
     } catch (e) {
@@ -1000,14 +1002,22 @@ window.ativarMonitoramento = function(cpf) {
             const resgateNoNavegador = localStorage.getItem('descontoAtivo');
             const temResgate = resgateNoFirebase || resgateNoNavegador;
 
-            // 1. ATUALIZA A LUPA
+            // --- 1. ATUALIZA A LUPA (ADAPTADO) ---
             const elementoPontos = document.getElementById('valorPontosLupa');
+            const elementoLabel = document.getElementById('label-lupa'); 
+
             if (elementoPontos) elementoPontos.innerText = dados.pontos;
 
-            // 2. LÓGICA DO TEXTO (Troca Vermelho por Dourado)
+            // Lógica para trocar o texto da lupa entre PONTOS e LOGIN
+            if (elementoLabel) {
+                elementoLabel.innerText = dados.pontos > 0 ? "PONTOS" : "LOGIN";
+            }
+
+            // --- 2. LÓGICA DO TEXTO LATERAL (VERMELHO VS DOURADO) ---
             const msgIncentivo = document.getElementById('msg-incentivo-login');
             if (msgIncentivo) {
                 if (temResgate) {
+                    // Estado: Crédito em Uso (Vermelho)
                     msgIncentivo.innerHTML = `
                         <div style="text-align: right; line-height: 1.2;">
                             <span style="color: #ff4444; font-weight: bold; font-size: 13px;">✨ Crédito em Uso</span><br>
@@ -1015,6 +1025,7 @@ window.ativarMonitoramento = function(cpf) {
                             <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; margin-left: 8px;">🔒 Sair</a>
                         </div>`;
                 } else {
+                    // Estado: Saldo Normal (Dourado)
                     msgIncentivo.innerHTML = `
                         <div style="text-align: right; line-height: 1.2;">
                             <span style="color: #d4af37; font-family: 'Playball', cursive; font-size: 18px;">Saldo ✨</span><br>
@@ -1025,10 +1036,10 @@ window.ativarMonitoramento = function(cpf) {
                 }
             }
 
-            // 3. ÁREA DE RESGATE NO CHECKOUT (Botão Aplicar)
+            // --- 3. ÁREA DE RESGATE NO CHECKOUT ---
             const areaDesconto = document.getElementById('area-desconto-pontos');
             if(areaDesconto) {
-                // SÓ mostra o botão se tiver pontos E não estiver com resgate ativo
+                // SÓ mostra se tiver pontos E não estiver com resgate ativo
                 if (dados.pontos > 0 && !temResgate) {
                     areaDesconto.style.display = 'block';
                     
@@ -1844,6 +1855,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
