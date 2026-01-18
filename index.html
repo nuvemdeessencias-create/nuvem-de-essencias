@@ -931,27 +931,29 @@ window.aplicarDescontoPontos = async function() {
     // --- NOVA FUNÇÃO: RECUPERAR PONTOS SE DESISTIR ---
 window.cancelarResgate = async function() {
     const cpf = localStorage.getItem('cpfCliente');
-    if (!cpf) return;
+    if (!cpf || !window.db) return;
 
     try {
         const cpfLimpo = cpf.replace(/\D/g, '');
-        const clienteRef = doc(db, "clientes", cpfLimpo);
+        const clienteRef = doc(window.db, "clientes", cpfLimpo);
         
-        // Buscamos o documento para saber quanto devolver
         const docSnap = await getDoc(clienteRef);
         if (docSnap.exists()) {
             const dados = docSnap.data();
             const pontosParaDevolver = dados.resgatePendente || 0;
 
             if (pontosParaDevolver > 0) {
+                // Devolve os pontos e LIMPA o resgatePendente no Firebase
                 await updateDoc(clienteRef, { 
                     "pontos": increment(pontosParaDevolver),
-                    "resgatePendente": 0 // Limpa o pendente
+                    "resgatePendente": 0 
                 });
             }
         }
         
+        // LIMPA o navegador para a mensagem sumir
         localStorage.removeItem('descontoAtivo');
+        
         if (typeof renderizarSacola === 'function') renderizarSacola();
         alert("Pontos devolvidos ao seu saldo! ✨");
     } catch (e) {
@@ -983,7 +985,7 @@ window.cancelarResgate = async function() {
         } catch (e) { console.error(e); }
     };
 
-    // --- MONITORAMENTO (MELHORADO COM OPÇÃO DE CANCELAR) ---
+    
 // --- MONITORAMENTO (VERSÃO FINAL SEM BUGS DE VISIBILIDADE) ---
 window.ativarMonitoramento = function(cpf) {
     localStorage.setItem('cpfCliente', cpf);
@@ -992,19 +994,21 @@ window.ativarMonitoramento = function(cpf) {
     onSnapshot(clienteRef, (docAtualizado) => {
         if (docAtualizado.exists()) {
             const dados = docAtualizado.data();
-            const descontoAtivo = localStorage.getItem('descontoAtivo');
+            
+            // Verifica se há resgate no Firebase OU no navegador
+            const resgateNoFirebase = dados.resgatePendente > 0;
+            const resgateNoNavegador = localStorage.getItem('descontoAtivo');
+            const temResgate = resgateNoFirebase || resgateNoNavegador;
 
             // 1. Atualiza a Lupa
             const elementoPontos = document.getElementById('valorPontosLupa');
-            const elementoLabel = document.getElementById('label-lupa');
             if (elementoPontos) elementoPontos.innerText = dados.pontos;
-            if (elementoLabel) elementoLabel.innerText = "PONTOS";
 
-            // 2. Lógica de Texto Lateral e Botão Cancelar
+            // 2. Lógica do Texto (Troca Vermelho por Dourado)
             const msgIncentivo = document.getElementById('msg-incentivo-login');
             if (msgIncentivo) {
-                // PRIORIDADE: Se houver desconto ativo, mostra CANCELAR independente do saldo
-                if (descontoAtivo) {
+                if (temResgate) {
+                    // MENSAGEM VERMELHA (Crédito em uso)
                     msgIncentivo.innerHTML = `
                         <div style="text-align: right; line-height: 1.2;">
                             <span style="color: #ff4444; font-weight: bold; font-size: 13px;">✨ Crédito em Uso</span><br>
@@ -1012,16 +1016,19 @@ window.ativarMonitoramento = function(cpf) {
                             <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; margin-left: 8px;">🔒 Sair</a>
                         </div>`;
                 } else {
+                    // MENSAGEM DOURADA (Texto alterado para apenas "Saldo")
                     msgIncentivo.innerHTML = `
                         <div style="text-align: right; line-height: 1.2;">
-                            <span style="color: #d4af37; font-family: 'Playball', cursive; font-size: 18px;">Seu Saldo ✨</span><br>
+                            <span style="color: #d4af37; font-family: 'Playball', cursive; font-size: 18px;">Saldo ✨</span><br>
                             <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; text-decoration: none;">
                                 🔒 <span style="text-decoration: underline;">Sair / Trocar CPF</span>
                             </a>
                         </div>`;
                 }
             }
-
+        }
+    });
+}
             // 3. Área de Resgate no Checkout (Botão Aplicar)
             const areaDesconto = document.getElementById('area-desconto-pontos');
             if(areaDesconto) {
@@ -1840,6 +1847,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
