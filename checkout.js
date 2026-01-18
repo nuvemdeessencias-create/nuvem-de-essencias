@@ -220,7 +220,28 @@ function coletarDadosCheckout(metodoPagamento, event) {
     });
 }
 
-function voltarParaLoja() {
+async function voltarParaLoja() {
+    // --- TRAVA DE SEGURANÇA: LIMPEZA DEFINITIVA NO FIREBASE ---
+    const cpf = localStorage.getItem('cpfCliente');
+    if (cpf && window.db) {
+        try {
+            const cpfLimpo = cpf.replace(/\D/g, '');
+            const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+            const clienteRef = doc(window.db, "clientes", cpfLimpo);
+            
+            // Zera o pendente para ele não conseguir "cancelar" e recuperar pontos
+            await updateDoc(clienteRef, { "resgatePendente": 0 });
+            
+            console.log("Fidelidade: Pontos baixados com sucesso no encerramento.");
+        } catch (e) {
+            console.error("Erro ao baixar pontos:", e);
+        }
+    }
+
+    // Limpezas de Navegador
     localStorage.removeItem('sacola');
+    localStorage.removeItem('descontoAtivo');
+    
+    // Recarrega a loja limpa
     window.location.reload();
 }
