@@ -1000,15 +1000,14 @@ window.ativarMonitoramento = function(cpf) {
             const resgateNoNavegador = localStorage.getItem('descontoAtivo');
             const temResgate = resgateNoFirebase || resgateNoNavegador;
 
-            // 1. Atualiza a Lupa
+            // 1. ATUALIZA A LUPA
             const elementoPontos = document.getElementById('valorPontosLupa');
             if (elementoPontos) elementoPontos.innerText = dados.pontos;
 
-            // 2. Lógica do Texto (Troca Vermelho por Dourado)
+            // 2. LÓGICA DO TEXTO (Troca Vermelho por Dourado)
             const msgIncentivo = document.getElementById('msg-incentivo-login');
             if (msgIncentivo) {
                 if (temResgate) {
-                    // MENSAGEM VERMELHA (Crédito em uso)
                     msgIncentivo.innerHTML = `
                         <div style="text-align: right; line-height: 1.2;">
                             <span style="color: #ff4444; font-weight: bold; font-size: 13px;">✨ Crédito em Uso</span><br>
@@ -1016,7 +1015,6 @@ window.ativarMonitoramento = function(cpf) {
                             <a href="javascript:void(0)" onclick="window.deslogarCliente()" style="color: #999; font-size: 10px; margin-left: 8px;">🔒 Sair</a>
                         </div>`;
                 } else {
-                    // MENSAGEM DOURADA (Texto alterado para apenas "Saldo")
                     msgIncentivo.innerHTML = `
                         <div style="text-align: right; line-height: 1.2;">
                             <span style="color: #d4af37; font-family: 'Playball', cursive; font-size: 18px;">Saldo ✨</span><br>
@@ -1026,28 +1024,27 @@ window.ativarMonitoramento = function(cpf) {
                         </div>`;
                 }
             }
-        }
-    });
-}
-            // 3. Área de Resgate no Checkout (Botão Aplicar)
+
+            // 3. ÁREA DE RESGATE NO CHECKOUT (Botão Aplicar)
             const areaDesconto = document.getElementById('area-desconto-pontos');
             if(areaDesconto) {
-                // SÓ mostra o botão de "APLICAR" se tiver pontos E não tiver um desconto já ativo
-                if (dados.pontos > 0 && !descontoAtivo) {
+                // SÓ mostra o botão se tiver pontos E não estiver com resgate ativo
+                if (dados.pontos > 0 && !temResgate) {
                     areaDesconto.style.display = 'block';
-                    if(document.getElementById('label-pontos-disponiveis')) 
-                        document.getElementById('label-pontos-disponiveis').innerText = dados.pontos;
+                    
+                    const labelDisponivel = document.getElementById('label-pontos-disponiveis');
+                    if(labelDisponivel) labelDisponivel.innerText = dados.pontos;
                     
                     const valorCredito = (dados.pontos * 0.02).toFixed(2).replace('.', ',');
-                    if(document.getElementById('valor-desconto-pwa')) 
-                        document.getElementById('valor-desconto-pwa').innerText = valorCredito;
+                    const campoValorPwa = document.getElementById('valor-desconto-pwa');
+                    if(campoValorPwa) campoValorPwa.innerText = valorCredito;
                 } else {
                     areaDesconto.style.display = 'none';
                 }
             }
         }
     });
-}
+};
     // --- EVENTOS DE CLIQUE PARA OS BOTÕES (EVITA O ERRO "NOT DEFINED") ---
     document.addEventListener('click', function(e) {
        if (e.target.id === 'btn-confirmar-cpf') window.confirmarCPFModal();
@@ -1847,6 +1844,7 @@ function finalizarWhatsApp() {
 </script>
 </body>
 </html>
+
 
 
 
