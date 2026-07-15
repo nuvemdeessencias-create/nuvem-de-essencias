@@ -77,8 +77,8 @@
                 </select>
             </div>
             <div class="grupo">
-                <label>CAMINHO DA IMAGEM PRINCIPAL</label>
-                <input type="text" id="imagem" placeholder="img/produtos/capa.png" required>
+                <label>CAMINHOS DAS IMAGENS PRINCIPAIS (SEPARE COM VÍRGULA)</label>
+                <input type="text" id="imagens" placeholder="img/produtos/capa1.png, img/produtos/capa2.png" required>
             </div>
         </div>
 
@@ -318,7 +318,10 @@ window.filtrarTabelaFidelidade = function() {
             document.getElementById('marca').value = p.marca;
             document.getElementById('ordem').value = p.ordem || 1;
             document.getElementById('secao').value = p.secao;
-            document.getElementById('imagem').value = p.imagem;
+            
+            // ALTERADO: Agora carrega a lista de imagens separadas por vírgula no campo
+            document.getElementById('imagens').value = p.imagens ? p.imagens.join(', ') : '';
+            
             document.getElementById('descricao').value = p.descricao;
             document.getElementById('descPix').value = p.descPix;
             document.getElementById('desc6x').value = p.desc6x;
@@ -359,7 +362,10 @@ window.filtrarTabelaFidelidade = function() {
             marca: document.getElementById('marca').value.toUpperCase(),
             ordem: parseInt(document.getElementById('ordem').value) || 99,
             secao: document.getElementById('secao').value,
-            imagem: document.getElementById('imagem').value,
+            
+            // ALTERADO: Pega o texto, divide por vírgula e limpa espaços para salvar como Array
+            imagens: document.getElementById('imagens').value.split(',').map(img => img.trim()),
+            
             descricao: document.getElementById('descricao').value,
             descPix: parseFloat(document.getElementById('descPix').value) || 0,
             desc6x: parseFloat(document.getElementById('desc6x').value) || 0,
@@ -389,4 +395,3 @@ window.filtrarTabelaFidelidade = function() {
 </script>
 </body>
 </html>
-
