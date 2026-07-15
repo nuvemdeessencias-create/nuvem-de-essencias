@@ -77,8 +77,8 @@
                 </select>
             </div>
             <div class="grupo">
-                <label>CAMINHOS DAS IMAGENS PRINCIPAIS (SEPARE COM VÍRGULA)</label>
-                <input type="text" id="imagens" placeholder="img/capa1.png, img/capa2.png" required>
+                <label>CAMINHO DA IMAGEM PRINCIPAL</label>
+                <input type="text" id="imagem" placeholder="img/produtos/capa.png" required>
             </div>
         </div>
 
@@ -319,8 +319,8 @@ window.filtrarTabelaFidelidade = function() {
             document.getElementById('ordem').value = p.ordem || 1;
             document.getElementById('secao').value = p.secao;
             
-            // ALTERADO: Agora carrega a lista de imagens separadas por vírgula no campo
-            document.getElementById('imagens').value = p.imagens ? p.imagens.join(', ') : '';
+            // RESTAURADO: Agora carrega o link da imagem (string) de volta no campo
+            document.getElementById('imagem').value = p.imagem || '';
             
             document.getElementById('descricao').value = p.descricao;
             document.getElementById('descPix').value = p.descPix;
@@ -363,8 +363,8 @@ window.filtrarTabelaFidelidade = function() {
             ordem: parseInt(document.getElementById('ordem').value) || 99,
             secao: document.getElementById('secao').value,
             
-            // ALTERADO: Pega o texto, divide por vírgula e limpa espaços para salvar como Array
-            imagens: document.getElementById('imagens').value.split(',').map(img => img.trim()),
+            // RESTAURADO: Pega o valor do campo como uma única string (link)
+            imagem: document.getElementById('imagem').value,
             
             descricao: document.getElementById('descricao').value,
             descPix: parseFloat(document.getElementById('descPix').value) || 0,
