@@ -59,10 +59,10 @@
             </div>
         </div>
 
-<div class="grupo">
-    <label>ORDEM DE EXIBIÇÃO (Ex: 1 para aparecer primeiro)</label>
-    <input type="number" id="ordem" value="1" min="1">
-</div>
+        <div class="grupo">
+            <label>ORDEM DE EXIBIÇÃO (Ex: 1 para aparecer primeiro)</label>
+            <input type="number" id="ordem" value="1" min="1">
+        </div>
         
         <div class="row">
             <div class="grupo">
@@ -108,23 +108,30 @@
 
     <hr style="margin: 40px 0; border: 0; border-top: 1px solid var(--ouro); opacity: 0.3;">
     <h2 style="color: var(--ouro); text-align: center; font-size: 18px;">GERENCIAR PRODUTOS</h2>
+    
+    <div style="margin-bottom: 15px;">
+        <label style="font-size: 12px; color: var(--ouro);">PESQUISAR PRODUTO OU MARCA:</label>
+        <input type="text" id="busca-produto-admin" placeholder="Digite o nome ou marca para filtrar..." 
+               style="width: 100%; margin-top: 5px; border-color: var(--ouro);" oninput="window.filtrarProdutosAdmin()">
+    </div>
+
     <div style="overflow-x: auto;">
         <table>
-           <thead>
-    <tr>
-        <th style="text-align: center; width: 50px;">Ordem</th>
-        <th>Produto</th>
-        <th style="text-align: center;">Marca</th>
-        <th style="text-align: center;">Estoque</th>
-        <th style="text-align: center;">Ações</th>
-    </tr>
-</thead>
+            <thead>
+                <tr>
+                    <th style="text-align: center; width: 50px;">Ordem</th>
+                    <th>Produto</th>
+                    <th style="text-align: center;">Marca</th>
+                    <th style="text-align: center;">Estoque</th>
+                    <th style="text-align: center;">Ações</th>
+                </tr>
+            </thead>
             <tbody id="lista-produtos-admin"></tbody>
         </table>
     </div>
 </div>
 
- <div id="admin-secao-fidelidade" style="background: #0d1b3e; padding: 20px; border-radius: 15px; border: 1px solid #b89356; margin-top: 20px; color: #fff;">
+<div id="admin-secao-fidelidade" style="background: #0d1b3e; padding: 20px; border-radius: 15px; border: 1px solid #b89356; margin-top: 20px; color: #fff;">
     <h3 style="color: #d4af37; margin-bottom: 15px;">Gerenciar Pontos de Clientes</h3>
     
     <div style="margin-bottom: 20px;">
@@ -142,8 +149,7 @@
                     <th style="padding: 10px;">Ações</th>
                 </tr>
             </thead>
-            <tbody id="tabela-clientes-fidelidade">
-                </tbody>
+            <tbody id="tabela-clientes-fidelidade"></tbody>
         </table>
     </div>
 </div>  
@@ -176,89 +182,97 @@
         appId: "1:929136751660:web:408079a808e0918ede0d89"
     };
 
-   const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-// Adicione esta linha abaixo para que os botões de EDITAR e ZERAR funcionem:
-window.db = db;
+    window.db = db;
 
-// --- ABAIXO VOCÊ COLA AS NOVAS FUNÇÕES ---
-
-function carregarListaFidelidade() {
-    const q = collection(db, "clientes"); // Note que tirei o 'window.' pois o 'db' está logo acima
-    onSnapshot(q, (snapshot) => {
-        const tbody = document.getElementById('tabela-clientes-fidelidade');
-        if (!tbody) return;
-        tbody.innerHTML = ""; 
-        snapshot.forEach((docSnap) => {
-            const cliente = docSnap.data();
-            const cpf = docSnap.id;
-            const pontos = cliente.pontos || 0;
-            const tr = document.createElement('tr');
-            tr.style.borderBottom = "1px solid rgba(184, 147, 86, 0.3)";
-            tr.innerHTML = `
-                <td style="padding: 10px;">${cpf}</td>
-                <td style="padding: 10px; font-weight: bold; color: #d4af37;">✨ ${pontos} pts</td>
-                <td style="padding: 10px;">
-                    <button onclick="window.editarPontosAdmin('${cpf}', ${pontos})" style="background: #b89356; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 5px;">Editar</button>
-                    <button onclick="window.zerarPontosAdmin('${cpf}')" style="background: #ff4444; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Zerar</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
+    function carregarListaFidelidade() {
+        const q = collection(db, "clientes");
+        onSnapshot(q, (snapshot) => {
+            const tbody = document.getElementById('tabela-clientes-fidelidade');
+            if (!tbody) return;
+            tbody.innerHTML = ""; 
+            snapshot.forEach((docSnap) => {
+                const cliente = docSnap.data();
+                const cpf = docSnap.id;
+                const pontos = cliente.pontos || 0;
+                const tr = document.createElement('tr');
+                tr.style.borderBottom = "1px solid rgba(184, 147, 86, 0.3)";
+                tr.innerHTML = `
+                    <td style="padding: 10px;">${cpf}</td>
+                    <td style="padding: 10px; font-weight: bold; color: #d4af37;">✨ ${pontos} pts</td>
+                    <td style="padding: 10px;">
+                        <button onclick="window.editarPontosAdmin('${cpf}', ${pontos})" style="background: #b89356; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer; margin-right: 5px;">Editar</button>
+                        <button onclick="window.zerarPontosAdmin('${cpf}')" style="background: #ff4444; color: #fff; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Zerar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
         });
-    });
-}
-
-// Chame a função para ela começar a trabalhar assim que a página abrir
-carregarListaFidelidade();
-
-// --- FUNÇÕES DE GERENCIAMENTO DE PONTOS ---
-
-window.editarPontosAdmin = async function(cpf, pontosAtuais) {
-    const novoValor = prompt(`CPF: ${cpf}\nPontos atuais: ${pontosAtuais}\n\nDigite o NOVO valor total de pontos:`, pontosAtuais);
-    
-    if (novoValor !== null && novoValor !== "") {
-        try {
-            // Usamos window.db para garantir que ele encontre a referência
-            const clienteRef = doc(window.db, "clientes", cpf);
-            await updateDoc(clienteRef, { pontos: parseInt(novoValor) });
-            alert("✅ Pontos atualizados com sucesso!");
-            // O onSnapshot cuidará de atualizar a tabela automaticamente
-        } catch (e) {
-            console.error("Erro ao editar:", e);
-            alert("❌ Erro ao atualizar pontos.");
-        }
     }
-};
 
-window.zerarPontosAdmin = async function(cpf) {
-    if (confirm(`⚠️ Tem certeza que deseja ZERAR os pontos do CPF ${cpf}?`)) {
-        try {
-            const clienteRef = doc(window.db, "clientes", cpf);
-            await updateDoc(clienteRef, { pontos: 0 });
-            alert("✨ Pontos zerados!");
-        } catch (e) {
-            console.error("Erro ao zerar:", e);
-            alert("❌ Erro ao zerar.");
-        }
-    }
-};
-// FUNÇÃO PARA FILTRAR A TABELA EM TEMPO REAL
-window.filtrarTabelaFidelidade = function() {
-    const termo = document.getElementById('busca-cpf-fidelidade').value.toLowerCase();
-    const linhas = document.querySelectorAll('#tabela-clientes-fidelidade tr');
+    carregarListaFidelidade();
 
-    linhas.forEach(linha => {
-        const textoCpf = linha.cells[0].textContent.toLowerCase();
-        // Verifica se o CPF na linha contém o que foi digitado no campo de busca
-        if (textoCpf.includes(termo)) {
-            linha.style.display = "";
-        } else {
-            linha.style.display = "none";
+    window.editarPontosAdmin = async function(cpf, pontosAtuais) {
+        const novoValor = prompt(`CPF: ${cpf}\nPontos atuais: ${pontosAtuais}\n\nDigite o NOVO valor total de pontos:`, pontosAtuais);
+        
+        if (novoValor !== null && novoValor !== "") {
+            try {
+                const clienteRef = doc(window.db, "clientes", cpf);
+                await updateDoc(clienteRef, { pontos: parseInt(novoValor) });
+                alert("✅ Pontos atualizados com sucesso!");
+            } catch (e) {
+                console.error("Erro ao editar:", e);
+                alert("❌ Erro ao atualizar pontos.");
+            }
         }
-    });
-};
-    // Tornar funções globais para os botões HTML funcionarem
+    };
+
+    window.zerarPontosAdmin = async function(cpf) {
+        if (confirm(`⚠️ Tem certeza que deseja ZERAR os pontos do CPF ${cpf}?`)) {
+            try {
+                const clienteRef = doc(window.db, "clientes", cpf);
+                await updateDoc(clienteRef, { pontos: 0 });
+                alert("✨ Pontos zerados!");
+            } catch (e) {
+                console.error("Erro ao zerar:", e);
+                alert("❌ Erro ao zerar.");
+            }
+        }
+    };
+
+    window.filtrarTabelaFidelidade = function() {
+        const termo = document.getElementById('busca-cpf-fidelidade').value.toLowerCase();
+        const linhas = document.querySelectorAll('#tabela-clientes-fidelidade tr');
+
+        linhas.forEach(linha => {
+            const textoCpf = linha.cells[0].textContent.toLowerCase();
+            if (textoCpf.includes(termo)) {
+                linha.style.display = "";
+            } else {
+                linha.style.display = "none";
+            }
+        });
+    };
+
+    // NOVA FUNÇÃO: FILTRAR PRODUTOS EM TEMPO REAL
+    window.filtrarProdutosAdmin = function() {
+        const termo = document.getElementById('busca-produto-admin').value.toLowerCase();
+        const linhas = document.querySelectorAll('#lista-produtos-admin tr');
+
+        linhas.forEach(linha => {
+            const produto = linha.cells[1] ? linha.cells[1].textContent.toLowerCase() : '';
+            const marca = linha.cells[2] ? linha.cells[2].textContent.toLowerCase() : '';
+
+            if (produto.includes(termo) || marca.includes(termo)) {
+                linha.style.display = "";
+            } else {
+                linha.style.display = "none";
+            }
+        });
+    };
+
     window.addVariacao = function(dados = null) {
         const container = document.getElementById('containerVariacoes');
         const div = document.createElement('div');
@@ -318,10 +332,7 @@ window.filtrarTabelaFidelidade = function() {
             document.getElementById('marca').value = p.marca;
             document.getElementById('ordem').value = p.ordem || 1;
             document.getElementById('secao').value = p.secao;
-            
-            // RESTAURADO: Agora carrega o link da imagem (string) de volta no campo
             document.getElementById('imagem').value = p.imagem || '';
-            
             document.getElementById('descricao').value = p.descricao;
             document.getElementById('descPix').value = p.descPix;
             document.getElementById('desc6x').value = p.desc6x;
@@ -362,10 +373,7 @@ window.filtrarTabelaFidelidade = function() {
             marca: document.getElementById('marca').value.toUpperCase(),
             ordem: parseInt(document.getElementById('ordem').value) || 99,
             secao: document.getElementById('secao').value,
-            
-            // RESTAURADO: Pega o valor do campo como uma única string (link)
             imagem: document.getElementById('imagem').value,
-            
             descricao: document.getElementById('descricao').value,
             descPix: parseFloat(document.getElementById('descPix').value) || 0,
             desc6x: parseFloat(document.getElementById('desc6x').value) || 0,
@@ -388,10 +396,8 @@ window.filtrarTabelaFidelidade = function() {
         }
     });
 
-    // Inicialização
     addVariacao();
     carregarProdutos();
-    
 </script>
 </body>
 </html>
